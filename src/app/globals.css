@@ -66,11 +66,15 @@
   --color-teal: var(--teal);
   --color-teal-tint: var(--teal-tint);
   --color-teal-light: var(--teal-light);
+  --color-teal-dark: #094e4b;
   --color-amber: var(--amber);
   --color-amber-tint: var(--amber-tint);
+  --color-amber-dark: #92400e;
   --color-critical: var(--critical);
   --color-critical-tint: var(--critical-tint);
   --color-ok: var(--ok);
+  --color-ok-tint: var(--teal-tint);
+  --color-ok-dark: #094e4b;
 
   /* shadcn semantic colours */
   --color-background: var(--background);

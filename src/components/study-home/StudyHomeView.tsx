@@ -24,6 +24,8 @@ interface StudyHomeViewProps {
   parsedInputs: number;
 }
 
+const EMPTY_MAP = {};
+
 export function StudyHomeView({
   study,
   sections,
@@ -43,13 +45,13 @@ export function StudyHomeView({
   const draftSentences = useSyncExternalStore(
     useDraftsStore.subscribe,
     () => useDraftsStore.getState().sentences,
-    () => ({}),
+    () => EMPTY_MAP,
   );
 
   const sectionStatuses = useSyncExternalStore(
     useDraftsStore.subscribe,
     () => useDraftsStore.getState().sectionStatuses,
-    () => ({}),
+    () => EMPTY_MAP,
   );
 
   const metrics = computeReadinessMetrics({

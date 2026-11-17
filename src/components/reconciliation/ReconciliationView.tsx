@@ -15,7 +15,7 @@ import { AutonomyPill, ReleaseBadge } from "@/components/trust";
 import type { StatRule } from "@/lib/data/seed-types";
 import { reconcileSection } from "@/lib/reconcile";
 import { rolePersona } from "@/lib/roles";
-import type { DraftSentence, Fact, RenderedPart, Section, Tlf } from "@/lib/types";
+import type { AuditEvent, DraftSentence, Fact, RenderedPart, Section, Tlf } from "@/lib/types";
 import { buildReferenceIndex, loadRules, validateSentence } from "@/lib/validate";
 import { useAuditStore } from "@/store/audit";
 import { useDraftsStore } from "@/store/drafts";
@@ -36,6 +36,7 @@ const EMPTY_SENTENCES: Record<string, DraftSentence> = {};
 const EMPTY_STATUSES: Record<string, "not_started" | "drafted" | "in_review" | "signed_off"> = {};
 const EMPTY_FACTS: Record<string, Fact> = {};
 const EMPTY_TLFS: Record<string, Tlf> = {};
+const EMPTY_EVENTS: AuditEvent[] = [];
 
 export function ReconciliationView({
   section,
@@ -78,7 +79,7 @@ export function ReconciliationView({
   const auditEvents = useSyncExternalStore(
     useAuditStore.subscribe,
     () => useAuditStore.getState().events,
-    () => [],
+    () => EMPTY_EVENTS,
   );
 
   const appendAudit = useAuditStore((state) => state.append);

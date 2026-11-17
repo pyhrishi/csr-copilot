@@ -10,6 +10,7 @@ import { STORE_PREFIX, persistStorage } from "./storage";
 interface DraftsState {
   sentences: Record<string, DraftSentence>;
   sectionStatuses: Record<string, SectionDraftStatus>;
+  sectionAutonomy: Record<string, "L0" | "L1" | "L2" | "L3">;
   tlfRevisionApplied: boolean;
   updatedSentenceIds: Record<string, boolean>;
   customFacts: Record<string, Fact>;
@@ -18,6 +19,7 @@ interface DraftsState {
   setSentences: (sentences: DraftSentence[]) => void;
   setSentenceState: (id: string, state: SentenceState) => void;
   setSectionStatus: (sectionId: string, status: SectionDraftStatus) => void;
+  setSectionAutonomy: (sectionId: string, level: "L0" | "L1" | "L2" | "L3") => void;
   applyTlfUpdate: (update: TlfUpdate, reRenderedSentences: DraftSentence[]) => void;
   revertTlfUpdate: () => void;
   reset: () => void;
@@ -28,6 +30,7 @@ export const useDraftsStore = create<DraftsState>()(
     (set) => ({
       sentences: {},
       sectionStatuses: {},
+      sectionAutonomy: {},
       tlfRevisionApplied: false,
       updatedSentenceIds: {},
       customFacts: {},
@@ -60,6 +63,13 @@ export const useDraftsStore = create<DraftsState>()(
           sectionStatuses: {
             ...state.sectionStatuses,
             [sectionId]: status,
+          },
+        })),
+      setSectionAutonomy: (sectionId, level) =>
+        set((state) => ({
+          sectionAutonomy: {
+            ...state.sectionAutonomy,
+            [sectionId]: level,
           },
         })),
       applyTlfUpdate: (update, reRenderedSentences) =>
@@ -97,6 +107,7 @@ export const useDraftsStore = create<DraftsState>()(
         set({
           sentences: {},
           sectionStatuses: {},
+          sectionAutonomy: {},
           tlfRevisionApplied: false,
           updatedSentenceIds: {},
           customFacts: {},

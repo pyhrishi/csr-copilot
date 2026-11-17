@@ -22,6 +22,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { Fact, Section, Tlf } from "@/lib/types";
 import type { ReconciliationRow, ReconciliationSummary } from "@/lib/reconcile";
 
@@ -156,7 +161,7 @@ export function ReconciliationTable({
               <TableHead className="min-w-[200px] text-xs font-bold text-ink">
                 Sentence (ICH E3)
               </TableHead>
-              <TableHead className="w-[120px] text-xs font-bold text-ink">
+              <TableHead className="w-[120px] text-right text-xs font-bold text-ink">
                 Rendered Value
               </TableHead>
               <TableHead className="w-[150px] text-xs font-bold text-ink">
@@ -165,7 +170,7 @@ export function ReconciliationTable({
               <TableHead className="min-w-[180px] text-xs font-bold text-ink">
                 Source TLF & Cell
               </TableHead>
-              <TableHead className="w-[130px] text-xs font-bold text-ink">
+              <TableHead className="w-[130px] text-right text-xs font-bold text-ink">
                 Source Value
               </TableHead>
               <TableHead className="w-[130px] text-xs font-bold text-ink">
@@ -232,13 +237,15 @@ export function ReconciliationTable({
                     </TableCell>
 
                     {/* Rendered Value as NumberChip */}
-                    <TableCell>
-                      <NumberChip
-                        factId={row.factId}
-                        value={row.renderedValue}
-                        fact={fact}
-                        onClick={(id) => setSelectedFactId(id)}
-                      />
+                    <TableCell className="text-right">
+                      <div className="inline-flex justify-end">
+                        <NumberChip
+                          factId={row.factId}
+                          value={row.renderedValue}
+                          fact={fact}
+                          onClick={(id) => setSelectedFactId(id)}
+                        />
+                      </div>
                     </TableCell>
 
                     {/* Fact ID */}
@@ -268,8 +275,8 @@ export function ReconciliationTable({
                     </TableCell>
 
                     {/* Source Value */}
-                    <TableCell className="text-xs font-mono font-medium text-ink tabular">
-                      <div className="flex items-center gap-1.5">
+                    <TableCell className="text-right text-xs font-mono font-medium text-ink tabular">
+                      <div className="inline-flex items-center justify-end gap-1.5">
                         <span>{row.sourceDisplay ?? "—"}</span>
                         {row.tlfVersion && (
                           <span className="text-[10px] font-sans px-1 rounded bg-paper-2 text-subtle border border-line">
@@ -290,17 +297,23 @@ export function ReconciliationTable({
 
                     {/* Inspect SourceDrawer Button */}
                     <TableCell className="text-right">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setSelectedFactId(row.factId)}
-                        className="h-7 w-7 p-0 text-subtle hover:text-ink hover:bg-paper-2"
-                        title="View cell in Source Drawer"
-                      >
-                        <FileSpreadsheet className="size-3.5" aria-hidden="true" />
-                        <span className="sr-only">Inspect source table cell</span>
-                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger
+                          render={
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setSelectedFactId(row.factId)}
+                              className="h-7 w-7 p-0 text-subtle hover:text-ink hover:bg-paper-2"
+                            >
+                              <FileSpreadsheet className="size-3.5" aria-hidden="true" />
+                              <span className="sr-only">Inspect source table cell</span>
+                            </Button>
+                          }
+                        />
+                        <TooltipContent>Inspect cell in Source Drawer</TooltipContent>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 );

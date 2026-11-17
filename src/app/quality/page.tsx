@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
 
-import { ScreenStub } from "@/components/shell/ScreenStub";
+import { QualityView } from "@/components/quality/QualityView";
+import { getFacts, getPatients } from "@/lib/data/seed";
 import { getScreen } from "@/lib/nav";
 
-export const metadata: Metadata = { title: getScreen("S9").title };
+export const metadata: Metadata = {
+  title: `${getScreen("S9").title} · CSR Copilot`,
+};
 
 export default function Page() {
-  return <ScreenStub screen="S9" />;
+  const facts = getFacts();
+  const patients = getPatients();
+
+  return <QualityView facts={facts} patients={patients} />;
 }

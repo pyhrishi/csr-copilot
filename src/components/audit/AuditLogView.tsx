@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { roleLabel } from "@/lib/roles";
-import type { DraftSentence, Fact, Section, Tlf } from "@/lib/types";
+import type { AuditEvent, DraftSentence, Fact, Section, Tlf } from "@/lib/types";
 import { useAuditStore, useDraftsStore } from "@/store";
 
 interface AuditLogViewProps {
@@ -45,13 +45,14 @@ const ACTION_COLORS: Record<string, string> = {
   autonomy_change: "bg-purple-100 text-purple-800 border-purple-300",
 };
 
+const EMPTY_EVENTS: AuditEvent[] = [];
 const EMPTY_SENTENCES: Record<string, DraftSentence> = {};
 
 export function AuditLogView({ sections, facts, tlfs }: AuditLogViewProps) {
   const auditEvents = useSyncExternalStore(
     useAuditStore.subscribe,
     () => useAuditStore.getState().events,
-    () => [],
+    () => EMPTY_EVENTS,
   );
 
   const draftSentences = useSyncExternalStore(

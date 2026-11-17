@@ -650,3 +650,124 @@ test.describe("DOCX Export", () => {
     await expect(page.getByText("Exported section 12.2 Adverse events to Word (.docx)").first()).toBeVisible();
   });
 });
+
+test.describe("Screen S9 · Quality Assurance (/quality)", () => {
+  test("renders 4 stat cards, error taxonomy, and cross-section consistency table", async ({ page }) => {
+    await page.goto("/quality");
+
+    // Header
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Quality & Consistency Assurance");
+
+    // 4 Stat cards
+    await expect(page.getByText("Numeric Fidelity", { exact: true })).toBeVisible();
+    await expect(page.getByText("100%", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("Citation Precision", { exact: true })).toBeVisible();
+    await expect(page.getByText("Sentence Acceptance Rate", { exact: true })).toBeVisible();
+    await expect(page.getByText("Critical Findings Caught Pre-QC", { exact: true })).toBeVisible();
+
+    // Cross-Section Consistency Checks
+    await expect(page.getByText("Cross-Section Consistency Checks")).toBeVisible();
+    await expect(page.getByText("Total Patient Deaths")).toBeVisible();
+    await expect(page.getByText("Serious Adverse Events (SAE) Cohort")).toBeVisible();
+    await expect(page.getByText("Disposition Accounting Identity")).toBeVisible();
+    await expect(page.getByText("Discontinuation Reasons Balance")).toBeVisible();
+    await expect(page.getByText("Section 14.3.3 Narratives Queue").first()).toBeVisible();
+    // All 4 rows match
+    const matchedBadges = page.getByText("Matched");
+    await expect(matchedBadges.first()).toBeVisible();
+    expect(await matchedBadges.count()).toBeGreaterThanOrEqual(4);
+
+    // Error Taxonomy Chart
+    await expect(page.getByText("Error Taxonomy & Prevention Engine")).toBeVisible();
+    await expect(page.getByText("NUM-001")).toBeVisible();
+    await expect(page.getByText("STAT-001")).toBeVisible();
+    await expect(page.getByText("CITE-001")).toBeVisible();
+  });
+});
+
+test.describe("Screen S10 · Autonomy & Risk Governance (/settings/autonomy)", () => {
+  test("renders SVG 2x2 risk matrix and allows QA role to adjust section autonomy with audit log", async ({ page }) => {
+    await page.goto("/settings/autonomy");
+
+    // Header
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Section Autonomy & Risk Governance");
+
+    // Risk Matrix Quadrants
+    await expect(page.getByText("AUTOMATE FIRST (R1 WEDGE)")).toBeVisible();
+    await expect(page.getByText("SUPERVISED WITH SIGN-OFF (R2)")).toBeVisible();
+    await expect(page.getByText("HUMAN OWNERSHIP")).toBeVisible();
+    await expect(page.getByText("LOW PRIORITY / BOILERPLATE")).toBeVisible();
+
+    // Matrix axes
+    await expect(page.getByText(/AI Suitability/i).first()).toBeVisible();
+    await expect(page.getByText(/Cost of an Error/i).first()).toBeVisible();
+
+    // As default writer role, autonomy change button is locked
+    const lockedBtn = page.getByRole("button", { name: "Locked (QA Only)" }).first();
+    await expect(lockedBtn).toBeVisible();
+    await expect(lockedBtn).toBeDisabled();
+
+    // Switch role to QA
+    const roleSwitcher = page.getByRole("combobox", { name: "Role" });
+    await roleSwitcher.click();
+    await page.getByRole("option", { name: /^QA$/ }).click();
+
+    // Now button is enabled "Change Level"
+    const changeBtn = page.getByRole("button", { name: "Change Level" }).first();
+    await expect(changeBtn).toBeVisible();
+    await expect(changeBtn).toBeEnabled();
+
+    // Click Change Level to open modal
+    await changeBtn.click();
+    await expect(page.getByRole("heading", { name: "Change Section Autonomy Level" })).toBeVisible();
+
+    // Select new level L3
+    const levelSelect = page.getByRole("dialog").getByRole("combobox");
+    await levelSelect.click();
+    await page.getByRole("option", { name: /L3 · Auto-Assemble/i }).click();
+
+    // Type mandatory justification reason
+    const reasonInput = page.getByPlaceholder(/State the clinical, statistical or validation reason/i);
+    await reasonInput.fill("Validated through 3 historical phase III oncology trials with 0 critical findings.");
+
+    // Submit change
+    const confirmBtn = page.getByRole("button", { name: "Authorize & Log Audit" });
+    await confirmBtn.click();
+
+    // Verify toast
+    await expect(page.getByText(/Logged to audit trail/i)).toBeVisible();
+
+    // Verify audit log has the event
+    await page.goto("/audit");
+    await expect(page.getByText("autonomy_change", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText(/Validated through 3 historical phase III/i)).toBeVisible();
+  });
+});
+
+test.describe("Screen S11 · Value Dashboard (/value)", () => {
+  test("renders prototype disclaimer badge, 4 KPI cards, and benchmark chart", async ({ page }) => {
+    await page.goto("/value");
+
+    // Header & prototype disclaimer badge
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Clinical Authoring Value & Impact Dashboard");
+    await expect(page.getByText("Simulated values for the prototype")).toBeVisible();
+
+    // 4 KPI Cards
+    await expect(page.getByText("Days from Database Lock to CSR Draft")).toBeVisible();
+    await expect(page.getByText("3.5 days")).toBeVisible();
+
+    await expect(page.getByText("Medical Writer Hours (Release 1 Sections)")).toBeVisible();
+    await expect(page.getByText("14 hrs")).toBeVisible();
+
+    await expect(page.getByText("Sentence Acceptance Rate")).toBeVisible();
+    await expect(page.getByText("88%").first()).toBeVisible();
+
+    await expect(page.getByText("Critical Errors Caught Pre-QC")).toBeVisible();
+    await expect(page.getByText("100%").first()).toBeVisible();
+
+    // Benchmark comparison section
+    await expect(page.getByRole("heading", { name: /Benchmark Comparison/i })).toBeVisible();
+    await expect(page.getByText("Database Lock to Draft (Days)")).toBeVisible();
+    await expect(page.getByText("Writer Hours on R1 Sections")).toBeVisible();
+  });
+});

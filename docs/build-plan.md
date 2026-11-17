@@ -44,9 +44,9 @@ Work top to bottom. Tick boxes as you finish. The SessionStart hook reads this f
 - [x] DOCX export of a section with the `docx` package
 
 ## M7 · Quality, autonomy, value
-- [ ] S9 quality view (mock gold-set metrics, clearly labelled) and cross-section consistency check
-- [ ] S10 risk matrix 2×2 and autonomy ladder; QA-only change with reason → audit
-- [ ] S11 value dashboard (simulated, labelled)
+- [x] S9 quality view (mock gold-set metrics, clearly labelled) and cross-section consistency check
+- [x] S10 risk matrix 2×2 and autonomy ladder; QA-only change with reason → audit
+- [x] S11 value dashboard (simulated, labelled)
 
 ## M8 · Live mode, demo polish, deploy
 - [ ] Optional Live AI mode: `/api/generate` route using `@anthropic-ai/sdk`, prompt in `src/lib/generation/prompts/section.md`; returns placeholder prose only; same fill and validate path
@@ -61,5 +61,5 @@ Work top to bottom. Tick boxes as you finish. The SessionStart hook reads this f
 - [ ] Data readiness KPI strip: add "Simulated seed" pill to emphasize mock ingestion metrics (regulatory-reviewer)
 - [ ] Validator micro-diff preview: generalize diff preview in RightPanel by reading dynamically from `finding.span` and `finding.fix.replacement` (biostat-checker)
 - [ ] TLF parse results: bind confidence display cell directly to parser telemetry attribute (biostat-checker)
-- [ ] Reconciliation table alignment: right-align numeric columns (Rendered Value and Source Value) (ux-critic)
-- [ ] Reconciliation table: wrap SourceDrawer inspection button in `<Tooltip>` (ux-critic)
+- [x] Reconciliation table alignment: right-align numeric columns (Rendered Value and Source Value) (ux-critic)
+- [x] Reconciliation table: wrap SourceDrawer inspection button in `<Tooltip>` (ux-critic)

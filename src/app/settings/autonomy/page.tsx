@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 
-import { ScreenStub } from "@/components/shell/ScreenStub";
+import { AutonomyView } from "@/components/autonomy/AutonomyView";
 import { getScreen } from "@/lib/nav";
 
-export const metadata: Metadata = { title: getScreen("S10").title };
+export const metadata: Metadata = {
+  title: `${getScreen("S10").title} · CSR Copilot`,
+};
 
 export default function Page() {
-  return <ScreenStub screen="S10" />;
+  return <AutonomyView />;
 }
