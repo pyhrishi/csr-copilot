@@ -1,11 +1,13 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import {
   AlertOctagon,
   CheckCircle2,
   Clock,
   Send,
+  Table2,
   XCircle,
 } from "lucide-react";
 
@@ -119,6 +121,14 @@ export function SectionStatusBar({
               {disabledReason}
             </span>
           ) : null}
+
+          <Link
+            href={`/sections/${sectionId}/reconciliation`}
+            className="inline-flex items-center justify-center rounded-md border border-line bg-card hover:bg-paper-2 text-ink text-xs font-medium h-8 px-3 transition-colors shadow-2xs"
+          >
+            <Table2 className="size-3.5 mr-1.5 text-teal" aria-hidden="true" />
+            <span>Reconciliation</span>
+          </Link>
 
           {disabledReason ? (
             <Tooltip>

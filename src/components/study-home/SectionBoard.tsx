@@ -19,6 +19,7 @@ import type { DraftSentence, Section } from "@/lib/types";
 interface SectionBoardProps {
   sections: readonly Section[];
   draftSentences: Record<string, DraftSentence>;
+  sectionStatuses?: Record<string, "not_started" | "drafted" | "in_review" | "signed_off">;
   highlightWriter?: boolean;
 }
 
@@ -51,6 +52,7 @@ const SECTION_METADATA: Record<
 export function SectionBoard({
   sections,
   draftSentences,
+  sectionStatuses,
   highlightWriter = false,
 }: SectionBoardProps) {
   return (
@@ -86,7 +88,7 @@ export function SectionBoard({
           <TableBody>
             {sections.map((section) => {
               const meta = SECTION_METADATA[section.id] ?? { owner: "Medical Writer" };
-              const statusInfo = computeSectionStatus(section, draftSentences);
+              const statusInfo = computeSectionStatus(section, draftSentences, sectionStatuses);
               const isR2Locked = section.release === "R2" || section.autonomy === "locked";
               const isHumanOnly = section.release === "human";
               const isLockedOrHuman = isR2Locked || isHumanOnly;

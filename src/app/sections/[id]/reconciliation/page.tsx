@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
+import { notFound } from "next/navigation";
 
-import { ScreenStub } from "@/components/shell/ScreenStub";
-import { SectionSubject, SubjectFallback } from "@/components/shell/StubSubjects";
-import { getSection, getSections } from "@/lib/data/seed";
+import { ReconciliationView } from "@/components/reconciliation";
+import { getFacts, getRules, getSection, getSections, getTlfs } from "@/lib/data/seed";
 
 export function generateStaticParams() {
   return getSections().map((s) => ({ id: s.id }));
@@ -12,19 +11,38 @@ export function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: PageProps<"/sections/[id]/reconciliation">): Promise<Metadata> {
-  const section = getSection(decodeURIComponent((await params).id));
-  return { title: section ? `Reconciliation · ${section.id}` : "Section not found" };
+  const { id } = await params;
+  const section = getSection(decodeURIComponent(id));
+  return {
+    title: section
+      ? `Reconciliation · Section ${section.id} ${section.title} · CSR Copilot`
+      : "Section not found",
+  };
 }
 
-export default function Page({ params }: PageProps<"/sections/[id]/reconciliation">) {
+export default async function Page({
+  params,
+}: PageProps<"/sections/[id]/reconciliation">) {
+  const { id } = await params;
+  const decodedId = decodeURIComponent(id);
+  const section = getSection(decodedId);
+
+  if (!section) {
+    notFound();
+  }
+
+  const allSections = getSections();
+  const facts = getFacts();
+  const tlfs = getTlfs();
+  const rules = getRules();
+
   return (
-    <ScreenStub
-      screen="S4"
-      subject={
-        <Suspense fallback={<SubjectFallback />}>
-          <SectionSubject params={params} />
-        </Suspense>
-      }
+    <ReconciliationView
+      section={section}
+      allSections={allSections}
+      facts={facts}
+      tlfs={tlfs}
+      rules={rules}
     />
   );
 }

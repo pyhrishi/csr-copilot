@@ -485,6 +485,7 @@ export function SectionWorkspaceView({
         sections={allSections}
         activeSectionId={section.id}
         draftSentences={draftSentences}
+        sectionStatuses={sectionStatuses}
       />
 
       {/* Pane 2 & 3: Center Canvas & Right Panel OR Locked Section View */}

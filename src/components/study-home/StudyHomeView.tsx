@@ -46,6 +46,12 @@ export function StudyHomeView({
     () => ({}),
   );
 
+  const sectionStatuses = useSyncExternalStore(
+    useDraftsStore.subscribe,
+    () => useDraftsStore.getState().sectionStatuses,
+    () => ({}),
+  );
+
   const metrics = computeReadinessMetrics({
     totalInputs,
     parsedInputs,
@@ -171,6 +177,7 @@ export function StudyHomeView({
           <SectionBoard
             sections={sections}
             draftSentences={draftSentences}
+            sectionStatuses={sectionStatuses}
             highlightWriter={true}
           />
 
@@ -186,6 +193,7 @@ export function StudyHomeView({
           <SectionBoard
             sections={sections}
             draftSentences={draftSentences}
+            sectionStatuses={sectionStatuses}
             highlightWriter={false}
           />
         </>

@@ -139,10 +139,6 @@ export function computeSectionStatus(
   const draftedCount = sectionDrafts.length;
   const percent = totalCount > 0 ? Math.round((draftedCount * 100) / totalCount) : 0;
 
-  if (draftedCount === 0) {
-    return { status: "not_started", label: "Not started", draftedCount, totalCount, percent: 0 };
-  }
-
   if (sectionStatuses?.[section.id]) {
     const explicitStatus = sectionStatuses[section.id];
     const labels: Record<SectionDraftStatus, string> = {
@@ -156,8 +152,12 @@ export function computeSectionStatus(
       label: labels[explicitStatus],
       draftedCount,
       totalCount,
-      percent,
+      percent: explicitStatus === "signed_off" ? 100 : percent,
     };
+  }
+
+  if (draftedCount === 0) {
+    return { status: "not_started", label: "Not started", draftedCount, totalCount, percent: 0 };
   }
 
   const allAccepted = draftedCount === totalCount && sectionDrafts.every((s) => s.state === "accepted");

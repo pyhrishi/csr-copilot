@@ -336,3 +336,102 @@ test.describe("S3 · Section Workspace", () => {
     await expect(page.getByRole("tab", { name: /Fact Panel/ })).toBeVisible();
   });
 });
+
+test.describe("S4 · Reconciliation Report", () => {
+  test("Section 12.2 reconciliation report renders numbers, gating blocks sign-off for writer and STAT-001, and biostatistician signs off", async ({ page }) => {
+    // 1. Start as Medical Writer on Section 12.2
+    await page.goto("/sections/12.2");
+    await expect(page.locator('[data-hydrated="true"]')).toBeVisible();
+
+    // Ensure role is Medical Writer
+    const roleCombobox = page.getByRole("combobox", { name: "Role" });
+    await roleCombobox.click();
+    await page.getByRole("option", { name: "Medical Writer" }).click();
+
+    // Generate draft if not generated
+    const generateBtn = page.getByRole("button", { name: "Generate draft" }).first();
+    if (await generateBtn.isVisible()) {
+      await generateBtn.click();
+      await expect(page.getByText("5 of 5 sentences")).toBeVisible({ timeout: 10000 });
+    }
+
+    // 2. Click Reconciliation button in section status bar to navigate to S4
+    const reconciliationLink = page.getByRole("link", { name: "Reconciliation", exact: true });
+    await expect(reconciliationLink).toBeVisible();
+    await reconciliationLink.click();
+
+    await page.waitForURL("/sections/12.2/reconciliation");
+
+    // 3. Verify S4 Title, Summary line and table
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Numeric Reconciliation");
+    await expect(page.getByText("12 of 12 numbers reconciled (100%)")).toBeVisible();
+    await expect(page.getByText("Extracted Numbers vs Source TLF Cells")).toBeVisible();
+
+    // Table rows
+    await expect(page.getByText("12.2-s1").first()).toBeVisible();
+    await expect(page.getByText("Table 14.3.1.1").first()).toBeVisible();
+    await expect(page.getByText("Matched").first()).toBeVisible();
+
+    // Run reconciliation button
+    const runBtn = page.getByRole("button", { name: "Run reconciliation" });
+    await expect(runBtn).toBeVisible();
+    await runBtn.click();
+    await expect(page.getByText("12 of 12 verified")).toBeVisible();
+
+    // Inspect SourceDrawer by clicking a NumberChip
+    const numberChip = page.getByRole("button", { name: /Clinical number/ }).first();
+    await numberChip.click();
+    await expect(page.getByText("Cited cell highlighted", { exact: true })).toBeVisible();
+    await page.keyboard.press("Escape");
+
+    // 4. Verify SignOffBlock is disabled for Medical Writer
+    const signOffBtn = page.getByRole("button", { name: /Sign off section/i });
+    await expect(signOffBtn).toBeDisabled();
+    await expect(page.getByText(/Sign-off requires the Biostatistician role/i)).toBeVisible();
+
+    // 5. Switch role to Biostatistician
+    await roleCombobox.click();
+    await page.getByRole("option", { name: "Biostatistician" }).click();
+
+    // 6. Sign-off is STILL disabled if STAT-001 is open!
+    const stat001Warning = page.getByText(/Regulatory Gate: 1 open critical finding/i);
+    if (await stat001Warning.isVisible()) {
+      await expect(page.getByText("STAT-001").first()).toBeVisible();
+      await expect(signOffBtn).toBeDisabled();
+
+      // Return to S3 to fix STAT-001
+      await page.getByRole("link", { name: /Return to Section Workspace/i }).click();
+      await page.waitForURL("/sections/12.2");
+
+      // Open Checks tab and apply suggestion
+      await page.getByRole("tab", { name: /Checks/ }).click();
+      const applyFixBtn = page.getByRole("button", { name: "Apply suggestion" });
+      await applyFixBtn.click();
+      await expect(page.getByText("All Checks Passed")).toBeVisible();
+
+      // Return to S4 Reconciliation
+      await page.getByRole("link", { name: "Reconciliation", exact: true }).click();
+      await page.waitForURL("/sections/12.2/reconciliation");
+    }
+
+    // 7. Now Biostatistician with 0 critical findings: Sign-off is enabled!
+    await expect(page.getByText(/Ready for Biostatistician Signature/i)).toBeVisible();
+    await expect(page.getByText("Marcus Vance, PhD")).toBeVisible();
+    await expect(page.getByText("Biostatistician").first()).toBeVisible();
+    await expect(page.getByText(/I confirm the numbers in this section match the source TLFs/i)).toBeVisible();
+
+    const enabledSignOffBtn = page.getByRole("button", { name: "Sign off section" });
+    await expect(enabledSignOffBtn).toBeEnabled();
+    await enabledSignOffBtn.click();
+
+    // 8. Verify Signed Off state on S4
+    await expect(page.getByText("Signed Off · Sealed")).toBeVisible();
+    await expect(page.getByText("Signed Off & Recorded")).toBeVisible();
+
+    // 9. Navigate to S1 (Study Home) and verify Section 12.2 shows "Signed off"
+    await page.goto("/");
+    await expect(page.locator("main")).toBeVisible();
+    const section122Row = page.getByRole("row", { name: /12.2.*Adverse events/i });
+    await expect(section122Row.getByText("Signed off")).toBeVisible();
+  });
+});

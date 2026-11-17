@@ -31,8 +31,8 @@ Work top to bottom. Tick boxes as you finish. The SessionStart hook reads this f
 - [x] Locked states for 11.4 (R2) and 13 (human)
 
 ## M4 · Reconciliation and sign-off
-- [ ] S4 reconciliation table and computed summary
-- [ ] Biostatistician sign-off (role-gated, blocked by open critical findings), written to audit
+- [x] S4 reconciliation table and computed summary
+- [x] Biostatistician sign-off (role-gated, blocked by open critical findings), written to audit
 
 ## M5 · Narratives
 - [ ] S5 queue with filters and batch generation (exceptions skipped with reason)

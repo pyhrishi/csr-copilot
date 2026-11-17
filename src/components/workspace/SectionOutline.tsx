@@ -1,19 +1,21 @@
 import Link from "next/link";
 import { CheckCircle2, CircleDashed, Clock, FileText, Lock, PenLine } from "lucide-react";
 
-import { computeSectionStatus } from "@/lib/study-readiness";
+import { computeSectionStatus, type SectionDraftStatus } from "@/lib/study-readiness";
 import type { DraftSentence, Section } from "@/lib/types";
 
 interface SectionOutlineProps {
   sections: readonly Section[];
   activeSectionId: string;
   draftSentences: Record<string, DraftSentence>;
+  sectionStatuses?: Record<string, SectionDraftStatus>;
 }
 
 export function SectionOutline({
   sections,
   activeSectionId,
   draftSentences,
+  sectionStatuses,
 }: SectionOutlineProps) {
   return (
     <aside className="w-[260px] shrink-0 border-r border-line bg-paper-2/30 p-4 flex flex-col gap-3 h-full overflow-y-auto">
@@ -25,7 +27,7 @@ export function SectionOutline({
       <nav aria-label="Section outline" className="space-y-1">
         {sections.map((s) => {
           const isActive = s.id === activeSectionId;
-          const statusInfo = computeSectionStatus(s, draftSentences);
+          const statusInfo = computeSectionStatus(s, draftSentences, sectionStatuses);
           const isR2Locked = s.release === "R2" || s.autonomy === "locked";
           const isHumanOnly = s.release === "human";
 
