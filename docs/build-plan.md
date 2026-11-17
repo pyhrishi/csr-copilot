@@ -16,7 +16,7 @@ Work top to bottom. Tick boxes as you finish. The SessionStart hook reads this f
 - [x] `src/lib/reconcile`: per-section reconciliation report
 - [x] `src/lib/narratives`: assemble a narrative from template + patient
 - [x] `src/lib/audit`: append-only event log (client store), with versions
-- [ ] All unit tests listed in `docs/data-model.md` pass
+- [x] All unit tests listed in `docs/data-model.md` pass
 
 ## M2 · Study home and data readiness
 - [ ] S1 Study home with section board, readiness tiles, release and autonomy badges

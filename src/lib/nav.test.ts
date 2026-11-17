@@ -31,3 +31,11 @@ describe("screen registry", () => {
     for (const screen of SCREENS) expect(screen.milestone).toMatch(/^M\d$/);
   });
 });
+
+describe("getScreen", () => {
+  it("returns a screen by id and throws on an unknown id", async () => {
+    const { getScreen } = await import("./nav");
+    expect(getScreen("S3").href).toBe(`/sections/${DEMO_SECTION_ID}`);
+    expect(() => getScreen("S99" as never)).toThrow(/Unknown screen/);
+  });
+});

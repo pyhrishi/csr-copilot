@@ -15,6 +15,14 @@ export default defineConfig({
     environment: "jsdom",
     include: ["src/**/*.test.{ts,tsx}"],
     setupFiles: ["./test/setup.ts"],
-    coverage: { provider: "v8", include: ["src/lib/**"] },
+    coverage: {
+      provider: "v8",
+      include: ["src/lib/**"],
+      // Type-only modules have no runtime code to cover.
+      exclude: ["src/lib/**/*.test.{ts,tsx}", "src/lib/types.ts", "src/lib/data/seed-types.ts"],
+      reporter: ["text-summary", "text"],
+      // M1 definition of done: the trust core stays at or above 90% on every measure.
+      thresholds: { lines: 90, statements: 90, functions: 90, branches: 90 },
+    },
   },
 });
