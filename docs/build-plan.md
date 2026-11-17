@@ -13,7 +13,7 @@ Work top to bottom. Tick boxes as you finish. The SessionStart hook reads this f
 ## M1 · The trust core (no UI)
 - [x] `src/lib/slots`: `renderSlots`, formats, patient-field derivations
 - [x] `src/lib/validate`: NUM-001, STAT-001..003 from `rules.json`, CITE-001, with suggestions
-- [ ] `src/lib/reconcile`: per-section reconciliation report
+- [x] `src/lib/reconcile`: per-section reconciliation report
 - [ ] `src/lib/narratives`: assemble a narrative from template + patient
 - [ ] `src/lib/audit`: append-only event log (client store), with versions
 - [ ] All unit tests listed in `docs/data-model.md` pass
