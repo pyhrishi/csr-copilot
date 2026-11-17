@@ -6,7 +6,7 @@ Work top to bottom. Tick boxes as you finish. The SessionStart hook reads this f
 - [x] Scaffold Next.js 16 (App Router, TypeScript, Tailwind CSS, ESLint, `src/` dir, Turbopack) with `npx create-next-app@latest` into a temporary folder (it refuses non-empty folders), then move its files here: merge its `.gitignore` into ours, keep our `README.md` and `CLAUDE.md`, and don't overwrite `docs/`, `data/`, `scripts/` or `.claude/`
 - [x] Add Prettier, Vitest (+ @vitest/coverage-v8), Playwright; scripts: `dev`, `build`, `lint`, `typecheck` (`tsc --noEmit`), `test` (`vitest run`), `e2e` (`playwright test`), `validate:seed`
 - [x] shadcn/ui init; add button, card, tabs, table, dialog, sheet, tooltip, badge, select, dropdown-menu, progress, separator, toast (sonner)
-- [ ] Fonts (EB Garamond, Public Sans via `next/font/google`) and design tokens from `docs/design-system.md`
+- [x] Fonts (EB Garamond, Public Sans via `next/font/google`) and design tokens from `docs/design-system.md`
 - [ ] App shell: fiction banner, top bar (role switcher, Simulated/Live toggle, Demo button), left nav with all 11 routes stubbed
 - [ ] Seed loader in `src/lib/data` with types from `docs/data-model.md`; `npm run validate:seed` passes
 
