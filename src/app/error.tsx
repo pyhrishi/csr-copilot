@@ -45,16 +45,13 @@ export default function ErrorBoundary({
             <span>Try again</span>
           </Button>
 
-          <Button
-            asChild
-            size="sm"
-            className="text-xs font-semibold bg-teal hover:bg-teal/90 text-white flex items-center gap-1.5"
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold bg-teal hover:bg-teal/90 text-white shadow-xs transition-colors"
           >
-            <Link href="/">
-              <Home className="size-3.5" aria-hidden="true" />
-              <span>Study home</span>
-            </Link>
-          </Button>
+            <Home className="size-3.5" aria-hidden="true" />
+            <span>Study home</span>
+          </Link>
         </div>
       </div>
     </div>

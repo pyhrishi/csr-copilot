@@ -266,7 +266,14 @@ export function DraftCanvas({
             </div>
           ) : (
             /* Document Canvas (Public Sans 16px/1.7, max width 72ch) */
-            <article className="max-w-[72ch] text-[16px] leading-[1.7] text-body font-sans space-y-5 pb-16">
+            <article className="max-w-[72ch] text-[16px] leading-[1.7] text-body font-sans space-y-5 pb-16 min-h-[400px]">
+              {sentences.length === 0 && isGenerating && (
+                <div className="space-y-4 animate-pulse">
+                  <div className="h-6 w-3/4 rounded bg-paper-2/80" />
+                  <div className="h-6 w-full rounded bg-paper-2/60" />
+                  <div className="h-6 w-5/6 rounded bg-paper-2/50" />
+                </div>
+              )}
               {sentences.map((draft, idx) => {
                 const isEditing = editingSentenceId === draft.id;
                 const isFocused = focusedSentenceId === draft.id;
