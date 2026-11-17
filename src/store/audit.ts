@@ -1,32 +1,36 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+import { EMPTY_LOG, appendEvent, restoreLog, type AuditLog, type NewAuditEvent } from "@/lib/audit";
 import type { AuditEvent } from "@/lib/types";
 import { STORE_PREFIX, persistStorage } from "./storage";
 
-export type NewAuditEvent = Omit<AuditEvent, "id" | "at">;
+export type { NewAuditEvent } from "@/lib/audit";
 
-// Append-only: `append` is the only mutator. There is deliberately no edit or delete.
-// (src/lib/audit adds richer helpers in M1.)
+// Append-only: `append` is the only mutator; the log itself lives in src/lib/audit.
 interface AuditState {
-  events: readonly AuditEvent[];
+  events: AuditLog;
   append: (event: NewAuditEvent) => AuditEvent;
 }
 
 export const useAuditStore = create<AuditState>()(
   persist(
-    (set) => ({
-      events: [],
+    (set, get) => ({
+      events: EMPTY_LOG,
       append: (event) => {
-        const stored: AuditEvent = Object.freeze({
-          ...event,
-          id: crypto.randomUUID(),
-          at: new Date().toISOString(),
-        });
-        set((state) => ({ events: [...state.events, stored] }));
-        return stored;
+        const events = appendEvent(get().events, event);
+        set({ events });
+        return events.at(-1)!;
       },
     }),
-    { name: `${STORE_PREFIX}audit`, storage: persistStorage, skipHydration: true },
+    {
+      name: `${STORE_PREFIX}audit`,
+      storage: persistStorage,
+      skipHydration: true,
+      merge: (persisted, current) => ({
+        ...current,
+        events: restoreLog((persisted as Partial<AuditState> | undefined)?.events ?? []),
+      }),
+    },
   ),
 );

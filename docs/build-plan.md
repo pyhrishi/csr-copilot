@@ -15,7 +15,7 @@ Work top to bottom. Tick boxes as you finish. The SessionStart hook reads this f
 - [x] `src/lib/validate`: NUM-001, STAT-001..003 from `rules.json`, CITE-001, with suggestions
 - [x] `src/lib/reconcile`: per-section reconciliation report
 - [x] `src/lib/narratives`: assemble a narrative from template + patient
-- [ ] `src/lib/audit`: append-only event log (client store), with versions
+- [x] `src/lib/audit`: append-only event log (client store), with versions
 - [ ] All unit tests listed in `docs/data-model.md` pass
 
 ## M2 · Study home and data readiness
