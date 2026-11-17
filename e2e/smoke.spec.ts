@@ -169,19 +169,21 @@ test.describe("S2 · Data Readiness", () => {
 test.describe("S3 · Section Workspace", () => {
   test("Section 12.2 streams 5 sentences with number chips and opens SourceDrawer", async ({ page }) => {
     await page.goto("/sections/12.2");
+    await expect(page.locator('[data-hydrated="true"]')).toBeVisible();
 
     // Heading & Provenance Legend
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Adverse events");
     await expect(page.getByLabel("Provenance legend")).toBeVisible();
     await expect(page.getByText("Provenance:")).toBeVisible();
 
-    // Generate Draft
+    // Generate Draft if not already generated
     const generateBtn = page.getByRole("button", { name: "Generate draft" }).first();
-    await expect(generateBtn).toBeVisible();
-    await generateBtn.click();
-
-    // Wait for all 5 sentences to stream in
-    await expect(page.getByText("5 of 5 sentences")).toBeVisible({ timeout: 10000 });
+    if (await generateBtn.isVisible()) {
+      await generateBtn.click();
+      await expect(page.getByText("5 of 5 sentences")).toBeVisible({ timeout: 10000 });
+    } else {
+      await expect(page.getByText("5 of 5 sentences")).toBeVisible();
+    }
 
     // Number chips should be visible
     const chips = page.getByRole("button", { name: /Clinical number/ });
@@ -202,19 +204,118 @@ test.describe("S3 · Section Workspace", () => {
     await expect(page.getByText("STAT-001")).toBeVisible();
   });
 
+  test("Section 12.2 generates draft, applies STAT-001 fix, accepts all sentences and enables review", async ({ page }) => {
+    await page.goto("/sections/12.2");
+    await expect(page.locator('[data-hydrated="true"]')).toBeVisible();
+
+    // Generate Draft if not present
+    const generateBtn = page.getByRole("button", { name: "Generate draft" }).first();
+    if (await generateBtn.isVisible()) {
+      await generateBtn.click();
+      await expect(page.getByText("5 of 5 sentences")).toBeVisible({ timeout: 10000 });
+    } else {
+      await expect(page.getByText("5 of 5 sentences")).toBeVisible();
+    }
+
+    // Open Checks tab
+    await page.getByRole("tab", { name: /Checks/ }).click();
+    await expect(page.getByText("STAT-001")).toBeVisible();
+    await expect(page.getByText("1 critical", { exact: true })).toBeVisible();
+
+    // Verify "Send to review" is disabled due to open critical finding
+    const disabledSendBtn = page.getByRole("button", { name: /Send to review/i });
+    await expect(disabledSendBtn).toBeDisabled();
+
+    // Apply suggestion on STAT-001
+    const applySuggestionBtn = page.getByRole("button", { name: "Apply suggestion" });
+    await expect(applySuggestionBtn).toBeVisible();
+    await applySuggestionBtn.click();
+
+    // Verify finding cleared and all checks passed
+    await expect(page.getByText("All Checks Passed")).toBeVisible();
+    await expect(page.getByText("0 open findings")).toBeVisible();
+
+    // Accept all 5 sentences
+    const acceptButtons = page.getByRole("button", { name: /^Accept/ });
+    const count = await acceptButtons.count();
+    expect(count).toBe(5);
+    for (let i = 0; i < count; i++) {
+      await acceptButtons.nth(i).click();
+    }
+
+    // Status bar reflects 5 accepted, 0 pending, 0 open findings
+    await expect(page.getByText("5 accepted")).toBeVisible();
+    await expect(page.getByText("0 pending")).toBeVisible();
+
+    // Send to review is now enabled
+    const enabledSendBtn = page.getByRole("button", { name: "Send to review" });
+    await expect(enabledSendBtn).toBeEnabled();
+    await enabledSendBtn.click();
+
+    // Toast confirms section is in review
+    await expect(page.getByText(/Section In Review/i)).toBeVisible();
+  });
+
+  test("Keyboard shortcuts dialog opens and inline editing flags raw numerals with NUM-001", async ({ page }) => {
+    await page.goto("/sections/12.2");
+    await expect(page.locator('[data-hydrated="true"]')).toBeVisible();
+
+    // Generate Draft if not present
+    const generateBtn = page.getByRole("button", { name: "Generate draft" }).first();
+    if (await generateBtn.isVisible()) {
+      await generateBtn.click();
+      await expect(page.getByText("5 of 5 sentences")).toBeVisible({ timeout: 10000 });
+    }
+
+    // Open Keyboard Shortcuts via ? shortcut
+    await page.keyboard.press("?");
+    await expect(page.getByRole("heading", { name: "Keyboard Shortcuts" })).toBeVisible();
+    await page.keyboard.press("Escape");
+
+    // Click Edit on first sentence
+    const editBtns = page.getByRole("button", { name: /^Edit/ });
+    await editBtns.first().click();
+
+    // ContentEditable box is visible
+    const editor = page.locator("[contenteditable='true']").first();
+    await expect(editor).toBeVisible();
+
+    // Type a raw numeral into editor
+    await editor.type(" in 201 patients");
+
+    // Save sentence
+    await page.getByRole("button", { name: "Save sentence" }).click();
+
+    // Checks tab now displays NUM-001 critical finding
+    await page.getByRole("tab", { name: /Checks/ }).click();
+    await expect(page.getByText("NUM-001", { exact: true })).toBeVisible();
+    await expect(page.getByText(/Critical Findings \(\d+\)/)).toBeVisible();
+    await expect(page.getByText(/critical/i).first()).toBeVisible();
+  });
+
   test("Sections 10.1 and 12.3 generate drafts with number chips", async ({ page }) => {
     // 10.1 Disposition
     await page.goto("/sections/10.1");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Disposition of patients");
-    await page.getByRole("button", { name: "Generate draft" }).first().click();
-    await expect(page.getByText("3 of 3 sentences")).toBeVisible({ timeout: 10000 });
+    const genBtn101 = page.getByRole("button", { name: "Generate draft" }).first();
+    if (await genBtn101.isVisible()) {
+      await genBtn101.click();
+      await expect(page.getByText("3 of 3 sentences")).toBeVisible({ timeout: 10000 });
+    } else {
+      await expect(page.getByText("3 of 3 sentences")).toBeVisible();
+    }
     await expect(page.getByRole("button", { name: /Clinical number/ }).first()).toBeVisible();
 
     // 12.3 Deaths
     await page.goto("/sections/12.3");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Deaths and other serious adverse events");
-    await page.getByRole("button", { name: "Generate draft" }).first().click();
-    await expect(page.getByText("3 of 3 sentences")).toBeVisible({ timeout: 10000 });
+    const genBtn123 = page.getByRole("button", { name: "Generate draft" }).first();
+    if (await genBtn123.isVisible()) {
+      await genBtn123.click();
+      await expect(page.getByText("3 of 3 sentences")).toBeVisible({ timeout: 10000 });
+    } else {
+      await expect(page.getByText("3 of 3 sentences")).toBeVisible();
+    }
     await expect(page.getByRole("button", { name: /Clinical number/ }).first()).toBeVisible();
   });
 

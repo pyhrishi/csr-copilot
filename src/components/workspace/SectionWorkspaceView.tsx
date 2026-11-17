@@ -1,20 +1,27 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { toast } from "sonner";
 
 import { SourceDrawer } from "@/components/trust";
 import { DraftCanvas } from "@/components/workspace/DraftCanvas";
 import { LockedSectionView } from "@/components/workspace/LockedSectionView";
+import { RegenerateDialog } from "@/components/workspace/RegenerateDialog";
 import { RightPanel } from "@/components/workspace/RightPanel";
 import { SectionOutline } from "@/components/workspace/SectionOutline";
+import { ShortcutsDialog } from "@/components/workspace/ShortcutsDialog";
 import type { StatRule } from "@/lib/data/seed-types";
 import { generateSimulatedDraft } from "@/lib/generation/simulated";
 import { roleLabel } from "@/lib/roles";
-import type { DraftSentence, Fact, Section, Tlf } from "@/lib/types";
+import { renderSlots } from "@/lib/slots/render";
+import { computeSectionStatus, type SectionDraftStatus } from "@/lib/study-readiness";
+import type { DraftSentence, Fact, Finding, Section, Tlf } from "@/lib/types";
+import { buildReferenceIndex, loadRules, validateSentence } from "@/lib/validate";
 import { useAuditStore } from "@/store/audit";
 import { useDraftsStore } from "@/store/drafts";
 import { useRoleStore } from "@/store/role";
+
+import { applySuggestionToTemplate } from "./editor-utils";
 
 interface SectionWorkspaceViewProps {
   section: Section;
@@ -23,6 +30,9 @@ interface SectionWorkspaceViewProps {
   tlfs: readonly Tlf[];
   rules: readonly StatRule[];
 }
+
+const EMPTY_SENTENCES: Record<string, DraftSentence> = {};
+const EMPTY_STATUSES: Record<string, SectionDraftStatus> = {};
 
 export function SectionWorkspaceView({
   section,
@@ -36,11 +46,26 @@ export function SectionWorkspaceView({
   const [activeFactId, setActiveFactId] = useState<string | undefined>(undefined);
   const [activeTlfId, setActiveTlfId] = useState<string | undefined>(undefined);
 
+  // Interaction states for M3 part 2
+  const [focusedSentenceId, setFocusedSentenceId] = useState<string | null>(null);
+  const [editingSentenceId, setEditingSentenceId] = useState<string | null>(null);
+  const [activeFactToInsert, setActiveFactToInsert] = useState<Fact | null>(null);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [regenerateTargetId, setRegenerateTargetId] = useState<string | null>(null);
+  const [regenerateOpen, setRegenerateOpen] = useState(false);
+  const [highlightedSentenceId, setHighlightedSentenceId] = useState<string | null>(null);
+
   // Client store subscriptions
   const draftSentences = useSyncExternalStore(
     useDraftsStore.subscribe,
     () => useDraftsStore.getState().sentences,
-    () => ({}) as Record<string, DraftSentence>,
+    () => EMPTY_SENTENCES,
+  );
+
+  const sectionStatuses = useSyncExternalStore(
+    useDraftsStore.subscribe,
+    () => useDraftsStore.getState().sectionStatuses,
+    () => EMPTY_STATUSES,
   );
 
   const role = useSyncExternalStore(
@@ -51,16 +76,81 @@ export function SectionWorkspaceView({
 
   const appendAudit = useAuditStore((state) => state.append);
   const setSentence = useDraftsStore((state) => state.setSentence);
+  const setSentenceState = useDraftsStore((state) => state.setSentenceState);
+  const setSectionStatus = useDraftsStore((state) => state.setSectionStatus);
 
   // Sentences belonging to this section
-  const currentSentences = section.sentences
-    .map((s) => draftSentences[s.id])
-    .filter(Boolean) as DraftSentence[];
+  const currentSentences = useMemo(() => {
+    return section.sentences
+      .map((s) => draftSentences[s.id])
+      .filter(Boolean) as DraftSentence[];
+  }, [section.sentences, draftSentences]);
 
   const isLockedOrHuman =
     section.release === "R2" ||
     section.release === "human" ||
     section.autonomy === "locked";
+
+  const validationCtx = useMemo(() => {
+    const factMap = new Map(facts.map((f) => [f.id, f]));
+    const compiledRules = loadRules(rules);
+    const references = buildReferenceIndex({ tlfs, sections: allSections });
+    return { facts: factMap, rules: compiledRules, references };
+  }, [facts, rules, tlfs, allSections]);
+
+  const { status: currentStatus } = computeSectionStatus(
+    section,
+    draftSentences,
+    sectionStatuses,
+  );
+
+  // Accept sentence
+  const handleAccept = useCallback(
+    (sentenceId: string) => {
+      const s = draftSentences[sentenceId];
+      if (!s) return;
+
+      setSentenceState(sentenceId, "accepted");
+      appendAudit({
+        actor: `${roleLabel(role)} (${role})`,
+        role,
+        action: "accept",
+        objectId: sentenceId,
+        detail: `Accepted sentence ${sentenceId} (${s.provenance})`,
+      });
+      toast.success("Sentence Accepted", {
+        description: `Sentence ${sentenceId} marked as accepted.`,
+      });
+    },
+    [draftSentences, setSentenceState, appendAudit, role],
+  );
+
+  // Reject sentence
+  const handleReject = useCallback(
+    (sentenceId: string) => {
+      const s = draftSentences[sentenceId];
+      if (!s) return;
+
+      setSentenceState(sentenceId, "rejected");
+      appendAudit({
+        actor: `${roleLabel(role)} (${role})`,
+        role,
+        action: "reject",
+        objectId: sentenceId,
+        detail: `Rejected sentence ${sentenceId}`,
+      });
+      toast.error("Sentence Rejected", {
+        description: `Sentence ${sentenceId} marked as rejected.`,
+      });
+    },
+    [draftSentences, setSentenceState, appendAudit, role],
+  );
+
+  // Start inline editing
+  const handleEdit = useCallback((sentenceId: string) => {
+    setEditingSentenceId(sentenceId);
+    setFocusedSentenceId(sentenceId);
+  }, []);
 
   // Click on NumberChip opens drawer with cited cell
   const handleFactClick = (factId: string) => {
@@ -84,6 +174,263 @@ export function SectionWorkspaceView({
     setDrawerOpen(true);
   };
 
+  // Global keyboard shortcuts (A, E, R, ?)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't intercept when user is typing inside an input, textarea or contentEditable
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable ||
+          target.closest("[contenteditable='true']"))
+      ) {
+        return;
+      }
+
+      if (e.key === "?" || (e.key === "/" && e.shiftKey)) {
+        e.preventDefault();
+        setShortcutsOpen(true);
+        return;
+      }
+
+      if (e.key === "ArrowDown" || e.key === "j" || e.key === "J") {
+        e.preventDefault();
+        const ids = currentSentences.map((s) => s.id);
+        if (ids.length > 0) {
+          const currentIndex = focusedSentenceId ? ids.indexOf(focusedSentenceId) : -1;
+          const nextIndex = currentIndex < ids.length - 1 ? currentIndex + 1 : 0;
+          setFocusedSentenceId(ids[nextIndex]);
+          const el = document.getElementById(`sentence-${ids[nextIndex]}`);
+          el?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        return;
+      }
+
+      if (e.key === "ArrowUp" || e.key === "k" || e.key === "K") {
+        e.preventDefault();
+        const ids = currentSentences.map((s) => s.id);
+        if (ids.length > 0) {
+          const currentIndex = focusedSentenceId ? ids.indexOf(focusedSentenceId) : ids.length;
+          const prevIndex = currentIndex > 0 ? currentIndex - 1 : ids.length - 1;
+          setFocusedSentenceId(ids[prevIndex]);
+          const el = document.getElementById(`sentence-${ids[prevIndex]}`);
+          el?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        return;
+      }
+
+      if (!focusedSentenceId) return;
+
+      if (e.key === "a" || e.key === "A") {
+        e.preventDefault();
+        handleAccept(focusedSentenceId);
+      } else if (e.key === "e" || e.key === "E") {
+        e.preventDefault();
+        handleEdit(focusedSentenceId);
+      } else if (e.key === "r" || e.key === "R") {
+        e.preventDefault();
+        handleReject(focusedSentenceId);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [focusedSentenceId, currentSentences, handleAccept, handleEdit, handleReject]);
+
+  // Save inline edit: re-runs renderSlots and validateSentence
+  const handleSaveEdit = (sentenceId: string, newTemplate: string) => {
+    const existing = draftSentences[sentenceId];
+    if (!existing) return;
+
+    try {
+      // 1. Render slots for new template
+      const newRendered = renderSlots(newTemplate, { facts });
+
+      // 2. Validate sentence
+      const newFindings = validateSentence(
+        { template: newTemplate, cites: existing.cites },
+        validationCtx,
+      );
+
+      const updatedSentence: DraftSentence = {
+        ...existing,
+        template: newTemplate,
+        rendered: newRendered,
+        provenance: "ai_edited",
+        findings: newFindings,
+        state: "pending",
+      };
+
+      setSentence(updatedSentence);
+      setEditingSentenceId(null);
+
+      // 3. Log audit event
+      appendAudit({
+        actor: `${roleLabel(role)} (${role})`,
+        role,
+        action: "edit",
+        objectId: sentenceId,
+        detail: `Edited sentence ${sentenceId} inline. Validators re-run: ${newFindings.length} findings open.`,
+      });
+
+      // 4. Alert user if critical finding (e.g. NUM-001)
+      const numFinding = newFindings.find((f) => f.ruleId === "NUM-001");
+      if (numFinding) {
+        toast.error("NUM-001 Critical Finding Raised", {
+          description: numFinding.message,
+        });
+      } else {
+        toast.success("Sentence Saved", {
+          description: `Sentence ${sentenceId} updated (AI-edited) and verified.`,
+        });
+      }
+    } catch (err) {
+      toast.error("Save Failed", {
+        description: (err as Error).message,
+      });
+    }
+  };
+
+  // Cancel edit
+  const handleCancelEdit = () => {
+    setEditingSentenceId(null);
+  };
+
+  // Open regenerate reason dialog
+  const handleRegenerate = (sentenceId: string) => {
+    setRegenerateTargetId(sentenceId);
+    setRegenerateOpen(true);
+  };
+
+  // Confirm sentence regeneration
+  const handleConfirmRegenerate = (reason: string) => {
+    if (!regenerateTargetId) return;
+
+    const templateDef = section.sentences.find((s) => s.id === regenerateTargetId);
+    if (!templateDef) return;
+
+    const rendered = renderSlots(templateDef.text, { facts });
+    const findings = validateSentence(
+      { template: templateDef.text, cites: templateDef.cites },
+      validationCtx,
+    );
+
+    const refreshed: DraftSentence = {
+      id: templateDef.id,
+      sectionId: section.id,
+      template: templateDef.text,
+      rendered,
+      provenance: "ai",
+      state: "pending",
+      cites: templateDef.cites,
+      generation: {
+        mode: "simulated",
+        promptVersion: "v1.0",
+        templateVersion: "v1.0",
+        at: new Date().toISOString(),
+      },
+      findings,
+    };
+
+    setSentence(refreshed);
+    appendAudit({
+      actor: `${roleLabel(role)} (${role})`,
+      role,
+      action: "regenerate",
+      objectId: regenerateTargetId,
+      detail: `Regenerated sentence ${regenerateTargetId}. Reason: ${reason}`,
+    });
+
+    toast.success("Sentence Regenerated", {
+      description: `Sentence ${regenerateTargetId} reset from template.`,
+    });
+  };
+
+  // Apply suggestion (e.g. STAT-001 on 12.2-s3)
+  const handleApplySuggestion = (sentenceId: string, finding: Finding) => {
+    const existing = draftSentences[sentenceId];
+    if (!existing) return;
+
+    const newTemplate = applySuggestionToTemplate(existing.template, finding);
+    const newRendered = renderSlots(newTemplate, { facts });
+    const newFindings = validateSentence(
+      { template: newTemplate, cites: existing.cites },
+      validationCtx,
+    );
+
+    const updated: DraftSentence = {
+      ...existing,
+      template: newTemplate,
+      rendered: newRendered,
+      provenance: "ai_edited",
+      findings: newFindings,
+    };
+
+    setSentence(updated);
+    setHighlightedSentenceId(sentenceId);
+    setFocusedSentenceId(sentenceId);
+    const targetEl = document.getElementById(`sentence-${sentenceId}`);
+    targetEl?.scrollIntoView({ behavior: "smooth", block: "center" });
+    setTimeout(() => setHighlightedSentenceId(null), 2500);
+
+    appendAudit({
+      actor: `${roleLabel(role)} (${role})`,
+      role,
+      action: "edit",
+      objectId: sentenceId,
+      detail: `Applied suggestion for ${finding.ruleId} on ${sentenceId}: ${finding.suggestion || "resolved"}`,
+    });
+
+    toast.success("Suggestion Applied", {
+      description: `${finding.ruleId} resolved on ${sentenceId}; sentence marked AI-edited.`,
+    });
+  };
+
+  // Insert fact from Fact Panel into sentence
+  const handleInsertFact = (fact: Fact) => {
+    if (editingSentenceId) {
+      setActiveFactToInsert(fact);
+      return;
+    }
+
+    // If no sentence is in edit mode, target focused sentence or first sentence
+    const targetId = focusedSentenceId ?? currentSentences[0]?.id;
+    if (targetId) {
+      setEditingSentenceId(targetId);
+      setFocusedSentenceId(targetId);
+      setActiveFactToInsert(fact);
+      toast.info(`Editing ${targetId}`, {
+        description: `Inserted fact ${fact.display} into sentence.`,
+      });
+    }
+  };
+
+  // Send section to review
+  const handleSendToReview = () => {
+    setSectionStatus(section.id, "in_review");
+    appendAudit({
+      actor: `${roleLabel(role)} (${role})`,
+      role,
+      action: "edit",
+      objectId: section.id,
+      detail: `Submitted Section ${section.id} for formal review.`,
+    });
+    toast.success("Section In Review", {
+      description: `Section ${section.id} has been submitted to reviewers.`,
+    });
+  };
+
+  // Focus and scroll to sentence from Checks tab
+  const handleSelectSentence = (sentenceId: string) => {
+    setFocusedSentenceId(sentenceId);
+    const el = document.getElementById(`sentence-${sentenceId}`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  };
+
   // Generate simulated draft
   const handleGenerate = async () => {
     if (isGenerating || isLockedOrHuman) return;
@@ -96,13 +443,16 @@ export function SectionWorkspaceView({
         tlfs,
         rules,
         allSections,
-        delayMs: 380,
+        delayMs: 350,
         onSentence: (sentence) => {
           setSentence(sentence);
         },
       });
 
-      // Log generation to immutable audit trail
+      if (generated.length > 0) {
+        setFocusedSentenceId(generated[0].id);
+      }
+
       appendAudit({
         actor: `${roleLabel(role)} (${role})`,
         role,
@@ -129,7 +479,7 @@ export function SectionWorkspaceView({
     (section.tlfs.length > 0 ? tlfs.find((t) => t.id === section.tlfs[0]) : tlfs[0]);
 
   return (
-    <div className="flex h-[calc(100vh-var(--topbar-h)-var(--banner-h))] overflow-hidden bg-paper">
+    <div data-hydrated="true" className="flex h-[calc(100vh-var(--topbar-h)-var(--banner-h))] overflow-hidden bg-paper">
       {/* Pane 1: Left Outline (260px) */}
       <SectionOutline
         sections={allSections}
@@ -156,14 +506,35 @@ export function SectionWorkspaceView({
             onGenerate={handleGenerate}
             onFactClick={handleFactClick}
             onCitationClick={handleCitationClick}
+            focusedSentenceId={focusedSentenceId}
+            highlightedSentenceId={highlightedSentenceId}
+            onFocusSentence={setFocusedSentenceId}
+            editingSentenceId={editingSentenceId}
+            onEdit={handleEdit}
+            onSaveEdit={handleSaveEdit}
+            onCancelEdit={handleCancelEdit}
+            onAccept={handleAccept}
+            onReject={handleReject}
+            onRegenerate={handleRegenerate}
+            onSendToReview={handleSendToReview}
+            sectionStatus={currentStatus}
+            isSubmittedToReview={sectionStatuses[section.id] === "in_review"}
+            onOpenShortcuts={() => setShortcutsOpen(true)}
+            activeFactToInsert={activeFactToInsert}
+            onFactInserted={() => setActiveFactToInsert(null)}
           />
 
           {/* Pane 3: Right Panel (360px) */}
           <RightPanel
             section={section}
             facts={facts}
+            tlfs={tlfs}
             sentences={currentSentences}
+            editingSentenceId={editingSentenceId}
             onFactClick={handleFactClick}
+            onInsertFact={handleInsertFact}
+            onSelectSentence={handleSelectSentence}
+            onApplySuggestion={handleApplySuggestion}
           />
         </div>
       )}
@@ -174,6 +545,17 @@ export function SectionWorkspaceView({
         onOpenChange={setDrawerOpen}
         tlf={selectedTlf}
         highlightFactId={activeFactId}
+      />
+
+      {/* Keyboard Shortcuts Dialog */}
+      <ShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
+
+      {/* Regenerate Reason Dialog */}
+      <RegenerateDialog
+        open={regenerateOpen}
+        sentenceId={regenerateTargetId}
+        onOpenChange={setRegenerateOpen}
+        onConfirm={handleConfirmRegenerate}
       />
     </div>
   );

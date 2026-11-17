@@ -113,6 +113,7 @@ export type SectionDraftStatus = "not_started" | "drafted" | "in_review" | "sign
 export function computeSectionStatus(
   section: Section,
   draftSentences: Record<string, DraftSentence>,
+  sectionStatuses?: Record<string, SectionDraftStatus>,
 ): {
   status: SectionDraftStatus;
   label: string;
@@ -140,6 +141,23 @@ export function computeSectionStatus(
 
   if (draftedCount === 0) {
     return { status: "not_started", label: "Not started", draftedCount, totalCount, percent: 0 };
+  }
+
+  if (sectionStatuses?.[section.id]) {
+    const explicitStatus = sectionStatuses[section.id];
+    const labels: Record<SectionDraftStatus, string> = {
+      not_started: "Not started",
+      drafted: "Drafted",
+      in_review: "In review",
+      signed_off: "Signed off",
+    };
+    return {
+      status: explicitStatus,
+      label: labels[explicitStatus],
+      draftedCount,
+      totalCount,
+      percent,
+    };
   }
 
   const allAccepted = draftedCount === totalCount && sectionDrafts.every((s) => s.state === "accepted");

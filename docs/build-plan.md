@@ -25,9 +25,9 @@ Work top to bottom. Tick boxes as you finish. The SessionStart hook reads this f
 ## M3 · Section workspace (hero screen)
 - [x] Three-pane layout; outline; Generate draft with streaming (simulated)
 - [x] NumberChip, CitationMarker, ProvenanceShade, SourceDrawer with highlighted cell
-- [ ] Accept / Edit / Reject / Regenerate with keyboard shortcuts; inline edit keeps chips atomic
-- [ ] Fact panel with drag-to-insert chips
-- [ ] Checks tab: STAT-001 on 12.2-s3 with one-click fix; NUM-001 when a raw numeral is typed
+- [x] Accept / Edit / Reject / Regenerate with keyboard shortcuts; inline edit keeps chips atomic
+- [x] Fact panel with drag-to-insert chips
+- [x] Checks tab: STAT-001 on 12.2-s3 with one-click fix; NUM-001 when a raw numeral is typed
 - [x] Locked states for 11.4 (R2) and 13 (human)
 
 ## M4 · Reconciliation and sign-off
