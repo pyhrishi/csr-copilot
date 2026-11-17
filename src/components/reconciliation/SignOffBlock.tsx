@@ -116,7 +116,7 @@ export function SignOffBlock({
             <div>
               <h3
                 id="signoff-heading"
-                className="font-serif text-lg font-bold text-ink flex items-center gap-2"
+                className="font-heading text-lg font-bold text-ink flex items-center gap-2"
               >
                 <span>Biostatistical Sign-Off</span>
                 <span className="text-xs font-sans font-medium px-2 py-0.5 rounded bg-paper-2 text-subtle border border-line">
@@ -198,7 +198,7 @@ export function SignOffBlock({
           <span className="text-[11px] font-bold uppercase tracking-wider text-teal block mb-1">
             Meaning of Signature (FDA 21 CFR § 11.50)
           </span>
-          <blockquote className="font-serif text-sm italic text-ink border-l-2 border-teal pl-3 py-0.5">
+          <blockquote className="font-heading text-sm italic text-ink border-l-2 border-teal pl-3 py-0.5">
             &ldquo;I confirm the numbers in this section match the source TLFs.&rdquo;
           </blockquote>
         </div>

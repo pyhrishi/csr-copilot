@@ -201,7 +201,7 @@ test.describe("S3 · Section Workspace", () => {
 
     // Checks tab has STAT-001 finding on 12.2-s3
     await page.getByRole("tab", { name: /Checks/ }).click();
-    await expect(page.getByText("STAT-001")).toBeVisible();
+    await expect(page.getByRole("tabpanel", { name: "Checks" }).getByText("STAT-001")).toBeVisible();
   });
 
   test("Section 12.2 generates draft, applies STAT-001 fix, accepts all sentences and enables review", async ({ page }) => {
@@ -219,7 +219,7 @@ test.describe("S3 · Section Workspace", () => {
 
     // Open Checks tab
     await page.getByRole("tab", { name: /Checks/ }).click();
-    await expect(page.getByText("STAT-001")).toBeVisible();
+    await expect(page.getByRole("tabpanel", { name: "Checks" }).getByText("STAT-001")).toBeVisible();
     await expect(page.getByText("1 critical", { exact: true })).toBeVisible();
 
     // Verify "Send to review" is disabled due to open critical finding
@@ -288,7 +288,7 @@ test.describe("S3 · Section Workspace", () => {
 
     // Checks tab now displays NUM-001 critical finding
     await page.getByRole("tab", { name: /Checks/ }).click();
-    await expect(page.getByText("NUM-001", { exact: true })).toBeVisible();
+    await expect(page.getByRole("tabpanel", { name: "Checks" }).getByText("NUM-001", { exact: true })).toBeVisible();
     await expect(page.getByText(/Critical Findings \(\d+\)/)).toBeVisible();
     await expect(page.getByText(/critical/i).first()).toBeVisible();
   });

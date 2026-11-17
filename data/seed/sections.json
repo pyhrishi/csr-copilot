@@ -121,7 +121,10 @@
         {
           "id": "12.3-s3",
           "text": "Narratives for all patients with serious TEAEs are provided in Section 14.3.3.",
-          "cites": []
+          "cites": [
+            "14.3.1.1.sae.velo",
+            "14.3.1.1.sae.pbo"
+          ]
         }
       ]
     },

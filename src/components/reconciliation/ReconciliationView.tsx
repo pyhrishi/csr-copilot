@@ -211,7 +211,7 @@ export function ReconciliationView({
                   </span>
                 )}
               </div>
-              <h1 className="font-serif text-2xl md:text-3xl font-bold text-ink">
+              <h1 className="font-heading text-2xl md:text-3xl font-bold text-ink">
                 {section.title} · Numeric Reconciliation
               </h1>
               <p className="text-xs text-subtle mt-1">
@@ -249,7 +249,7 @@ export function ReconciliationView({
                 <span className="text-[11px] font-bold uppercase tracking-wider text-teal block mb-0.5">
                   Reconciliation Fidelity
                 </span>
-                <h2 className="text-xl md:text-2xl font-bold font-serif text-ink tracking-tight">
+                <h2 className="text-xl md:text-2xl font-bold font-heading text-ink tracking-tight">
                   {computedSummaryText}
                 </h2>
                 <p className="text-xs text-subtle mt-0.5">
@@ -266,7 +266,7 @@ export function ReconciliationView({
                 <span className="text-[11px] uppercase tracking-wider text-subtle block">
                   Total Numbers
                 </span>
-                <span className="font-serif text-2xl font-bold text-ink tabular">
+                <span className="font-heading text-2xl font-bold text-ink tabular">
                   {summary.total}
                 </span>
               </div>
@@ -275,7 +275,7 @@ export function ReconciliationView({
                 <span className="text-[11px] uppercase tracking-wider text-subtle block">
                   Matched
                 </span>
-                <span className="font-serif text-2xl font-bold text-teal tabular">
+                <span className="font-heading text-2xl font-bold text-teal tabular">
                   {summary.matched}
                 </span>
               </div>
@@ -284,7 +284,7 @@ export function ReconciliationView({
                 <span className="text-[11px] uppercase tracking-wider text-subtle block">
                   Concordance
                 </span>
-                <span className="font-serif text-2xl font-bold text-ink tabular">
+                <span className="font-heading text-2xl font-bold text-ink tabular">
                   {share}%
                 </span>
               </div>
@@ -296,7 +296,7 @@ export function ReconciliationView({
         <section aria-label="Numeric reconciliation table" className="space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="font-serif text-lg font-bold text-ink">
+              <h2 className="font-heading text-lg font-bold text-ink">
                 Extracted Numbers vs Source TLF Cells
               </h2>
               <p className="text-xs text-subtle">

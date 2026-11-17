@@ -69,7 +69,10 @@ export function RightPanel({
 
   return (
     <aside className="w-[360px] shrink-0 border-l border-line bg-paper-2/30 flex flex-col h-full overflow-hidden">
-      <Tabs defaultValue="facts" className="flex flex-col h-full">
+      <Tabs
+        defaultValue={criticalFindings.length > 0 ? "checks" : "facts"}
+        className="flex flex-col h-full"
+      >
         {/* Tabs Header */}
         <div className="p-3 border-b border-line bg-card shrink-0">
           <TabsList className="grid w-full grid-cols-2 h-9 p-1 bg-paper-2">

@@ -125,7 +125,7 @@ export function StudyHomeView({
                 Biostatistician Verification Workspace
               </strong>
               <p className="text-body mt-0.5">
-                TLF tables parsed into 52 structured facts. 24 of 24 numbers match their source tables (100%).
+                TLF tables parsed into {facts.length} structured facts. {metrics.numbersReconciled.matched} of {metrics.numbersReconciled.total} numbers match their source tables ({metrics.numbersReconciled.percent}%).
               </p>
             </div>
           </div>
@@ -150,14 +150,14 @@ export function StudyHomeView({
                 Executive CSR Readiness Overview
               </strong>
               <p className="text-subtle mt-0.5">
-                Target final CSR submission in 66 days (22 Jan 2027). All 5 input packages parsed; 2 open data management queries.
+                Target final CSR submission in 66 days (22 Jan 2027). All {totalInputs} input packages parsed; 2 open data management queries.
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2 text-xs font-semibold tabular">
             <span className="text-teal flex items-center gap-1">
               <CheckCircle2 className="size-3.5" aria-hidden="true" />
-              100% Numeric Match
+              {metrics.numbersReconciled.percent}% Numeric Match
             </span>
           </div>
         </div>
@@ -166,38 +166,16 @@ export function StudyHomeView({
       {/* Primary Study Overview Card */}
       <StudyCard study={study} />
 
-      {/* S1 Layout order adapts based on active role emphasis:
-          - Medical Writer sees their sections first, followed by readiness.
-          - Executive sees readiness first, followed by the section board.
-          - Other roles default to standard readiness -> section board.
-      */}
-      {isWriter ? (
-        <>
-          {/* Medical Writer: Section board first */}
-          <SectionBoard
-            sections={sections}
-            draftSentences={draftSentences}
-            sectionStatuses={sectionStatuses}
-            highlightWriter={true}
-          />
+      {/* Readiness tiles rendered above section board for above-the-fold visibility across viewports */}
+      <ReadinessTiles metrics={metrics} highlight={isExec} />
 
-          {/* Readiness tiles below */}
-          <ReadinessTiles metrics={metrics} />
-        </>
-      ) : (
-        <>
-          {/* Executive & other roles: Readiness tiles first */}
-          <ReadinessTiles metrics={metrics} highlight={isExec} />
-
-          {/* Section board below */}
-          <SectionBoard
-            sections={sections}
-            draftSentences={draftSentences}
-            sectionStatuses={sectionStatuses}
-            highlightWriter={false}
-          />
-        </>
-      )}
+      {/* Section board with role-specific writer emphasis */}
+      <SectionBoard
+        sections={sections}
+        draftSentences={draftSentences}
+        sectionStatuses={sectionStatuses}
+        highlightWriter={isWriter}
+      />
     </div>
   );
 }

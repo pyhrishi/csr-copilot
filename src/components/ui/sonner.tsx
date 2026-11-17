@@ -14,6 +14,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
     <Sonner
       // The prototype is light-only (no dark theme in docs/design-system.md).
       theme="light"
+      position="top-right"
+      duration={2500}
       className="toaster group"
       icons={{
         success: <CircleCheckIcon className="size-4" />,

@@ -54,3 +54,12 @@ Work top to bottom. Tick boxes as you finish. The SessionStart hook reads this f
 - [ ] Empty, loading and error states; `prefers-reduced-motion`; Lighthouse accessibility ≥ 90 on S1 and S3
 - [ ] Playwright smoke test: every route renders; the demo path completes
 - [ ] Run `/demo-ready`, then `/deploy-vercel`
+
+## Polish backlog (checkpoint 1)
+- [ ] NumberChip tooltip: include explicit cell coordinate indices (`Cell: R{fact.cell.row + 1}:C{fact.cell.col + 1}`) alongside row/column labels (regulatory-reviewer)
+- [ ] Audit log: distinguish section review submission (`setSectionStatus("in_review")`) with dedicated workflow action in audit event (regulatory-reviewer)
+- [ ] Data readiness KPI strip: add "Simulated seed" pill to emphasize mock ingestion metrics (regulatory-reviewer)
+- [ ] Validator micro-diff preview: generalize diff preview in RightPanel by reading dynamically from `finding.span` and `finding.fix.replacement` (biostat-checker)
+- [ ] TLF parse results: bind confidence display cell directly to parser telemetry attribute (biostat-checker)
+- [ ] Reconciliation table alignment: right-align numeric columns (Rendered Value and Source Value) (ux-critic)
+- [ ] Reconciliation table: wrap SourceDrawer inspection button in `<Tooltip>` (ux-critic)

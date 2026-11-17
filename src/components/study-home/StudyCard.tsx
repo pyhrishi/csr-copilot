@@ -39,7 +39,7 @@ export function StudyCard({ study }: StudyCardProps) {
   ];
 
   return (
-    <div className="rounded-xl border border-line bg-card p-6 shadow-xs">
+    <div className="rounded-xl border border-line bg-card p-5 shadow-xs">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">

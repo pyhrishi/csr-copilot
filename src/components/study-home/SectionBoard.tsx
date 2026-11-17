@@ -198,21 +198,25 @@ export function SectionBoard({
                   {/* Actions */}
                   <TableCell className="text-right">
                     {isR2Locked ? (
-                      <span
-                        className="inline-flex items-center gap-1 text-xs text-subtle cursor-not-allowed font-medium"
+                      <Link
+                        href={`/sections/${section.id}`}
+                        className="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold bg-paper-2/80 text-subtle hover:bg-paper-2 hover:text-ink border border-line transition-colors"
                         title={meta.lockedReason}
                       >
                         <Lock className="size-3" aria-hidden="true" />
-                        <span>Locked</span>
-                      </span>
+                        <span>Locked (R2)</span>
+                        <ArrowRight className="size-2.5 ml-0.5 opacity-60" aria-hidden="true" />
+                      </Link>
                     ) : isHumanOnly ? (
-                      <span
-                        className="inline-flex items-center gap-1 text-xs text-amber cursor-not-allowed font-medium"
+                      <Link
+                        href={`/sections/${section.id}`}
+                        className="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold bg-paper-2/80 text-amber hover:bg-paper-2 hover:text-ink border border-line transition-colors"
                         title={meta.lockedReason}
                       >
                         <PenLine className="size-3" aria-hidden="true" />
                         <span>Human only</span>
-                      </span>
+                        <ArrowRight className="size-2.5 ml-0.5 opacity-60" aria-hidden="true" />
+                      </Link>
                     ) : (
                       <Link
                         href={`/sections/${section.id}`}

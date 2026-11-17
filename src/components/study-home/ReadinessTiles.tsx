@@ -171,10 +171,17 @@ export function ReadinessTiles({ metrics, highlight = false }: ReadinessTilesPro
             </p>
           </div>
           <div className="mt-3 pt-3 border-t border-line/60 flex items-center justify-between text-[11px]">
-            <span className="text-teal font-medium flex items-center gap-1">
-              <CheckCircle2 className="size-3" aria-hidden="true" />
-              100% table match
-            </span>
+            {numbersReconciled.percent === 100 && numbersReconciled.total > 0 ? (
+              <span className="text-teal font-medium flex items-center gap-1">
+                <CheckCircle2 className="size-3" aria-hidden="true" />
+                100% table match
+              </span>
+            ) : (
+              <span className="text-amber font-medium flex items-center gap-1">
+                <Clock className="size-3" aria-hidden="true" />
+                {numbersReconciled.percent}% table match
+              </span>
+            )}
             <Link
               href="/sections/12.2/reconciliation"
               className="text-subtle hover:text-ink hover:underline"

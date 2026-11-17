@@ -35,6 +35,7 @@ export function TlfMappingTable({ tlfs, sections }: TlfMappingTableProps) {
   const [mappings, setMappings] = useState<Record<string, string>>(DEFAULT_MAPPINGS);
   const appendAudit = useAuditStore((state) => state.append);
   const role = useRoleStore((state) => state.role);
+  const isExec = role === "exec";
 
   const handleOverride = (tlfId: string, newSectionId: string) => {
     const oldSectionId = mappings[tlfId] ?? DEFAULT_MAPPINGS[tlfId] ?? "none";
@@ -66,10 +67,17 @@ export function TlfMappingTable({ tlfs, sections }: TlfMappingTableProps) {
           <GitCommitHorizontal className="size-4" aria-hidden="true" />
           <span>TLF-to-Section Mapping</span>
         </h3>
-        <span className="text-xs text-subtle flex items-center gap-1">
-          <SlidersHorizontal className="size-3" aria-hidden="true" />
-          Overrides log an immutable audit event
-        </span>
+        <div className="flex items-center gap-2">
+          {isExec && (
+            <span className="text-[11px] font-medium text-muted bg-paper-2 px-2 py-0.5 rounded border border-line">
+              Read-only view (Executive)
+            </span>
+          )}
+          <span className="text-xs text-subtle flex items-center gap-1">
+            <SlidersHorizontal className="size-3" aria-hidden="true" />
+            Overrides log an immutable audit event
+          </span>
+        </div>
       </div>
 
       <div className="rounded-xl border border-line bg-card overflow-hidden shadow-xs">
@@ -111,6 +119,7 @@ export function TlfMappingTable({ tlfs, sections }: TlfMappingTableProps) {
                   <TableCell>
                     <div className="max-w-xs">
                       <Select
+                        disabled={isExec}
                         value={currentSectionId}
                         onValueChange={(val) => {
                           if (val) handleOverride(tlf.id, val);

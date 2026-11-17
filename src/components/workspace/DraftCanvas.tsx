@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import {
+  AlertOctagon,
   Check,
   CheckCircle2,
   Keyboard,
@@ -51,6 +52,7 @@ interface DraftCanvasProps {
   onOpenShortcuts: () => void;
   activeFactToInsert?: Fact | null;
   onFactInserted?: () => void;
+  isReadOnly?: boolean;
 }
 
 export function DraftCanvas({
@@ -77,6 +79,7 @@ export function DraftCanvas({
   onOpenShortcuts,
   activeFactToInsert,
   onFactInserted,
+  isReadOnly = false,
 }: DraftCanvasProps) {
   const factMap = React.useMemo(() => new Map(facts.map((f) => [f.id, f])), [facts]);
   const hasDraft = sentences.length > 0;
@@ -122,8 +125,9 @@ export function DraftCanvas({
 
               <Button
                 onClick={onGenerate}
-                disabled={isGenerating}
+                disabled={isGenerating || isReadOnly}
                 className="bg-teal hover:bg-teal/90 text-white font-semibold text-xs h-9 px-4 shadow-xs flex items-center gap-2"
+                title={isReadOnly ? "Read-only mode for Executive role" : undefined}
               >
                 {isGenerating ? (
                   <>
@@ -155,6 +159,15 @@ export function DraftCanvas({
             </div>
           </div>
         </div>
+
+        {/* Read-Only Notice for Executive Role */}
+        {isReadOnly && (
+          <div className="mb-4 flex items-center justify-between p-3 rounded-md bg-paper-2 border border-line text-xs font-medium text-subtle">
+            <span>
+              Viewing as <strong>Executive</strong> (read-only mode). Drafting, inline editing, and sentence actions are reserved for Medical Writers.
+            </span>
+          </div>
+        )}
 
         {/* Editor Body */}
         <div className="flex-1">
@@ -207,6 +220,9 @@ export function DraftCanvas({
                   );
                 }
 
+                const hasCriticalFinding = draft.findings?.some((f) => f.severity === "critical");
+                const criticalRule = draft.findings?.find((f) => f.severity === "critical");
+
                 return (
                   <div
                     key={draft.id || idx}
@@ -217,12 +233,25 @@ export function DraftCanvas({
                     className={`relative group rounded-md transition-all outline-none p-2 -m-2 ${
                       isHighlighted
                         ? "ring-2 ring-amber bg-amber-tint/40 animate-pulse"
-                        : isFocused
-                          ? "ring-2 ring-teal/60 bg-card/60"
-                          : "hover:bg-card/40"
+                        : hasCriticalFinding
+                          ? "border-l-2 border-critical bg-critical-tint/15 ring-1 ring-critical/30"
+                          : isFocused
+                            ? "ring-2 ring-teal/60 bg-card/60"
+                            : "hover:bg-card/40"
                     }`}
                   >
                     <p className="relative">
+                      {/* Critical finding inline badge */}
+                      {hasCriticalFinding && (
+                        <span
+                          className="inline-flex items-center gap-1 mr-2 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase bg-critical text-white align-middle tabular shadow-2xs"
+                          title={criticalRule?.message}
+                        >
+                          <AlertOctagon className="size-2.5" aria-hidden="true" />
+                          <span>{criticalRule?.ruleId ?? "Critical"}</span>
+                        </span>
+                      )}
+
                       {/* State badge if accepted or rejected */}
                       {isAccepted && (
                         <span className="inline-flex items-center gap-1 mr-2 px-1.5 py-0.2 rounded text-[10px] font-bold uppercase bg-teal text-white align-middle tabular">

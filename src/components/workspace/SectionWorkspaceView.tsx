@@ -505,6 +505,7 @@ export function SectionWorkspaceView({
             facts={facts}
             isGenerating={isGenerating}
             onGenerate={handleGenerate}
+            isReadOnly={role === "exec"}
             onFactClick={handleFactClick}
             onCitationClick={handleCitationClick}
             focusedSentenceId={focusedSentenceId}
