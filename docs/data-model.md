@@ -118,7 +118,7 @@ A `{P:...}` slot renders as one or more `patient` parts, each citing its source.
    - Live mode sends Claude the fact *ids and labels, never values*, with the instruction to use slots, and gets back placeholder prose.
 3. **Fill:** `renderSlots(template, facts) → RenderedPart[]`. Unknown fact id → throw; never render a guess.
 4. **Validate:**
-   - **NUM-001:** any numeral in a `text` part (outside slots, outside "Table/Section/Listing/Figure x.y" references and rule ids) is critical. Counts written as words ("one", "twelve", "twice", "half" …) count as numerals too.
+   - **NUM-001:** any numeral in a `text` part, in any script, is critical. The only exceptions are references to real ids (Table/Figure → the study's TLF ids; Section → ICH E3 sections and seed section ids; Listing → ICH E3 16.2.x listings and TLF ids) and rule ids. A real id followed by a count noun ("Section 12 patients") is still read as a count. Counts written as words ("one", "twelve", "twice", "half", "several" …) count as numerals too.
    - **STAT-001..003** come from `rules.json`.
    - **CITE-001:** every slot's fact id must appear in `cites`.
 5. **Reconcile:** for each slot part, re-read the fact from the store and compare `value` to the source TLF cell display → Matched or Mismatch.

@@ -1,13 +1,22 @@
 import { describe, expect, it } from "vitest";
 
-import { getFacts, getRules, getSections } from "@/lib/data/seed";
+import { getFacts, getRules, getSections, getTlfs } from "@/lib/data/seed";
 import { renderSlots } from "@/lib/slots";
 import type { Fact } from "@/lib/types";
-import { CITE_001, applyFix, loadRules, validateSentence } from ".";
+import {
+  CITE_001,
+  ICH_E3_LISTINGS,
+  ICH_E3_SECTIONS,
+  applyFix,
+  buildReferenceIndex,
+  loadRules,
+  validateSentence,
+} from ".";
 
 const facts = getFacts();
 const rules = loadRules(getRules());
-const ctx = { facts, rules };
+const references = buildReferenceIndex({ tlfs: getTlfs(), sections: getSections() });
+const ctx = { facts, rules, references };
 const sentences = getSections().flatMap((s) => s.sentences);
 const sentence = (id: string) => {
   const s = sentences.find((x) => x.id === id);
@@ -36,6 +45,7 @@ describe("NUM-001 (numerals outside slots)", () => {
     expect(validate("Hypotension was the most frequent TEAE (Table 14.3.1.1).")).toEqual([]);
     expect(validate("Narratives are provided in Section 14.3.3.")).toEqual([]);
     expect(validate("See Listings 16.2.7 and 16.2.8, Figure 14.2.1 and ICH E3.")).toEqual([]);
+    expect(validate("See Section 13 for the discussion.")).toEqual([]);
     expect(validate("This wording was flagged by STAT-001.")).toEqual([]);
   });
 
@@ -59,7 +69,7 @@ describe("NUM-001 (numerals outside slots)", () => {
   });
 
   it("accepts lists of references", () => {
-    expect(validate("Shown in Tables 14.1.1, 14.1.2 and 14.1.3.")).toEqual([]);
+    expect(validate("Shown in Tables 14.1.1, 14.1.2 and 14.3.1.1.")).toEqual([]);
     expect(validate("Described in Sections 12.2 and 12.3.")).toEqual([]);
     expect(validate("Shown in Tables 14.3.1.1–14.3.1.2.")).toEqual([]);
   });
@@ -71,7 +81,8 @@ describe("NUM-001 (numerals outside slots)", () => {
       ["Figure 201 patients were reviewed.", "201"],
       ["As shown in Table 5, rates were similar.", "5"],
       ["Listing 12 patients by site.", "12"],
-      ["See Section 13 for the discussion.", "13"],
+      ["In Section 12 patients had an event.", "12"],
+      ["See Table 14.9.9 for details.", "14.9.9"],
     ] as const) {
       const findings = validate(template);
       expect(ids(findings), template).toEqual(["NUM-001"]);
@@ -86,6 +97,12 @@ describe("NUM-001 (numerals outside slots)", () => {
       "Table 14.1.1 - 12.5 patients.",
       "Sections 12.2 and 30.5 patients.",
       "Tables 14.1.1 and 14.5 patients.",
+      // Count-shaped numbers that look like ids but are not real ones in this study.
+      "Section 12.5 patients.",
+      "Section 12.2 and 12.5 patients.",
+      "Table 14.1.1 to 14.5.5 patients.",
+      "Table 14.1.1, 14.200.3 patients.",
+      "Table 14.1.1.5 patients.",
     ]) {
       expect(ids(validate(template)), template).toContain("NUM-001");
     }
@@ -104,7 +121,24 @@ describe("NUM-001 (numerals outside slots)", () => {
   });
 
   it("flags plural and single-occurrence count words", () => {
-    for (const word of ["none", "single", "once", "thrice", "hundreds", "thousands", "dozens"]) {
+    for (const word of [
+      "none",
+      "single",
+      "once",
+      "thrice",
+      "hundreds",
+      "thousands",
+      "dozens",
+      "both",
+      "several",
+      "couple",
+      "pair",
+      "double",
+      "triple",
+      "quarter",
+      "percent",
+      "per cent",
+    ]) {
       expect(ids(validate(`In ${word} of the patients.`)), word).toEqual(["NUM-001"]);
     }
   });
@@ -121,6 +155,32 @@ describe("NUM-001 (numerals outside slots)", () => {
     const findings = validate(template);
     expect(findings.map((f) => template.slice(...f.span!))).toEqual(["One", "twelve", "twice"]);
     expect(findings.every((f) => f.ruleId === "NUM-001" && /word/.test(f.message))).toBe(true);
+  });
+
+  it("reads a real id followed by a count noun as a count", () => {
+    for (const [template, numeral] of [
+      ["In Section 12.2 patients were reported.", "12.2"],
+      ["Section 12 deaths occurred.", "12"],
+      ["Section 13 percent of cases.", "13"],
+    ] as const) {
+      const findings = validate(template);
+      expect(
+        findings.map((f) => template.slice(...f.span!)),
+        template,
+      ).toContain(numeral);
+    }
+  });
+
+  it("builds the reference index from the study's TLFs, ICH E3 and seed sections", () => {
+    expect([...references.tlf].sort()).toEqual(
+      getTlfs()
+        .map((t) => t.id)
+        .sort(),
+    );
+    for (const id of [...ICH_E3_SECTIONS, ...getSections().map((x) => x.id)])
+      expect(references.section.has(id)).toBe(true);
+    for (const id of ICH_E3_LISTINGS) expect(references.listing.has(id)).toBe(true);
+    expect(references.section.has("201")).toBe(false);
   });
 
   it("does not look inside slots", () => {
@@ -199,7 +259,7 @@ describe("STAT-001 (significance without a test)", () => {
     store.set(pFact.id, notSignificant);
     const findings = validateSentence(
       { template: `The difference was significant (p={F:${pFact.id}}).`, cites: [pFact.id] },
-      { facts: store, rules },
+      { facts: store, rules, references },
     );
     expect(ids(findings)).toEqual(["STAT-001"]);
   });

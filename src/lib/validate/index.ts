@@ -7,6 +7,12 @@ import { checkStatisticalLanguage } from "./stat";
 
 export { CITE_001, loadRules, type CompiledRule, type RuleSet } from "./rules";
 export type { SentenceInput, ValidationContext } from "./context";
+export {
+  ICH_E3_LISTINGS,
+  ICH_E3_SECTIONS,
+  buildReferenceIndex,
+  type ReferenceIndex,
+} from "./references";
 
 const SEVERITY_ORDER: Record<Finding["severity"], number> = { critical: 0, major: 1, minor: 2 };
 
@@ -18,7 +24,7 @@ const SEVERITY_ORDER: Record<Finding["severity"], number> = { critical: 0, major
 export function validateSentence(sentence: SentenceInput, ctx: ValidationContext): Finding[] {
   const segments = parseTemplate(sentence.template);
   return [
-    ...checkNumerals(segments, ctx.rules),
+    ...checkNumerals(segments, ctx.rules, ctx.references),
     ...checkCitations(segments, sentence.cites),
     ...checkStatisticalLanguage(segments, ctx.rules.stat, ctx.facts),
   ].sort(
