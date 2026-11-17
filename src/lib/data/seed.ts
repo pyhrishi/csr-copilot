@@ -73,3 +73,7 @@ export function getPatient(id: string): Patient | undefined {
 export function getRules(): StatRule[] {
   return readSeed<{ statisticalLanguageRules: StatRule[] }>("rules.json").statisticalLanguageRules;
 }
+
+// --- Inputs --------------------------------------------------------------------------------
+export { getInputSources, type InputSource } from "./inputs";
+

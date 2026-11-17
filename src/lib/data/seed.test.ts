@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
   getFact,
   getFacts,
+  getInputSources,
   getNarrativeTemplate,
   getPatient,
   getPatients,
@@ -73,5 +74,15 @@ describe("seed loaders", () => {
 
   it("compile every rule pattern as a RegExp", () => {
     for (const rule of getRules()) expect(() => new RegExp(rule.pattern), rule.id).not.toThrow();
+  });
+
+  it("loads 5 input sources with deterministic sha256 hashes derived from seed content", () => {
+    const inputs = getInputSources();
+    expect(inputs).toHaveLength(5);
+    for (const input of inputs) {
+      expect(input.version).toMatch(/^v\d+\.\d+$/);
+      expect(input.sha256).toMatch(/^[a-f0-9]{64}$/);
+      expect(input.status).toBe("parsed");
+    }
   });
 });

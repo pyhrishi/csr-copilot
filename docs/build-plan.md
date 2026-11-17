@@ -19,8 +19,8 @@ Work top to bottom. Tick boxes as you finish. The SessionStart hook reads this f
 - [x] All unit tests listed in `docs/data-model.md` pass
 
 ## M2 · Study home and data readiness
-- [ ] S1 Study home with section board, readiness tiles, release and autonomy badges
-- [ ] S2 Data readiness: inputs with versions and hashes, TLF parse results, mapping table, exceptions
+- [x] S1 Study home with section board, readiness tiles, release and autonomy badges
+- [x] S2 Data readiness: inputs with versions and hashes, TLF parse results, mapping table, exceptions
 
 ## M3 · Section workspace (hero screen)
 - [ ] Three-pane layout; outline; Generate draft with streaming (simulated)
