@@ -1,28 +1,44 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
+import { notFound } from "next/navigation";
 
-import { ScreenStub } from "@/components/shell/ScreenStub";
-import { SectionSubject, SubjectFallback } from "@/components/shell/StubSubjects";
-import { getSection, getSections } from "@/lib/data/seed";
+import { SectionWorkspaceView } from "@/components/workspace/SectionWorkspaceView";
+import { getFacts, getRules, getSection, getSections, getTlfs } from "@/lib/data/seed";
 
 export function generateStaticParams() {
   return getSections().map((s) => ({ id: s.id }));
 }
 
-export async function generateMetadata({ params }: PageProps<"/sections/[id]">): Promise<Metadata> {
-  const section = getSection(decodeURIComponent((await params).id));
-  return { title: section ? `${section.id} ${section.title}` : "Section not found" };
+export async function generateMetadata({
+  params,
+}: PageProps<"/sections/[id]">): Promise<Metadata> {
+  const { id } = await params;
+  const section = getSection(decodeURIComponent(id));
+  return {
+    title: section ? `${section.id} ${section.title} · CSR Copilot` : "Section not found",
+  };
 }
 
-export default function Page({ params }: PageProps<"/sections/[id]">) {
+export default async function Page({ params }: PageProps<"/sections/[id]">) {
+  const { id } = await params;
+  const decodedId = decodeURIComponent(id);
+  const section = getSection(decodedId);
+
+  if (!section) {
+    notFound();
+  }
+
+  const allSections = getSections();
+  const facts = getFacts();
+  const tlfs = getTlfs();
+  const rules = getRules();
+
   return (
-    <ScreenStub
-      screen="S3"
-      subject={
-        <Suspense fallback={<SubjectFallback />}>
-          <SectionSubject params={params} />
-        </Suspense>
-      }
+    <SectionWorkspaceView
+      section={section}
+      allSections={allSections}
+      facts={facts}
+      tlfs={tlfs}
+      rules={rules}
     />
   );
 }

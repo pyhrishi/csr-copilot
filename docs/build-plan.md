@@ -23,12 +23,12 @@ Work top to bottom. Tick boxes as you finish. The SessionStart hook reads this f
 - [x] S2 Data readiness: inputs with versions and hashes, TLF parse results, mapping table, exceptions
 
 ## M3 · Section workspace (hero screen)
-- [ ] Three-pane layout; outline; Generate draft with streaming (simulated)
-- [ ] NumberChip, CitationMarker, ProvenanceShade, SourceDrawer with highlighted cell
+- [x] Three-pane layout; outline; Generate draft with streaming (simulated)
+- [x] NumberChip, CitationMarker, ProvenanceShade, SourceDrawer with highlighted cell
 - [ ] Accept / Edit / Reject / Regenerate with keyboard shortcuts; inline edit keeps chips atomic
 - [ ] Fact panel with drag-to-insert chips
 - [ ] Checks tab: STAT-001 on 12.2-s3 with one-click fix; NUM-001 when a raw numeral is typed
-- [ ] Locked states for 11.4 (R2) and 13 (human)
+- [x] Locked states for 11.4 (R2) and 13 (human)
 
 ## M4 · Reconciliation and sign-off
 - [ ] S4 reconciliation table and computed summary

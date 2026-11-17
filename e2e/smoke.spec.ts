@@ -165,3 +165,73 @@ test.describe("S2 · Data Readiness", () => {
     await expect(page.getByText("Proceed to Section 12.2 Workspace")).toBeVisible();
   });
 });
+
+test.describe("S3 · Section Workspace", () => {
+  test("Section 12.2 streams 5 sentences with number chips and opens SourceDrawer", async ({ page }) => {
+    await page.goto("/sections/12.2");
+
+    // Heading & Provenance Legend
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Adverse events");
+    await expect(page.getByLabel("Provenance legend")).toBeVisible();
+    await expect(page.getByText("Provenance:")).toBeVisible();
+
+    // Generate Draft
+    const generateBtn = page.getByRole("button", { name: "Generate draft" }).first();
+    await expect(generateBtn).toBeVisible();
+    await generateBtn.click();
+
+    // Wait for all 5 sentences to stream in
+    await expect(page.getByText("5 of 5 sentences")).toBeVisible({ timeout: 10000 });
+
+    // Number chips should be visible
+    const chips = page.getByRole("button", { name: /Clinical number/ });
+    await expect(chips.first()).toBeVisible();
+
+    // Click first number chip to open SourceDrawer
+    await chips.first().click();
+
+    // Verify SourceDrawer is open with Table details
+    await expect(page.getByRole("heading", { name: /Table 14\./ })).toBeVisible();
+    await expect(page.getByText("Cited cell highlighted", { exact: true })).toBeVisible();
+
+    // Close SourceDrawer before interacting with the right panel behind it
+    await page.keyboard.press("Escape");
+
+    // Checks tab has STAT-001 finding on 12.2-s3
+    await page.getByRole("tab", { name: /Checks/ }).click();
+    await expect(page.getByText("STAT-001")).toBeVisible();
+  });
+
+  test("Sections 10.1 and 12.3 generate drafts with number chips", async ({ page }) => {
+    // 10.1 Disposition
+    await page.goto("/sections/10.1");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Disposition of patients");
+    await page.getByRole("button", { name: "Generate draft" }).first().click();
+    await expect(page.getByText("3 of 3 sentences")).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole("button", { name: /Clinical number/ }).first()).toBeVisible();
+
+    // 12.3 Deaths
+    await page.goto("/sections/12.3");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Deaths and other serious adverse events");
+    await page.getByRole("button", { name: "Generate draft" }).first().click();
+    await expect(page.getByText("3 of 3 sentences")).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole("button", { name: /Clinical number/ }).first()).toBeVisible();
+  });
+
+  test("Sections 11.4 and 13 display expected locked states", async ({ page }) => {
+    // 11.4 (R2 Locked)
+    await page.goto("/sections/11.4");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Efficacy results");
+    await expect(page.getByText(/Efficacy results arrive in Release 2 with biostatistician sign-off/)).toBeVisible();
+    await expect(page.getByText("Locked for Release 2")).toBeVisible();
+
+    // 13 (Human Authoring)
+    await page.goto("/sections/13");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Discussion and overall conclusions");
+    await expect(page.getByText(/Conclusions stay human-authored; AI supplies a fact panel only/)).toBeVisible();
+    await expect(page.getByText("Human-Authored Section")).toBeVisible();
+
+    // Section 13 displays Fact Panel
+    await expect(page.getByRole("tab", { name: /Fact Panel/ })).toBeVisible();
+  });
+});

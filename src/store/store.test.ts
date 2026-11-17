@@ -60,6 +60,25 @@ describe("client stores", () => {
     expect(useAuditStore.getState().events).toEqual([event]);
   });
 
+  it("stores and updates sentences in useDraftsStore", () => {
+    const sentence = {
+      id: "12.2-s1",
+      sectionId: "12.2",
+      template: "Test sentence",
+      rendered: [],
+      provenance: "ai" as const,
+      state: "pending" as const,
+      cites: [],
+      generation: { mode: "simulated" as const, promptVersion: "v1", templateVersion: "v1", at: "" },
+      findings: [],
+    };
+    useDraftsStore.getState().setSentence(sentence);
+    expect(useDraftsStore.getState().sentences["12.2-s1"]).toEqual(sentence);
+
+    useDraftsStore.getState().setSentenceState("12.2-s1", "accepted");
+    expect(useDraftsStore.getState().sentences["12.2-s1"].state).toBe("accepted");
+  });
+
   it("expose every persisted store for rehydration", () => {
     for (const store of persistedStores) expect(typeof store.persist.rehydrate).toBe("function");
   });
