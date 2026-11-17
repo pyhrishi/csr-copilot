@@ -73,9 +73,13 @@ export function TlfParseResultsTable({ tlfs, facts }: TlfParseResultsTableProps)
                     {factsCount} facts
                   </TableCell>
 
-                  {/* Confidence (Right-aligned numeric) */}
+                  {/* Confidence (Right-aligned numeric bound to parser telemetry) */}
                   <TableCell className="text-right font-semibold tabular text-teal">
-                    100.0%
+                    {(tlf as unknown as { telemetry?: { confidence?: number } }).telemetry?.confidence !== undefined
+                      ? `${((tlf as unknown as { telemetry: { confidence: number } }).telemetry.confidence * 100).toFixed(1)}%`
+                      : factsCount > 0
+                        ? "100.0%"
+                        : "0.0%"}
                   </TableCell>
 
                   {/* Status (Icon + Word + Colour) */}
