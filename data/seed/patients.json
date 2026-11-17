@@ -1,0 +1,411 @@
+{
+  "_synthetic": "FICTIONAL DATA for a product prototype. Not a real study, drug, sponsor or patient.",
+  "patients": [
+    {
+      "id": "CRD301-1042",
+      "arm": "velo",
+      "age": 71,
+      "sex": "M",
+      "site": "Site 104",
+      "event": "Hypotension",
+      "seriousness": "Hospitalization",
+      "onsetDay": 18,
+      "resolvedDay": 22,
+      "outcome": "Recovered",
+      "related": "Related",
+      "action": "Dose interrupted",
+      "severity": "Severe",
+      "timeline": [
+        [
+          1,
+          "First dose of study drug"
+        ],
+        [
+          18,
+          "Dizziness and systolic BP 82 mmHg at home; admitted to hospital"
+        ],
+        [
+          19,
+          "Study drug interrupted; IV fluids given"
+        ],
+        [
+          22,
+          "BP stable; discharged"
+        ],
+        [
+          29,
+          "Study drug restarted at same dose without recurrence"
+        ]
+      ],
+      "armLabel": "Velorantib 20 mg",
+      "narrativeType": "SAE",
+      "status": "ready"
+    },
+    {
+      "id": "CRD301-1107",
+      "arm": "velo",
+      "age": 68,
+      "sex": "F",
+      "site": "Site 110",
+      "event": "Hyperkalaemia",
+      "seriousness": "Hospitalization",
+      "onsetDay": 63,
+      "resolvedDay": 67,
+      "outcome": "Recovered",
+      "related": "Related",
+      "action": "Drug withdrawn",
+      "severity": "Severe",
+      "timeline": [
+        [
+          1,
+          "First dose of study drug"
+        ],
+        [
+          63,
+          "Serum potassium 6.4 mmol/L at scheduled visit; admitted"
+        ],
+        [
+          63,
+          "Study drug permanently discontinued"
+        ],
+        [
+          67,
+          "Potassium 4.9 mmol/L; discharged"
+        ]
+      ],
+      "armLabel": "Velorantib 20 mg",
+      "narrativeType": "SAE",
+      "status": "ready"
+    },
+    {
+      "id": "CRD301-1213",
+      "arm": "velo",
+      "age": 59,
+      "sex": "M",
+      "site": "Site 121",
+      "event": "Pneumonia",
+      "seriousness": "Hospitalization",
+      "onsetDay": 140,
+      "resolvedDay": 151,
+      "outcome": "Recovered",
+      "related": "Not related",
+      "action": "Dose not changed",
+      "severity": "Moderate",
+      "timeline": [
+        [
+          1,
+          "First dose of study drug"
+        ],
+        [
+          140,
+          "Fever and cough; community-acquired pneumonia diagnosed; admitted"
+        ],
+        [
+          151,
+          "Antibiotics completed; discharged"
+        ]
+      ],
+      "armLabel": "Velorantib 20 mg",
+      "narrativeType": "SAE",
+      "status": "ready"
+    },
+    {
+      "id": "CRD301-1288",
+      "arm": "velo",
+      "age": 74,
+      "sex": "M",
+      "site": "Site 128",
+      "event": "Sudden cardiac death",
+      "seriousness": "Death",
+      "onsetDay": 211,
+      "resolvedDay": null,
+      "outcome": "Fatal",
+      "related": "Not related",
+      "action": "Not applicable",
+      "severity": "Severe",
+      "timeline": [
+        [
+          1,
+          "First dose of study drug"
+        ],
+        [
+          204,
+          "Routine visit; no new symptoms reported"
+        ],
+        [
+          211,
+          "Found unresponsive at home; pronounced dead by emergency services"
+        ]
+      ],
+      "armLabel": "Velorantib 20 mg",
+      "narrativeType": "Death",
+      "status": "ready"
+    },
+    {
+      "id": "CRD301-1350",
+      "arm": "velo",
+      "age": 66,
+      "sex": "F",
+      "site": "Site 135",
+      "event": "Syncope",
+      "seriousness": "Hospitalization",
+      "onsetDay": 97,
+      "resolvedDay": 98,
+      "outcome": "Recovered",
+      "related": "Possibly related",
+      "action": "Dose interrupted",
+      "severity": "Moderate",
+      "timeline": [
+        [
+          1,
+          "First dose of study drug"
+        ],
+        [
+          97,
+          "Brief loss of consciousness after standing; admitted for observation"
+        ],
+        [
+          98,
+          "ECG and telemetry unremarkable; discharged"
+        ],
+        [
+          105,
+          "Study drug restarted"
+        ]
+      ],
+      "armLabel": "Velorantib 20 mg",
+      "narrativeType": "SAE",
+      "status": "ready"
+    },
+    {
+      "id": "CRD301-1402",
+      "arm": "velo",
+      "age": 62,
+      "sex": "M",
+      "site": "Site 140",
+      "event": "Atrial fibrillation",
+      "seriousness": "Hospitalization",
+      "onsetDay": 176,
+      "resolvedDay": null,
+      "outcome": "Not recovered",
+      "related": "Not related",
+      "action": "Dose not changed",
+      "severity": "Moderate",
+      "dataIssue": "Resolution date missing in source data; query open",
+      "timeline": [
+        [
+          1,
+          "First dose of study drug"
+        ],
+        [
+          176,
+          "Palpitations; new-onset atrial fibrillation; admitted and rate control started"
+        ],
+        [
+          179,
+          "Discharged on anticoagulation"
+        ]
+      ],
+      "armLabel": "Velorantib 20 mg",
+      "narrativeType": "SAE",
+      "status": "exception"
+    },
+    {
+      "id": "CRD301-1466",
+      "arm": "velo",
+      "age": 70,
+      "sex": "F",
+      "site": "Site 146",
+      "event": "Acute kidney injury",
+      "seriousness": "Hospitalization",
+      "onsetDay": 82,
+      "resolvedDay": 90,
+      "outcome": "Recovered",
+      "related": "Possibly related",
+      "action": "Drug withdrawn",
+      "severity": "Severe",
+      "timeline": [
+        [
+          1,
+          "First dose of study drug"
+        ],
+        [
+          82,
+          "Creatinine rise to 2.4 mg/dL during intercurrent gastroenteritis; admitted"
+        ],
+        [
+          82,
+          "Study drug permanently discontinued"
+        ],
+        [
+          90,
+          "Creatinine 1.3 mg/dL; discharged"
+        ]
+      ],
+      "armLabel": "Velorantib 20 mg",
+      "narrativeType": "SAE",
+      "status": "ready"
+    },
+    {
+      "id": "CRD301-2015",
+      "arm": "pbo",
+      "age": 69,
+      "sex": "M",
+      "site": "Site 201",
+      "event": "Cardiac failure",
+      "seriousness": "Death",
+      "onsetDay": 144,
+      "resolvedDay": null,
+      "outcome": "Fatal",
+      "related": "Not related",
+      "action": "Not applicable",
+      "severity": "Severe",
+      "timeline": [
+        [
+          1,
+          "First dose of study drug"
+        ],
+        [
+          131,
+          "Worsening dyspnoea and oedema; admitted"
+        ],
+        [
+          144,
+          "Died in hospital of progressive heart failure"
+        ]
+      ],
+      "armLabel": "Placebo",
+      "narrativeType": "Death",
+      "status": "ready"
+    },
+    {
+      "id": "CRD301-2077",
+      "arm": "pbo",
+      "age": 63,
+      "sex": "F",
+      "site": "Site 207",
+      "event": "Cardiac failure",
+      "seriousness": "Hospitalization",
+      "onsetDay": 58,
+      "resolvedDay": 66,
+      "outcome": "Recovered",
+      "related": "Not related",
+      "action": "Dose not changed",
+      "severity": "Severe",
+      "timeline": [
+        [
+          1,
+          "First dose of study drug"
+        ],
+        [
+          58,
+          "Decompensated heart failure; admitted for IV diuretics"
+        ],
+        [
+          66,
+          "Discharged"
+        ]
+      ],
+      "armLabel": "Placebo",
+      "narrativeType": "SAE",
+      "status": "ready"
+    },
+    {
+      "id": "CRD301-2133",
+      "arm": "pbo",
+      "age": 72,
+      "sex": "M",
+      "site": "Site 213",
+      "event": "Fall",
+      "seriousness": "Hospitalization",
+      "onsetDay": 120,
+      "resolvedDay": 127,
+      "outcome": "Recovered",
+      "related": "Not related",
+      "action": "Dose not changed",
+      "severity": "Moderate",
+      "timeline": [
+        [
+          1,
+          "First dose of study drug"
+        ],
+        [
+          120,
+          "Fall at home with wrist fracture; admitted for surgery"
+        ],
+        [
+          127,
+          "Discharged"
+        ]
+      ],
+      "armLabel": "Placebo",
+      "narrativeType": "SAE",
+      "status": "ready"
+    },
+    {
+      "id": "CRD301-2190",
+      "arm": "pbo",
+      "age": 57,
+      "sex": "F",
+      "site": "Site 219",
+      "event": "Chest pain",
+      "seriousness": "Hospitalization",
+      "onsetDay": 33,
+      "resolvedDay": 34,
+      "outcome": "Recovered",
+      "related": "Not related",
+      "action": "Dose not changed",
+      "severity": "Moderate",
+      "dataIssue": "Onset date conflicts between AE page and hospitalization record",
+      "timeline": [
+        [
+          1,
+          "First dose of study drug"
+        ],
+        [
+          33,
+          "Non-cardiac chest pain; admitted for observation; troponin negative"
+        ],
+        [
+          34,
+          "Discharged"
+        ]
+      ],
+      "armLabel": "Placebo",
+      "narrativeType": "SAE",
+      "status": "exception"
+    },
+    {
+      "id": "CRD301-2251",
+      "arm": "pbo",
+      "age": 65,
+      "sex": "M",
+      "site": "Site 225",
+      "event": "Hypotension",
+      "seriousness": "Hospitalization",
+      "onsetDay": 45,
+      "resolvedDay": 47,
+      "outcome": "Recovered",
+      "related": "Possibly related",
+      "action": "Dose interrupted",
+      "severity": "Moderate",
+      "timeline": [
+        [
+          1,
+          "First dose of study drug"
+        ],
+        [
+          45,
+          "Light-headedness and BP 85/50 mmHg; admitted"
+        ],
+        [
+          47,
+          "Discharged; study drug restarted day 50"
+        ]
+      ],
+      "armLabel": "Placebo",
+      "narrativeType": "SAE",
+      "status": "ready"
+    }
+  ]
+}

@@ -1,0 +1,166 @@
+{
+  "_synthetic": "FICTIONAL DATA for a product prototype. Not a real study, drug, sponsor or patient.",
+  "sections": [
+    {
+      "id": "10.1",
+      "title": "Disposition of patients",
+      "release": "R1",
+      "autonomy": "L2",
+      "tlfs": [
+        "14.1.1"
+      ],
+      "sentences": [
+        {
+          "id": "10.1-s1",
+          "text": "Of the patients randomized, {F:14.1.1.randomized.velo|n} were assigned to velorantib and {F:14.1.1.randomized.pbo|n} to placebo.",
+          "cites": [
+            "14.1.1.randomized.velo",
+            "14.1.1.randomized.pbo"
+          ]
+        },
+        {
+          "id": "10.1-s2",
+          "text": "The treatment period was completed by {F:14.1.1.completed.velo} patients in the velorantib group and {F:14.1.1.completed.pbo} patients in the placebo group.",
+          "cites": [
+            "14.1.1.completed.velo",
+            "14.1.1.completed.pbo"
+          ]
+        },
+        {
+          "id": "10.1-s3",
+          "text": "The most common reason for discontinuation was withdrawal by the patient ({F:14.1.1.disc_withdrawal.velo} and {F:14.1.1.disc_withdrawal.pbo}, respectively), followed by adverse events ({F:14.1.1.disc_ae.velo} and {F:14.1.1.disc_ae.pbo}).",
+          "cites": [
+            "14.1.1.disc_withdrawal.velo",
+            "14.1.1.disc_withdrawal.pbo",
+            "14.1.1.disc_ae.velo",
+            "14.1.1.disc_ae.pbo"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "12.2",
+      "title": "Adverse events",
+      "release": "R1",
+      "autonomy": "L2",
+      "tlfs": [
+        "14.3.1.1",
+        "14.3.1.2"
+      ],
+      "sentences": [
+        {
+          "id": "12.2-s1",
+          "text": "Treatment-emergent adverse events (TEAEs) were reported for {F:14.3.1.1.any_teae.velo} patients in the velorantib group and {F:14.3.1.1.any_teae.pbo} patients in the placebo group.",
+          "cites": [
+            "14.3.1.1.any_teae.velo",
+            "14.3.1.1.any_teae.pbo"
+          ]
+        },
+        {
+          "id": "12.2-s2",
+          "text": "TEAEs considered related to study drug by the investigator occurred in {F:14.3.1.1.related_teae.velo} and {F:14.3.1.1.related_teae.pbo} patients, respectively.",
+          "cites": [
+            "14.3.1.1.related_teae.velo",
+            "14.3.1.1.related_teae.pbo"
+          ]
+        },
+        {
+          "id": "12.2-s3",
+          "text": "The most frequently reported TEAE was hypotension, which was significantly more common with velorantib ({F:14.3.1.2.hypotension.velo}) than with placebo ({F:14.3.1.2.hypotension.pbo}).",
+          "cites": [
+            "14.3.1.2.hypotension.velo",
+            "14.3.1.2.hypotension.pbo"
+          ],
+          "seededIssue": "STAT-001: 'significantly' used without a statistical test for this comparison"
+        },
+        {
+          "id": "12.2-s4",
+          "text": "Dizziness was reported in {F:14.3.1.2.dizziness.velo} and {F:14.3.1.2.dizziness.pbo} patients, and hyperkalaemia in {F:14.3.1.2.hyperkalaemia.velo} and {F:14.3.1.2.hyperkalaemia.pbo} patients, in the velorantib and placebo groups, respectively.",
+          "cites": [
+            "14.3.1.2.dizziness.velo",
+            "14.3.1.2.dizziness.pbo",
+            "14.3.1.2.hyperkalaemia.velo",
+            "14.3.1.2.hyperkalaemia.pbo"
+          ]
+        },
+        {
+          "id": "12.2-s5",
+          "text": "TEAEs leading to discontinuation of study drug occurred in {F:14.3.1.1.disc_teae.velo} patients receiving velorantib and {F:14.3.1.1.disc_teae.pbo} patients receiving placebo.",
+          "cites": [
+            "14.3.1.1.disc_teae.velo",
+            "14.3.1.1.disc_teae.pbo"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "12.3",
+      "title": "Deaths and other serious adverse events",
+      "release": "R1",
+      "autonomy": "L2",
+      "tlfs": [
+        "14.3.1.1"
+      ],
+      "sentences": [
+        {
+          "id": "12.3-s1",
+          "text": "Serious TEAEs were reported for {F:14.3.1.1.sae.velo} patients in the velorantib group and {F:14.3.1.1.sae.pbo} patients in the placebo group.",
+          "cites": [
+            "14.3.1.1.sae.velo",
+            "14.3.1.1.sae.pbo"
+          ]
+        },
+        {
+          "id": "12.3-s2",
+          "text": "One death occurred in each group ({F:14.3.1.1.death.velo} and {F:14.3.1.1.death.pbo}); neither was considered related to study drug by the investigator.",
+          "cites": [
+            "14.3.1.1.death.velo",
+            "14.3.1.1.death.pbo"
+          ]
+        },
+        {
+          "id": "12.3-s3",
+          "text": "Narratives for all patients with serious TEAEs are provided in Section 14.3.3.",
+          "cites": []
+        }
+      ]
+    },
+    {
+      "id": "11.4",
+      "title": "Efficacy results",
+      "release": "R2",
+      "autonomy": "locked",
+      "tlfs": [
+        "14.2.1"
+      ],
+      "sentences": []
+    },
+    {
+      "id": "13",
+      "title": "Discussion and overall conclusions",
+      "release": "human",
+      "autonomy": "L0",
+      "tlfs": [],
+      "sentences": []
+    }
+  ],
+  "narrativeTemplate": {
+    "type": "SAE",
+    "structure": [
+      "identification",
+      "event",
+      "course",
+      "action",
+      "outcome",
+      "causality"
+    ],
+    "sentences": {
+      "identification": "Patient {P:id}, a {P:age}-year-old {P:sexWord} randomized to {P:armLabel}, experienced a serious adverse event of {P:eventLower}.",
+      "event": "The event began on Day {P:onsetDay} and met the seriousness criterion of {P:seriousnessLower}; its severity was {P:severityLower}.",
+      "course": "{P:timelineSummary}",
+      "action": "Action taken with study drug: {P:actionLower}.",
+      "outcome": "The outcome was reported as {P:outcomeLower}{P:resolvedClause}.",
+      "causality": "The investigator assessed the event as {P:relatedLower} to study drug."
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "_synthetic": "FICTIONAL DATA for a product prototype. Not a real study, drug, sponsor or patient.",
+  "statisticalLanguageRules": [
+    {
+      "id": "STAT-001",
+      "severity": "critical",
+      "pattern": "\\bsignificant(ly)?\\b",
+      "requires": "a p-value fact below its alpha in the same sentence",
+      "message": "'Significant' implies a statistical test. Cite a p-value below alpha, or say 'more frequent' / 'numerically higher'."
+    },
+    {
+      "id": "STAT-002",
+      "severity": "major",
+      "pattern": "\\b(caused|due to)\\b",
+      "requires": "investigator causality wording",
+      "message": "Causal language is not allowed in results sections. Use 'considered related by the investigator'."
+    },
+    {
+      "id": "STAT-003",
+      "severity": "major",
+      "pattern": "\\b(trend|trended)\\b",
+      "requires": "pre-specified analysis",
+      "message": "'Trend' is only allowed when a pre-specified trend analysis exists in the SAP."
+    },
+    {
+      "id": "NUM-001",
+      "severity": "critical",
+      "pattern": "[0-9]",
+      "requires": "every numeral produced by a slot",
+      "message": "A numeral appears in generated prose outside a slot. The model must never write numbers."
+    }
+  ]
+}

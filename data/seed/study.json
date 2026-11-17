@@ -1,0 +1,37 @@
+{
+  "_synthetic": "FICTIONAL DATA for a product prototype. Not a real study, drug, sponsor or patient.",
+  "id": "CRD-301",
+  "shortName": "CARDIA-3",
+  "title": "A Phase III, randomized, double-blind, placebo-controlled study of velorantib in adults with chronic heart failure with reduced ejection fraction",
+  "sponsor": "Meridian Biopharma (fictional design partner)",
+  "phase": "III",
+  "indication": "Chronic heart failure with reduced ejection fraction (HFrEF)",
+  "design": "Randomized 1:1, double-blind, placebo-controlled, 52-week treatment period",
+  "arms": [
+    {
+      "id": "velo",
+      "label": "Velorantib 20 mg",
+      "randomized": 300,
+      "safetyN": 298
+    },
+    {
+      "id": "pbo",
+      "label": "Placebo",
+      "randomized": 300,
+      "safetyN": 299
+    }
+  ],
+  "populations": {
+    "randomized": "All randomized patients (N=600)",
+    "safety": "All patients who received at least one dose (N=597)"
+  },
+  "milestones": {
+    "lastPatientLastVisit": "2026-09-18",
+    "databaseLock": "2026-10-30",
+    "toplineResults": "2026-11-27",
+    "csrTargetFinal": "2027-01-22"
+  },
+  "template": "Meridian CSR template v3.2 (ICH E3)",
+  "therapeuticAreaPack": "Cardiovascular v1",
+  "status": "Post-lock: CSR in authoring"
+}
