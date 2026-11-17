@@ -1,0 +1,13 @@
+.next
+node_modules
+coverage
+playwright-report
+test-results
+package-lock.json
+data/seed
+docs/PRD-TRD.md
+# hand-written docs and Claude config: keep their formatting as authored
+docs
+.claude
+*.md
+scripts
