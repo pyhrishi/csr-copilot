@@ -3,7 +3,7 @@
 Work top to bottom. Tick boxes as you finish. The SessionStart hook reads this file and tells Claude the current milestone, which is the first one with an unticked box. Keep each milestone shippable: the app builds and runs after every one.
 
 ## M0 · Scaffold
-- [ ] Scaffold Next.js 16 (App Router, TypeScript, Tailwind CSS, ESLint, `src/` dir, Turbopack) with `npx create-next-app@latest` into a temporary folder (it refuses non-empty folders), then move its files here: merge its `.gitignore` into ours, keep our `README.md` and `CLAUDE.md`, and don't overwrite `docs/`, `data/`, `scripts/` or `.claude/`
+- [x] Scaffold Next.js 16 (App Router, TypeScript, Tailwind CSS, ESLint, `src/` dir, Turbopack) with `npx create-next-app@latest` into a temporary folder (it refuses non-empty folders), then move its files here: merge its `.gitignore` into ours, keep our `README.md` and `CLAUDE.md`, and don't overwrite `docs/`, `data/`, `scripts/` or `.claude/`
 - [ ] Add Prettier, Vitest (+ @vitest/coverage-v8), Playwright; scripts: `dev`, `build`, `lint`, `typecheck` (`tsc --noEmit`), `test` (`vitest run`), `e2e` (`playwright test`), `validate:seed`
 - [ ] shadcn/ui init; add button, card, tabs, table, dialog, sheet, tooltip, badge, select, dropdown-menu, progress, separator, toast (sonner)
 - [ ] Fonts (EB Garamond, Public Sans via `next/font/google`) and design tokens from `docs/design-system.md`

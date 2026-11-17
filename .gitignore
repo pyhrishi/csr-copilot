@@ -21,3 +21,17 @@ demo-screens/
 next-env.d.ts
 # Claude Code local-only settings
 .claude/settings.local.json
+# merged from create-next-app
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+/build
+*.pem
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
