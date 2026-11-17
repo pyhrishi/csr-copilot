@@ -112,7 +112,7 @@
         },
         {
           "id": "12.3-s2",
-          "text": "One death occurred in each group ({F:14.3.1.1.death.velo} and {F:14.3.1.1.death.pbo}); neither was considered related to study drug by the investigator.",
+          "text": "Deaths were reported for {F:14.3.1.1.death.velo} patients in the velorantib group and {F:14.3.1.1.death.pbo} patients in the placebo group; investigator causality for each death is given in the patient narratives (Section 14.3.3).",
           "cites": [
             "14.3.1.1.death.velo",
             "14.3.1.1.death.pbo"

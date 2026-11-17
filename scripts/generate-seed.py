@@ -174,7 +174,7 @@ sections = [
         {"id": "12.2-s5", "text": "TEAEs leading to discontinuation of study drug occurred in {F:14.3.1.1.disc_teae.velo} patients receiving velorantib and {F:14.3.1.1.disc_teae.pbo} patients receiving placebo.", "cites": ["14.3.1.1.disc_teae.velo", "14.3.1.1.disc_teae.pbo"]}]},
     {"id": "12.3", "title": "Deaths and other serious adverse events", "release": "R1", "autonomy": "L2", "tlfs": ["14.3.1.1"], "sentences": [
         {"id": "12.3-s1", "text": "Serious TEAEs were reported for {F:14.3.1.1.sae.velo} patients in the velorantib group and {F:14.3.1.1.sae.pbo} patients in the placebo group.", "cites": ["14.3.1.1.sae.velo", "14.3.1.1.sae.pbo"]},
-        {"id": "12.3-s2", "text": "One death occurred in each group ({F:14.3.1.1.death.velo} and {F:14.3.1.1.death.pbo}); neither was considered related to study drug by the investigator.", "cites": ["14.3.1.1.death.velo", "14.3.1.1.death.pbo"]},
+        {"id": "12.3-s2", "text": "Deaths were reported for {F:14.3.1.1.death.velo} patients in the velorantib group and {F:14.3.1.1.death.pbo} patients in the placebo group; investigator causality for each death is given in the patient narratives (Section 14.3.3).", "cites": ["14.3.1.1.death.velo", "14.3.1.1.death.pbo"]},
         {"id": "12.3-s3", "text": "Narratives for all patients with serious TEAEs are provided in Section 14.3.3.", "cites": []}]},
     {"id": "11.4", "title": "Efficacy results", "release": "R2", "autonomy": "locked", "tlfs": ["14.2.1"], "sentences": []},
     {"id": "13", "title": "Discussion and overall conclusions", "release": "human", "autonomy": "L0", "tlfs": [], "sentences": []},
