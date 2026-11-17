@@ -8,7 +8,7 @@ Work top to bottom. Tick boxes as you finish. The SessionStart hook reads this f
 - [x] shadcn/ui init; add button, card, tabs, table, dialog, sheet, tooltip, badge, select, dropdown-menu, progress, separator, toast (sonner)
 - [x] Fonts (EB Garamond, Public Sans via `next/font/google`) and design tokens from `docs/design-system.md`
 - [ ] App shell: fiction banner, top bar (role switcher, Simulated/Live toggle, Demo button), left nav with all 11 routes stubbed
-- [ ] Seed loader in `src/lib/data` with types from `docs/data-model.md`; `npm run validate:seed` passes
+- [x] Seed loader in `src/lib/data` with types from `docs/data-model.md`; `npm run validate:seed` passes
 
 ## M1 · The trust core (no UI)
 - [ ] `src/lib/slots`: `renderSlots`, formats, patient-field derivations
