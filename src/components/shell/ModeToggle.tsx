@@ -1,16 +1,27 @@
 "use client";
 
+import { useEffect } from "react";
 import { FlaskConical, Lock, Sparkles } from "lucide-react";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { LIVE_MODE_AVAILABLE, useModeStore } from "@/store";
 
-const LIVE_UNAVAILABLE_REASON = "Live AI mode arrives in M8 and needs an API key.";
+const LIVE_UNAVAILABLE_REASON =
+  "Live AI mode requires an API key or local model (e.g. GROQ_API_KEY for free Llama 3.3, OPENROUTER_API_KEY, or local Ollama).";
 
-/** Simulated / Live AI switch. Live stays disabled (with its reason on hover and focus) until M8. */
+/** Simulated / Live AI switch. Enabled when server reports an open-source model or key is configured. */
 export function ModeToggle() {
   const mode = useModeStore((s) => s.mode);
   const setMode = useModeStore((s) => s.setMode);
+  const liveAvailable = useModeStore((s) => s.liveAvailable);
+  const liveModel = useModeStore((s) => s.liveModel);
+  const checkLiveStatus = useModeStore((s) => s.checkLiveStatus);
+
+  useEffect(() => {
+    checkLiveStatus();
+  }, [checkLiveStatus]);
+
+  const isAvailable = liveAvailable || LIVE_MODE_AVAILABLE;
 
   const base =
     "inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-sm font-semibold transition-colors";
@@ -45,30 +56,36 @@ export function ModeToggle() {
                 type="button"
                 role="radio"
                 aria-checked={mode === "live"}
-                aria-disabled={!LIVE_MODE_AVAILABLE}
-                aria-describedby={LIVE_MODE_AVAILABLE ? undefined : "live-mode-reason"}
-                onClick={() => setMode("live")}
+                aria-disabled={!isAvailable}
+                aria-describedby={isAvailable ? undefined : "live-mode-reason"}
+                onClick={() => isAvailable && setMode("live")}
                 className={
                   base +
                   (mode === "live"
                     ? " bg-card text-teal shadow-xs"
-                    : LIVE_MODE_AVAILABLE
+                    : isAvailable
                       ? " text-subtle hover:text-ink"
-                      : " cursor-not-allowed text-subtle")
+                      : " cursor-not-allowed text-subtle opacity-60")
                 }
               />
             }
           >
-            {LIVE_MODE_AVAILABLE ? (
+            {isAvailable ? (
               <Sparkles aria-hidden className="size-4" />
             ) : (
               <Lock aria-hidden className="size-4" />
             )}
             Live
           </TooltipTrigger>
-          {!LIVE_MODE_AVAILABLE && <TooltipContent>{LIVE_UNAVAILABLE_REASON}</TooltipContent>}
+          {!isAvailable ? (
+            <TooltipContent>{LIVE_UNAVAILABLE_REASON}</TooltipContent>
+          ) : (
+            <TooltipContent>
+              Live AI mode active ({liveModel || "open-source Llama 3.3"})
+            </TooltipContent>
+          )}
         </Tooltip>
-        {!LIVE_MODE_AVAILABLE && (
+        {!isAvailable && (
           <span id="live-mode-reason" className="sr-only">
             {LIVE_UNAVAILABLE_REASON}
           </span>

@@ -19,6 +19,7 @@ import type { DraftSentence, Fact, Finding, Section, Tlf } from "@/lib/types";
 import { buildReferenceIndex, loadRules, validateSentence } from "@/lib/validate";
 import { useAuditStore } from "@/store/audit";
 import { useDraftsStore } from "@/store/drafts";
+import { useModeStore } from "@/store/mode";
 import { useRoleStore } from "@/store/role";
 
 import { applySuggestionToTemplate } from "./editor-utils";
@@ -441,40 +442,115 @@ export function SectionWorkspaceView({
     }
   };
 
-  // Generate simulated draft
+  const mode = useModeStore((s) => s.mode);
+  const liveModel = useModeStore((s) => s.liveModel);
+
+  // Generate draft (simulated or live)
   const handleGenerate = async () => {
     if (isGenerating || isLockedOrHuman) return;
 
     setIsGenerating(true);
     try {
-      const generated = await generateSimulatedDraft({
-        section,
-        facts,
-        tlfs,
-        rules,
-        allSections,
-        delayMs: 350,
-        onSentence: (sentence) => {
-          setSentence(sentence);
-        },
-      });
+      let generated: DraftSentence[] = [];
 
-      if (generated.length > 0) {
-        setFocusedSentenceId(generated[0].id);
+      if (mode === "live") {
+        const res = await fetch("/api/generate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "text/event-stream",
+          },
+          body: JSON.stringify({ sectionId: section.id }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ error: "Generation failed" }));
+          throw new Error(err.error || `HTTP ${res.status}`);
+        }
+
+        const reader = res.body?.getReader();
+        if (!reader) throw new Error("No response stream");
+
+        const decoder = new TextDecoder();
+        let buffer = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const parts = buffer.split("\n\n");
+          buffer = parts.pop() ?? "";
+
+          for (const part of parts) {
+            const line = part.trim();
+            if (line.startsWith("data: ")) {
+              try {
+                const payload = JSON.parse(line.slice(6));
+                if (payload.type === "sentence" && payload.sentence) {
+                  setSentence(payload.sentence);
+                  generated.push(payload.sentence);
+                } else if (payload.type === "done" && payload.sentences) {
+                  generated = payload.sentences;
+                } else if (payload.type === "error") {
+                  throw new Error(payload.error);
+                }
+              } catch (e) {
+                if ((e as Error).message.includes("error")) throw e;
+              }
+            }
+          }
+        }
+
+        if (generated.length > 0) {
+          setFocusedSentenceId(generated[0].id);
+        }
+
+        appendAudit({
+          actor: `${roleLabel(role)} (${role})`,
+          role,
+          action: "generate",
+          objectId: section.id,
+          detail: `Generated live AI draft for Section ${section.id} (${generated.length} sentences with deterministic slot filling)`,
+          versions: {
+            prompt: "v1.0",
+            template: "v1.0",
+            model: liveModel || "llama-3.3-70b-versatile",
+          },
+        });
+
+        toast.success("Live AI Draft Generated", {
+          description: `Streamed ${generated.length} sentences via ${liveModel || "open-source model"} with deterministic number chips.`,
+        });
+      } else {
+        generated = await generateSimulatedDraft({
+          section,
+          facts,
+          tlfs,
+          rules,
+          allSections,
+          delayMs: 350,
+          onSentence: (sentence) => {
+            setSentence(sentence);
+          },
+        });
+
+        if (generated.length > 0) {
+          setFocusedSentenceId(generated[0].id);
+        }
+
+        appendAudit({
+          actor: `${roleLabel(role)} (${role})`,
+          role,
+          action: "generate",
+          objectId: section.id,
+          detail: `Generated simulated draft for Section ${section.id} (${generated.length} sentences with deterministic slot filling)`,
+          versions: { prompt: "v1.0", template: "v1.0" },
+        });
+
+        toast.success("Draft Generated", {
+          description: `Streamed ${generated.length} sentences with verified numbers from source tables.`,
+        });
       }
-
-      appendAudit({
-        actor: `${roleLabel(role)} (${role})`,
-        role,
-        action: "generate",
-        objectId: section.id,
-        detail: `Generated simulated draft for Section ${section.id} (${generated.length} sentences with deterministic slot filling)`,
-        versions: { prompt: "v1.0", template: "v1.0" },
-      });
-
-      toast.success("Draft Generated", {
-        description: `Streamed ${generated.length} sentences with verified numbers from source tables.`,
-      });
     } catch (err) {
       toast.error("Generation failed", {
         description: (err as Error).message,

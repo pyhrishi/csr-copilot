@@ -34,7 +34,20 @@ describe("client stores", () => {
   });
 
   it("refuse Live mode until it is available", () => {
+    useModeStore.getState().setLiveAvailable(false);
     expect(useModeStore.getState().setMode("live")).toBe(false);
+    expect(useModeStore.getState().mode).toBe("simulated");
+  });
+
+  it("enables Live mode when live status is set to available", () => {
+    useModeStore.getState().setLiveAvailable(true, "llama-3.3-70b-versatile", "groq");
+    expect(useModeStore.getState().setMode("live")).toBe(true);
+    expect(useModeStore.getState().mode).toBe("live");
+    expect(useModeStore.getState().liveModel).toBe("llama-3.3-70b-versatile");
+    expect(useModeStore.getState().liveProvider).toBe("groq");
+
+    // Falls back to simulated if live availability is revoked
+    useModeStore.getState().setLiveAvailable(false);
     expect(useModeStore.getState().mode).toBe("simulated");
   });
 

@@ -207,7 +207,20 @@ export function DraftCanvas({
 
           {/* Provenance Legend (Always visible in editor header) */}
           <div className="mt-4 pt-3 border-t border-line/60 flex items-center justify-between">
-            <ProvenanceLegend />
+            <div className="flex items-center gap-3">
+              <ProvenanceLegend />
+              {sentences.some((s) => s.generation?.mode === "live") && (
+                <span
+                  data-testid="live-ai-header-badge"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-teal-tint text-teal border border-teal/30 shadow-2xs"
+                >
+                  <Sparkles className="size-3" aria-hidden="true" />
+                  <span>
+                    Live AI ({sentences.find((s) => s.generation?.mode === "live")?.generation?.model || "open-source"})
+                  </span>
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-3 text-xs text-subtle tabular">
               <span>
                 {sentences.length} of {section.sentences.length} sentences
@@ -324,6 +337,16 @@ export function DraftCanvas({
                       {updatedSentenceIds?.[draft.id] && (
                         <span className="inline-flex items-center gap-1 mr-2 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase bg-teal-tint text-teal border border-teal/30 align-middle tabular">
                           <span>Source updated</span>
+                        </span>
+                      )}
+                      {draft.generation?.mode === "live" && (
+                        <span
+                          data-testid={`live-badge-${draft.id}`}
+                          className="inline-flex items-center gap-1 mr-2 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase bg-teal-tint text-teal border border-teal/30 align-middle tabular"
+                          title={`Generated live with ${draft.generation.model || "open-source model"}`}
+                        >
+                          <Sparkles className="size-2.5" aria-hidden="true" />
+                          <span>Live AI</span>
                         </span>
                       )}
 
