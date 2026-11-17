@@ -7,7 +7,7 @@ Work top to bottom. Tick boxes as you finish. The SessionStart hook reads this f
 - [x] Add Prettier, Vitest (+ @vitest/coverage-v8), Playwright; scripts: `dev`, `build`, `lint`, `typecheck` (`tsc --noEmit`), `test` (`vitest run`), `e2e` (`playwright test`), `validate:seed`
 - [x] shadcn/ui init; add button, card, tabs, table, dialog, sheet, tooltip, badge, select, dropdown-menu, progress, separator, toast (sonner)
 - [x] Fonts (EB Garamond, Public Sans via `next/font/google`) and design tokens from `docs/design-system.md`
-- [ ] App shell: fiction banner, top bar (role switcher, Simulated/Live toggle, Demo button), left nav with all 11 routes stubbed
+- [x] App shell: fiction banner, top bar (role switcher, Simulated/Live toggle, Demo button), left nav with all 11 routes stubbed
 - [x] Seed loader in `src/lib/data` with types from `docs/data-model.md`; `npm run validate:seed` passes
 
 ## M1 · The trust core (no UI)
