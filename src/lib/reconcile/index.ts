@@ -139,6 +139,7 @@ export function reconcileSection(
 /** Plain, evidential summary text, e.g. "12 of 12 numbers match their source tables (100%)". */
 export function describeReconciliation(summary: ReconciliationSummary): string {
   if (summary.total === 0) return "This section has no numbers to reconcile.";
-  const share = Math.round((summary.matched * 100) / summary.total);
+  // Floor, so 100% appears only when every row matches (199 of 200 must not read as 100%).
+  const share = Math.floor((summary.matched * 100) / summary.total);
   return `${summary.matched} of ${summary.total} numbers match their source tables (${share}%)`;
 }

@@ -1,21 +1,40 @@
-// NUM-001: the model never writes a number. Any digit, or a count written as a word, in a text
-// part is critical. References to tables, sections, listings and figures, and rule ids, are allowed.
+// NUM-001: the model never writes a number. Any numeral (in any script), or a count written as a
+// word, in a text part is critical. Only document references with real CSR-style ids, and rule ids,
+// are allowed. When in doubt this check flags: a false positive is a click; a missed number is a
+// clinical error.
 import type { TemplateSegment } from "@/lib/slots";
 import type { Finding } from "@/lib/types";
 import type { RuleSet } from "./rules";
 
+/** A list or range separator between references. */
+const SEP = String.raw`(?:\s*,\s*(?:and\s+)?|\s+(?:and|to)\s+|\s*[–-]\s*)`;
+/** A reference may not run into more digits, a decimal part or a percent sign. */
+const END = String.raw`(?![\p{N}%]|\.\p{N})`;
+
 const ALLOWED_REFERENCES = [
-  // A reference, optionally followed by more references in a list ("Tables 14.1.1, 14.1.2 and
-  // 14.1.3", "Sections 12.2 and 12.3"). After a comma an item must look like a TLF id (two or more
-  // dots); after "and"/"to"/a dash one dot is enough. No item may be followed by a digit, a decimal part or %,
-  // so a count after a reference ("Table 14.3.1.1, 12.5% of patients") is never absorbed.
-  /\b(?:Tables?|Sections?|Listings?|Figures?)\s+\d+(?:\.\d+)*(?:(?:\s*,\s*(?:and\s+)?\d+(?:\.\d+){2,}|(?:\s+(?:and|to)\s+|\s*[–-]\s*)\d+(?:\.\d+)+)(?![\d%]|\.\d))*/g,
-  /\bICH\s+E\d+\b/g,
-  /\b(?:NUM|STAT|CITE)-\d+\b/g,
+  // Tables, listings and figures use dotted TLF ids with at least three parts (14.3.1, 16.2.7.1).
+  // List and range items must share the head's first number and depth ("Tables 14.1.1 and
+  // 14.1.2"), so "Table 14.1.1 to 12.5 patients" never hides a count.
+  new RegExp(
+    String.raw`\b(?:Tables?|Listings?|Figures?)\s+(\d+)(?:\.\d+){2,}${END}(?:${SEP}\1(?:\.\d+){2,}${END})*`,
+    "gu",
+  ),
+  // ICH E3 sections are cited with at least two parts (12.2, 14.3.3). A bare "Section 13" is flagged:
+  // it cannot be told apart from "Section 201 patients".
+  new RegExp(String.raw`\bSections?\s+(\d+)(?:\.\d+)+${END}(?:${SEP}\1(?:\.\d+)+${END})*`, "gu"),
+  /\bICH\s+E\d+\b/gu,
+  /\b(?:NUM|STAT|CITE)-\d+\b/gu,
 ];
-const DIGITS = /\d+(?:[.,]\d+)*%?/g;
-const COUNT_WORDS =
-  /\b(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|dozen|twice|half)\b/gi;
+
+/** Any Unicode number character: ASCII and other-script digits (Nd), Roman numerals (Nl), superscripts and fractions (No). */
+const NUMERALS = /\p{N}+(?:[.,]\p{N}+)*%?/gu;
+const COUNT_WORDS = new RegExp(
+  String.raw`\b(?:zero|none|single|once|twice|thrice|half|` +
+    String.raw`one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|` +
+    String.raw`sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|` +
+    String.raw`hundreds?|thousands?|dozens?)\b`,
+  "giu",
+);
 
 /** Replaces allowed references with spaces so offsets are preserved. */
 function maskReferences(text: string): string {
@@ -28,7 +47,7 @@ export function checkNumerals(segments: readonly TemplateSegment[], rules: RuleS
     if (seg.kind !== "text") continue;
     const masked = maskReferences(seg.value);
     for (const [re, wording] of [
-      [DIGITS, "numeral"],
+      [NUMERALS, "numeral"],
       [COUNT_WORDS, "count written as a word"],
     ] as const) {
       for (const m of masked.matchAll(re)) {

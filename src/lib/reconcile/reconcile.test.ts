@@ -78,7 +78,9 @@ describe("reconcileSection", () => {
       { matched: true } as never,
     ]);
     expect(summary).toEqual({ total: 3, matched: 2, mismatched: 1, allMatched: false });
-    expect(describeReconciliation(summary)).toBe("2 of 3 numbers match their source tables (67%)");
+    expect(describeReconciliation(summary)).toBe("2 of 3 numbers match their source tables (66%)");
+    const nearlyAll = { total: 200, matched: 199, mismatched: 1, allMatched: false };
+    expect(describeReconciliation(nearlyAll)).not.toContain("(100%)");
   });
 });
 

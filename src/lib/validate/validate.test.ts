@@ -64,6 +64,51 @@ describe("NUM-001 (numerals outside slots)", () => {
     expect(validate("Shown in Tables 14.3.1.1–14.3.1.2.")).toEqual([]);
   });
 
+  // Regression tests for the bypasses found in the biostat-checker review of M1.
+  it("flags a count after a reference word that is not a real CSR id", () => {
+    for (const [template, numeral] of [
+      ["In Section 201 patients had an event.", "201"],
+      ["Figure 201 patients were reviewed.", "201"],
+      ["As shown in Table 5, rates were similar.", "5"],
+      ["Listing 12 patients by site.", "12"],
+      ["See Section 13 for the discussion.", "13"],
+    ] as const) {
+      const findings = validate(template);
+      expect(ids(findings), template).toEqual(["NUM-001"]);
+      expect(template.slice(...findings[0].span!), template).toBe(numeral);
+    }
+  });
+
+  it("never lets a list or range continuation hide a count", () => {
+    for (const template of [
+      "Table 14.1.1 to 12.5 patients.",
+      "Table 14.1.1-12.5 patients.",
+      "Table 14.1.1 - 12.5 patients.",
+      "Sections 12.2 and 30.5 patients.",
+      "Tables 14.1.1 and 14.5 patients.",
+    ]) {
+      expect(ids(validate(template)), template).toContain("NUM-001");
+    }
+  });
+
+  it("flags numerals in any script, Roman numerals, superscripts and fractions", () => {
+    for (const template of [
+      "In \uFF12\uFF10\uFF11 patients.", // fullwidth
+      "In \u0662\u0660\u0661 patients.", // Arabic-Indic
+      "In \u00B2\u2070\u00B9 patients.", // superscripts
+      "In \u00BD of patients.", // vulgar fraction one half
+      "In \u216B patients.", // Roman numeral twelve
+    ]) {
+      expect(ids(validate(template)), JSON.stringify(template)).toEqual(["NUM-001"]);
+    }
+  });
+
+  it("flags plural and single-occurrence count words", () => {
+    for (const word of ["none", "single", "once", "thrice", "hundreds", "thousands", "dozens"]) {
+      expect(ids(validate(`In ${word} of the patients.`)), word).toEqual(["NUM-001"]);
+    }
+  });
+
   it("flags percentages and decimals as one numeral each", () => {
     const template = "The rate was 7.4% overall.";
     const findings = validate(template);
