@@ -35,8 +35,8 @@ Work top to bottom. Tick boxes as you finish. The SessionStart hook reads this f
 - [x] Biostatistician sign-off (role-gated, blocked by open critical findings), written to audit
 
 ## M5 · Narratives
-- [ ] S5 queue with filters and batch generation (exceptions skipped with reason)
-- [ ] S6 detail: patient timeline, cited narrative, safety physician review
+- [x] S5 queue with filters and batch generation (exceptions skipped with reason)
+- [x] S6 detail: patient timeline, cited narrative, safety physician review
 
 ## M6 · Change, audit, export
 - [ ] S7 TLF change impact (v1 → v2 dizziness), apply update, re-reconcile

@@ -435,3 +435,89 @@ test.describe("S4 · Reconciliation Report", () => {
     await expect(section122Row.getByText("Signed off")).toBeVisible();
   });
 });
+
+test.describe("S5 · Narratives Queue", () => {
+  test("renders 12 patients, filters, counts, and runs batch generation skipping exceptions", async ({ page }) => {
+    await page.goto("/narratives");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Patient Narratives Queue");
+
+    // Initial counts in bottom bar
+    await expect(page.getByText(/10 ready · 2 exceptions/)).toBeVisible();
+
+    // Verify exception patient displays data issue and data management owner
+    await expect(page.getByText("CRD301-1402")).toBeVisible();
+    await expect(page.getByText(/Resolution date missing in source data; query open/i)).toBeVisible();
+    await expect(page.getByText(/Owner: Data management/i).first()).toBeVisible();
+
+    // Click "Generate all ready narratives" (Demo Script Step 8)
+    const generateBtn = page.getByRole("button", { name: /Generate all ready narratives/i });
+    await expect(generateBtn).toBeEnabled();
+    await generateBtn.click();
+
+    // Wait for batch completion
+    await expect(page.getByText("All ready narratives drafted", { exact: false })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/10 drafted · 0 reviewed/)).toBeVisible();
+
+    // CRD301-1042 now shows Drafted status
+    const row1042 = page.getByRole("row", { name: /CRD301-1042/i });
+    await expect(row1042.getByText("Drafted")).toBeVisible();
+
+    // Exceptions are still exceptions
+    const row1402 = page.getByRole("row", { name: /CRD301-1402/i });
+    await expect(row1402.getByText("Exception", { exact: true })).toBeVisible();
+  });
+});
+
+test.describe("S6 · Narrative Detail", () => {
+  test("renders patient timeline, cited prose, and allows safety physician sign-off", async ({ page }) => {
+    // Open CRD301-1042 (Demo Script Step 9)
+    await page.goto("/narratives/CRD301-1042");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(/Patient Narrative · CRD301-1042/);
+
+    // 1. Patient summary card
+    await expect(page.getByText("Velorantib 20 mg").first()).toBeVisible();
+    await expect(page.getByText("Hypotension").first()).toBeVisible();
+    await expect(page.getByText(/71 yrs · Male/)).toBeVisible();
+
+    // 2. Interactive SVG timeline
+    await expect(page.getByRole("region", { name: "Patient clinical timeline" })).toBeVisible();
+    await expect(page.getByText(/AE Onset \(Day 18\)/)).toBeVisible();
+    await expect(page.getByText(/Resolution \(Day 22\)/)).toBeVisible();
+
+    // 3. Cited narrative prose
+    await expect(page.getByText(/Assembled Narrative Draft/)).toBeVisible();
+    await expect(page.getByText(/dizziness and systolic BP 82 mmHg/i)).toBeVisible();
+
+    // Click a timeline citation tag to highlight timeline node
+    const citeTag = page.getByRole("button", { name: /T-Day 18/i }).first();
+    await citeTag.click();
+
+    // 4. Safety physician review: Approve narrative
+    const approveBtn = page.getByRole("button", { name: /Approve Narrative/i });
+    await expect(approveBtn).toBeEnabled();
+    await approveBtn.click();
+
+    // Verify Approved state
+    await expect(page.getByText(/Safety Physician Approved · Sealed for Submission/i)).toBeVisible();
+
+    // 5. Navigate back to S5 and verify CRD301-1042 shows Reviewed
+    await page.getByRole("link", { name: /Back to Narratives Queue/i }).click();
+    await page.waitForURL("/narratives");
+    const row1042 = page.getByRole("row", { name: /CRD301-1042/i });
+    await expect(row1042.getByText("✓ Reviewed")).toBeVisible();
+  });
+
+  test("refuses drafting for exception patient and displays verbatim data issue", async ({ page }) => {
+    await page.goto("/narratives/CRD301-1402");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(/Patient Narrative · CRD301-1402/);
+
+    // Refusal banner
+    await expect(page.getByText(/GCP Regulatory Refusal · Narrative Assembly Blocked/i)).toBeVisible();
+    await expect(page.getByText(/Resolution date missing in source data; query open/i).first()).toBeVisible();
+    await expect(page.getByText(/Data management/).first()).toBeVisible();
+
+    // Review is blocked
+    await expect(page.getByText(/Review Blocked by Open Data Exception/i)).toBeVisible();
+    await expect(page.getByRole("button", { name: /Approve Narrative/i })).not.toBeVisible();
+  });
+});

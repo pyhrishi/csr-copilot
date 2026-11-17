@@ -7,6 +7,7 @@ import {
   useAuditStore,
   useDraftsStore,
   useModeStore,
+  useNarrativesStore,
   useRoleStore,
 } from "@/store";
 
@@ -77,6 +78,25 @@ describe("client stores", () => {
 
     useDraftsStore.getState().setSentenceState("12.2-s1", "accepted");
     expect(useDraftsStore.getState().sentences["12.2-s1"].state).toBe("accepted");
+  });
+
+  it("stores narratives drafts and reviews in useNarrativesStore", () => {
+    useNarrativesStore.getState().setDraft("CRD301-1042", {
+      patientId: "CRD301-1042",
+      type: "SAE",
+      sentences: [],
+      generatedAt: new Date().toISOString(),
+    });
+    expect(useNarrativesStore.getState().drafts["CRD301-1042"]).toBeDefined();
+    expect(useNarrativesStore.getState().statuses["CRD301-1042"]).toBe("drafted");
+
+    useNarrativesStore.getState().setReview("CRD301-1042", {
+      decision: "approved",
+      reviewer: "Dr. Sarah Chen",
+      role: "writer",
+      at: new Date().toISOString(),
+    });
+    expect(useNarrativesStore.getState().statuses["CRD301-1042"]).toBe("reviewed");
   });
 
   it("expose every persisted store for rehydration", () => {

@@ -2,7 +2,8 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { getNarrativeTemplate, getPatient, getPatients } from "@/lib/data/seed";
+import { getNarrativeTemplate, getPatient, getPatients, getRules, getSections, getTlfs, getFacts } from "@/lib/data/seed";
+import { buildReferenceIndex, loadRules, validateSentence } from "@/lib/validate";
 import { partsToText } from "@/lib/slots";
 import type { Patient } from "@/lib/types";
 import { assembleNarrative, type NarrativeResult } from ".";
@@ -44,6 +45,22 @@ describe("assembleNarrative", () => {
       for (const s of assemble(p).sentences) {
         for (const part of s.parts)
           if (part.type === "text") expect(part.value, `${p.id} ${s.part}`).not.toMatch(/\d/);
+      }
+    }
+  });
+
+  it("produces no NUM-001 findings across all 10 ready assembled narratives", () => {
+    expect(ready).toHaveLength(10);
+    const rules = loadRules(getRules());
+    const references = buildReferenceIndex({ tlfs: getTlfs(), sections: getSections() });
+    const ctx = { facts: getFacts(), rules, references };
+
+    for (const patient of ready) {
+      const result = assemble(patient);
+      for (const s of result.sentences) {
+        const findings = validateSentence({ template: s.template, cites: [] }, ctx);
+        const numFindings = findings.filter((f) => f.ruleId === "NUM-001");
+        expect(numFindings, `${patient.id} ${s.part}`).toEqual([]);
       }
     }
   });

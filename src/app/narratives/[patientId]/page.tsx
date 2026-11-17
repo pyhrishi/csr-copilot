@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
+import { notFound } from "next/navigation";
 
-import { ScreenStub } from "@/components/shell/ScreenStub";
-import { PatientSubject, SubjectFallback } from "@/components/shell/StubSubjects";
-import { getPatient, getPatients } from "@/lib/data/seed";
+import { NarrativeDetailView } from "@/components/narratives/NarrativeDetailView";
+import { getNarrativeTemplate, getPatient, getPatients } from "@/lib/data/seed";
 
 export function generateStaticParams() {
   return getPatients().map((p) => ({ patientId: p.id }));
@@ -12,19 +11,30 @@ export function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: PageProps<"/narratives/[patientId]">): Promise<Metadata> {
-  const patient = getPatient(decodeURIComponent((await params).patientId));
-  return { title: patient ? `Narrative · ${patient.id}` : "Patient not found" };
+  const { patientId } = await params;
+  const patient = getPatient(decodeURIComponent(patientId));
+  return {
+    title: patient ? `Narrative · ${patient.id} · CSR Copilot` : "Patient not found",
+  };
 }
 
-export default function Page({ params }: PageProps<"/narratives/[patientId]">) {
+export default async function Page({ params }: PageProps<"/narratives/[patientId]">) {
+  const { patientId } = await params;
+  const decodedId = decodeURIComponent(patientId);
+  const patient = getPatient(decodedId);
+
+  if (!patient) {
+    notFound();
+  }
+
+  const template = getNarrativeTemplate();
+  const allPatients = getPatients();
+
   return (
-    <ScreenStub
-      screen="S6"
-      subject={
-        <Suspense fallback={<SubjectFallback />}>
-          <PatientSubject params={params} />
-        </Suspense>
-      }
+    <NarrativeDetailView
+      patient={patient}
+      template={template}
+      allPatients={allPatients}
     />
   );
 }
