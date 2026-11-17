@@ -12,3 +12,5 @@ docs
 *.md
 scripts
 .playwright-mcp
+# copied verbatim from docs/data-model.md (see src/lib/types.test.ts)
+src/lib/types.ts

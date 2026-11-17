@@ -11,7 +11,7 @@ Work top to bottom. Tick boxes as you finish. The SessionStart hook reads this f
 - [x] Seed loader in `src/lib/data` with types from `docs/data-model.md`; `npm run validate:seed` passes
 
 ## M1 · The trust core (no UI)
-- [ ] `src/lib/slots`: `renderSlots`, formats, patient-field derivations
+- [x] `src/lib/slots`: `renderSlots`, formats, patient-field derivations
 - [ ] `src/lib/validate`: NUM-001, STAT-001..003 from `rules.json`, CITE-001, with suggestions
 - [ ] `src/lib/reconcile`: per-section reconciliation report
 - [ ] `src/lib/narratives`: assemble a narrative from template + patient
