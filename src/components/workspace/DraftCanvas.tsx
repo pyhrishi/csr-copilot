@@ -102,6 +102,7 @@ export function DraftCanvas({
   const appendAudit = useAuditStore((s) => s.append);
   const role = useRoleStore((s) => s.role);
   const updatedSentenceIds = useDraftsStore((s) => s.updatedSentenceIds);
+  const storedAutonomy = useDraftsStore((s) => s.sectionAutonomy[section.id]);
 
   const handleExportDocx = async () => {
     try {
@@ -136,19 +137,19 @@ export function DraftCanvas({
   };
 
   return (
-    <main className="flex-1 overflow-hidden flex flex-col bg-paper">
+    <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-paper">
       {/* Scrollable Canvas Area */}
-      <div className="flex-1 overflow-y-auto p-8 flex flex-col">
+      <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto p-8">
         {/* Editor Header */}
         <div className="border-b border-line pb-4 mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1.5">
                 <span className="rounded-md bg-ink px-2 py-0.5 text-xs font-bold text-teal-light tabular">
                   Section {section.id}
                 </span>
                 <ReleaseBadge release={section.release} />
-                <AutonomyPill level={section.autonomy} />
+                <AutonomyPill level={storedAutonomy ?? section.autonomy} />
               </div>
 
               <h1 className="font-heading text-2xl sm:text-3xl font-semibold text-ink">
@@ -157,7 +158,7 @@ export function DraftCanvas({
             </div>
 
             {/* Header Actions: Shortcuts Help & Generate */}
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex flex-wrap items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
@@ -407,7 +408,7 @@ export function DraftCanvas({
                       }`}
                     >
                       <div className="flex items-center gap-1">
-                        <span className="text-[10px] font-mono text-muted mr-1.5">
+                        <span className="text-[10px] font-mono text-subtle mr-1.5">
                           {draft.id}
                         </span>
 

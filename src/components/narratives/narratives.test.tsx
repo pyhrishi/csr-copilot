@@ -84,7 +84,7 @@ describe("Narrative Components", () => {
       fireEvent.click(approveBtn);
 
       expect(
-        screen.getByText(/Safety Physician Approved · Sealed for Submission/i),
+        screen.getByText(/Safety Physician Approved · Signed \(prototype\)/i),
       ).toBeInTheDocument();
       expect(useNarrativesStore.getState().statuses["CRD301-1042"]).toBe("reviewed");
 

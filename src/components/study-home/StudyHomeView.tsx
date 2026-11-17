@@ -2,7 +2,15 @@
 
 import { useSyncExternalStore } from "react";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, FileText, Sparkles, UserCheck } from "lucide-react";
+import {
+  ArrowRight,
+  CheckCircle2,
+  CircleDashed,
+  Clock,
+  FileText,
+  Sparkles,
+  UserCheck,
+} from "lucide-react";
 
 import { ReadinessTiles } from "@/components/study-home/ReadinessTiles";
 import { SectionBoard } from "@/components/study-home/SectionBoard";
@@ -54,6 +62,12 @@ export function StudyHomeView({
     () => EMPTY_MAP,
   );
 
+  const sectionAutonomy = useSyncExternalStore(
+    useDraftsStore.subscribe,
+    () => useDraftsStore.getState().sectionAutonomy,
+    () => EMPTY_MAP,
+  );
+
   const metrics = computeReadinessMetrics({
     totalInputs,
     parsedInputs,
@@ -68,47 +82,46 @@ export function StudyHomeView({
   const isExec = role === "exec";
 
   return (
-    <div className="px-6 py-8 md:px-8 md:py-10 space-y-8 max-w-7xl mx-auto">
+    <div className="mx-auto max-w-7xl space-y-8 px-6 py-8 md:px-8 md:py-10">
       {/* Page Title & Persona Context */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-line pb-4">
+      <div className="flex flex-col gap-4 border-b border-line pb-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-heading text-3xl sm:text-4xl font-semibold text-ink">
-            Study Home
-          </h1>
-          <p className="text-sm text-subtle mt-1">
+          <h1 className="font-heading text-3xl font-semibold text-ink sm:text-4xl">Study Home</h1>
+          <p className="mt-1 text-sm text-subtle">
             Clinical study status, ICH E3 authoring sections, and clinical data readiness.
           </p>
         </div>
 
         {/* Current Active Persona Banner */}
-        <div className="flex items-center gap-2 rounded-lg border border-line bg-card px-3 py-1.5 shadow-xs shrink-0">
+        <div className="flex shrink-0 items-center gap-2 rounded-lg border border-line bg-card px-3 py-1.5 shadow-xs">
           <UserCheck className="size-4 text-teal" aria-hidden="true" />
           <div className="text-xs">
             <span className="text-subtle">Viewing as </span>
-            <strong className="text-ink font-semibold">{roleLabel(role)}</strong>
+            <strong className="font-semibold text-ink">{roleLabel(role)}</strong>
           </div>
         </div>
       </div>
 
       {/* Role-specific callout */}
       {isWriter && (
-        <div className="rounded-lg border border-teal/30 bg-teal-tint/40 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        <div className="flex flex-col justify-between gap-3 rounded-lg border border-teal/30 bg-teal-tint/40 p-4 text-xs sm:flex-row sm:items-center">
           <div className="flex items-center gap-3">
-            <div className="size-8 rounded-full bg-teal text-white flex items-center justify-center shrink-0">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-teal text-white">
               <FileText className="size-4" aria-hidden="true" />
             </div>
             <div>
-              <strong className="text-ink text-sm font-semibold">
+              <strong className="text-sm font-semibold text-ink">
                 Medical Writer Priority Workspace
               </strong>
-              <p className="text-body mt-0.5">
-                Your assigned Release 1 safety sections (10.1, 12.2, 12.3) are ready for authoring and review.
+              <p className="mt-0.5 text-body">
+                Your assigned Release 1 safety sections (10.1, 12.2, 12.3) are ready for authoring
+                and review.
               </p>
             </div>
           </div>
           <Link
             href="/sections/12.2"
-            className="inline-flex items-center gap-1.5 rounded-md bg-teal px-3 py-1.5 font-semibold text-white hover:bg-teal/90 shadow-xs shrink-0"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-teal px-3 py-1.5 font-semibold text-white shadow-xs hover:bg-teal/90"
           >
             <span>Open Hero Section 12.2</span>
             <ArrowRight className="size-3.5" aria-hidden="true" />
@@ -117,23 +130,26 @@ export function StudyHomeView({
       )}
 
       {role === "biostat" && (
-        <div className="rounded-lg border border-teal/30 bg-teal-tint/40 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        <div className="flex flex-col justify-between gap-3 rounded-lg border border-teal/30 bg-teal-tint/40 p-4 text-xs sm:flex-row sm:items-center">
           <div className="flex items-center gap-3">
-            <div className="size-8 rounded-full bg-teal text-white flex items-center justify-center shrink-0">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-teal text-white">
               <CheckCircle2 className="size-4" aria-hidden="true" />
             </div>
             <div>
-              <strong className="text-ink text-sm font-semibold">
+              <strong className="text-sm font-semibold text-ink">
                 Biostatistician Verification Workspace
               </strong>
-              <p className="text-body mt-0.5">
-                TLF tables parsed into {facts.length} structured facts. {metrics.numbersReconciled.matched} of {metrics.numbersReconciled.total} numbers match their source tables ({metrics.numbersReconciled.percent}%).
+              <p className="mt-0.5 text-body">
+                {`TLF tables parsed into ${facts.length} structured facts. `}
+                {metrics.numbersReconciled.total === 0
+                  ? "Nothing drafted yet, so there are no numbers to reconcile."
+                  : `${metrics.numbersReconciled.matched} of ${metrics.numbersReconciled.total} numbers in drafted sentences match their source tables (${metrics.numbersReconciled.percent}%).`}
               </p>
             </div>
           </div>
           <Link
             href="/sections/12.2/reconciliation"
-            className="inline-flex items-center gap-1.5 rounded-md bg-teal px-3 py-1.5 font-semibold text-white hover:bg-teal/90 shadow-xs shrink-0"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-teal px-3 py-1.5 font-semibold text-white shadow-xs hover:bg-teal/90"
           >
             <span>Review Reconciled Numbers (12.2)</span>
             <ArrowRight className="size-3.5" aria-hidden="true" />
@@ -142,25 +158,41 @@ export function StudyHomeView({
       )}
 
       {isExec && (
-        <div className="rounded-lg border border-line bg-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        <div className="flex flex-col justify-between gap-3 rounded-lg border border-line bg-card p-4 text-xs sm:flex-row sm:items-center">
           <div className="flex items-center gap-3">
-            <div className="size-8 rounded-full bg-ink text-teal-light flex items-center justify-center shrink-0">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-ink text-teal-light">
               <Sparkles className="size-4" aria-hidden="true" />
             </div>
             <div>
-              <strong className="text-ink text-sm font-semibold">
+              <strong className="text-sm font-semibold text-ink">
                 Executive CSR Readiness Overview
               </strong>
-              <p className="text-subtle mt-0.5">
-                Target final CSR submission in 66 days (22 Jan 2027). All {totalInputs} input packages parsed; 2 open data management queries.
+              <p className="mt-0.5 text-subtle">
+                Target final CSR submission in 66 days (22 Jan 2027). All {totalInputs} input
+                packages parsed; 2 open data management queries.
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2 text-xs font-semibold tabular">
-            <span className="text-teal flex items-center gap-1">
-              <CheckCircle2 className="size-3.5" aria-hidden="true" />
-              {metrics.numbersReconciled.percent}% Numeric Match
-            </span>
+            {metrics.numbersReconciled.total === 0 ? (
+              <span className="flex items-center gap-1 text-subtle">
+                <CircleDashed className="size-3.5" aria-hidden="true" />
+                No numbers drafted yet
+              </span>
+            ) : (
+              <span
+                className={`flex items-center gap-1 ${
+                  metrics.numbersReconciled.allMatched ? "text-teal" : "text-amber"
+                }`}
+              >
+                {metrics.numbersReconciled.allMatched ? (
+                  <CheckCircle2 className="size-3.5" aria-hidden="true" />
+                ) : (
+                  <Clock className="size-3.5" aria-hidden="true" />
+                )}
+                {metrics.numbersReconciled.percent}% Numeric Match
+              </span>
+            )}
           </div>
         </div>
       )}
@@ -176,6 +208,7 @@ export function StudyHomeView({
         sections={sections}
         draftSentences={draftSentences}
         sectionStatuses={sectionStatuses}
+        sectionAutonomy={sectionAutonomy}
         highlightWriter={isWriter}
       />
     </div>

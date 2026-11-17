@@ -108,7 +108,7 @@ export function ExceptionsList({ exceptions }: ExceptionsListProps) {
         <div className="bg-amber-tint/30 px-4 py-3 border-t border-line text-xs text-amber flex items-start gap-2">
           <AlertTriangle className="size-4 shrink-0 mt-0.5" aria-hidden="true" />
           <p>
-            <strong>Regulatory Protocol Notice:</strong> In accordance with Meridian Biopharma SOP-DM-204,
+            <strong>Regulatory Protocol Notice:</strong> Under the fictional sponsor&rsquo;s data-management process,
             automated narrative generation is refused for patient records with unresolved source queries.
             Both exceptions will be excluded from the batch generation run in Section 12.3 narratives.
           </p>

@@ -148,7 +148,7 @@ export function ValueDashboardView() {
               </div>
 
               <div className="space-y-2 text-xs border-t border-line/60 pt-3">
-                <div className="flex items-center justify-between text-[11px] font-mono text-muted">
+                <div className="flex items-center justify-between text-[11px] font-mono text-subtle">
                   <span>Traditional Baseline:</span>
                   <span className="line-through font-semibold text-body">
                     {kpi.baseline}
@@ -173,7 +173,7 @@ export function ValueDashboardView() {
           </div>
 
           <div className="flex items-center gap-4 text-xs font-semibold">
-            <div className="flex items-center gap-1.5 text-muted">
+            <div className="flex items-center gap-1.5 text-subtle">
               <span className="w-3 h-3 rounded-xs bg-slate-300 border border-slate-400" />
               <span>Traditional Baseline</span>
             </div>
@@ -200,7 +200,7 @@ export function ValueDashboardView() {
               </div>
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-[11px] font-mono">
-                  <span className="w-16 text-muted">Baseline:</span>
+                  <span className="w-16 text-subtle">Baseline:</span>
                   <div className="flex-1 bg-paper rounded h-4 overflow-hidden border border-line flex items-center">
                     <div className="bg-slate-300 h-full rounded w-full flex items-center justify-end px-2 text-[10px] text-slate-700 font-bold">
                       42 days
@@ -229,7 +229,7 @@ export function ValueDashboardView() {
               </div>
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-[11px] font-mono">
-                  <span className="w-16 text-muted">Baseline:</span>
+                  <span className="w-16 text-subtle">Baseline:</span>
                   <div className="flex-1 bg-paper rounded h-4 overflow-hidden border border-line flex items-center">
                     <div className="bg-slate-300 h-full rounded w-full flex items-center justify-end px-2 text-[10px] text-slate-700 font-bold">
                       110 hours
@@ -265,7 +265,7 @@ export function ValueDashboardView() {
               </div>
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-[11px] font-mono">
-                  <span className="w-16 text-muted">Baseline:</span>
+                  <span className="w-16 text-subtle">Baseline:</span>
                   <div className="flex-1 bg-paper rounded h-4 overflow-hidden border border-line flex items-center">
                     <div
                       className="bg-slate-300 h-full rounded flex items-center justify-end px-2 text-[10px] text-slate-700 font-bold"
@@ -297,7 +297,7 @@ export function ValueDashboardView() {
               </div>
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-[11px] font-mono">
-                  <span className="w-16 text-muted">Baseline:</span>
+                  <span className="w-16 text-subtle">Baseline:</span>
                   <div className="flex-1 bg-paper rounded h-4 overflow-hidden border border-line flex items-center">
                     <div
                       className="bg-slate-300 h-full rounded flex items-center justify-end px-2 text-[10px] text-slate-700 font-bold"
@@ -334,7 +334,7 @@ export function ValueDashboardView() {
               In production pilot engagements, baseline metrics are measured directly from the
               sponsor&apos;s two most recently completed Phase III CSR packages. Savings of 38.5 days on
               the post-lock critical path represent an estimated $1.2M in avoided study extension
-              costs and earlier regulatory dossier submission (FDA NDA / EMA MAA).
+              costs and an earlier draft CSR (simulated).
             </p>
           </div>
         </div>

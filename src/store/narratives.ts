@@ -28,11 +28,13 @@ interface NarrativesState {
   drafts: Record<string, NarrativeDraft>;
   statuses: Record<string, NarrativePatientStatus>;
   reviews: Record<string, NarrativeReview>;
+  customPatients: Record<string, Patient>;
   isGeneratingBatch: boolean;
   batchProgress: { current: number; total: number; currentPatientId?: string };
   setDraft: (patientId: string, draft: NarrativeDraft) => void;
   setStatus: (patientId: string, status: NarrativePatientStatus) => void;
   setReview: (patientId: string, review: NarrativeReview) => void;
+  addPatient: (patient: Patient) => void;
   generatePatientNarrative: (patient: Patient, template: NarrativeTemplate) => boolean;
   generateAllReady: (
     patients: Patient[],
@@ -48,8 +50,15 @@ export const useNarrativesStore = create<NarrativesState>()(
       drafts: {},
       statuses: {},
       reviews: {},
+      customPatients: {},
       isGeneratingBatch: false,
       batchProgress: { current: 0, total: 0 },
+
+      addPatient: (patient) =>
+        set((state) => ({
+          customPatients: { ...state.customPatients, [patient.id]: patient },
+          statuses: { ...state.statuses, [patient.id]: "ready" },
+        })),
 
       setDraft: (patientId, draft) =>
         set((state) => ({
@@ -154,6 +163,7 @@ export const useNarrativesStore = create<NarrativesState>()(
           drafts: {},
           statuses: {},
           reviews: {},
+          customPatients: {},
           isGeneratingBatch: false,
           batchProgress: { current: 0, total: 0 },
         }),

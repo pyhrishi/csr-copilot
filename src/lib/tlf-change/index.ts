@@ -14,6 +14,8 @@ export interface FactChange {
 
 export interface TlfUpdate {
   tlfId: string;
+  /** The replaced table's facts as they were before this update. */
+  previousFacts: Fact[];
   fromVersion: number;
   toVersion: number;
   facts: Fact[];
@@ -76,6 +78,7 @@ export function applyTlfVersion(current: CurrentData, revision: TlfRevision): Tl
 
   return {
     tlfId: tlf.id,
+    previousFacts: [...oldFacts.values()],
     fromVersion: previous.version,
     toVersion: tlf.version,
     facts,
@@ -83,4 +86,49 @@ export function applyTlfVersion(current: CurrentData, revision: TlfRevision): Tl
     changes,
     affectedSentenceIds,
   };
+}
+
+export interface TlfCellDiff {
+  factId: string;
+  rowLabel: string;
+  columnLabel: string;
+  /** null when the cell is new in this version. */
+  before: Fact | null;
+  /** null when the cell was removed in this version. */
+  after: Fact | null;
+  changed: boolean;
+}
+
+/**
+ * Every cell of the re-run table, old and new, in table order (removed cells last). The screen
+ * renders this directly, so no cell value is ever typed into the UI.
+ */
+export function tlfCellDiff(update: TlfUpdate): TlfCellDiff[] {
+  const table = update.tlfs.find((t) => t.id === update.tlfId);
+  if (!table) throw new Error(`Table ${update.tlfId} is missing from the update`);
+  const before = new Map(update.previousFacts.map((f) => [f.id, f]));
+  const after = new Map(update.facts.filter((f) => f.tlf === update.tlfId).map((f) => [f.id, f]));
+  const changed = new Set(update.changes.map((c) => c.factId));
+
+  const cells: TlfCellDiff[] = table.rows.flatMap((row) =>
+    row.cells.map((cell, col) => ({
+      factId: cell.factId,
+      rowLabel: row.label,
+      columnLabel: table.columns[col] ?? "",
+      before: before.get(cell.factId) ?? null,
+      after: after.get(cell.factId) ?? null,
+      changed: changed.has(cell.factId),
+    })),
+  );
+  const removed = update.changes
+    .filter((c) => c.after === null && c.before)
+    .map((c) => ({
+      factId: c.factId,
+      rowLabel: c.before!.rowLabel,
+      columnLabel: c.before!.columnLabel,
+      before: c.before,
+      after: null,
+      changed: true,
+    }));
+  return [...cells, ...removed];
 }

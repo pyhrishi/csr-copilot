@@ -82,7 +82,7 @@ export interface Finding {
 
 export interface AuditEvent {
   id: string; at: string; actor: string; role: Role;
-  action: "generate" | "accept" | "edit" | "reject" | "regenerate" | "sign_off" | "autonomy_change" | "tlf_update" | "export";
+  action: "generate" | "accept" | "edit" | "reject" | "regenerate" | "sign_off" | "autonomy_change" | "tlf_update" | "sign_off_revoked" | "export";
   objectId: string; detail: string;
   versions?: { model?: string; prompt?: string; template?: string; tlf?: string };
 }

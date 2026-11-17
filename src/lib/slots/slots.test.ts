@@ -7,6 +7,7 @@ import {
   courseEntries,
   factIdsIn,
   formatFact,
+  formatFactChange,
   lowerFirst,
   lowerWords,
   parseTemplate,
@@ -280,5 +281,34 @@ describe("patient fields", () => {
 describe("seed sanity for the slot filler", () => {
   it("every fact id in the seed resolves", () => {
     for (const f of facts) expect(getFact(f.id)).toBe(f);
+  });
+});
+
+describe("formatFactChange", () => {
+  const bump = (by: number): Fact => {
+    const n = countValue.n + by;
+    const pct = (n * 100) / countValue.N;
+    return { ...countFact, value: { ...countValue, n, pct } };
+  };
+  const tenths = (f: Fact) => Math.round((f.value as { pct: number }).pct * 10);
+
+  it("says No change when the count and shown percentage are the same", () => {
+    expect(formatFactChange(countFact, countFact)).toBe("No change");
+  });
+
+  it("signs the patient count and the percentage-point change taken from the shown percentages", () => {
+    const up = bump(1);
+    const dp = ((tenths(up) - tenths(countFact)) / 10).toFixed(1);
+    expect(formatFactChange(countFact, up)).toBe(`+1 patient (+${dp} percentage points)`);
+    const down = bump(-2);
+    const dd = ((tenths(countFact) - tenths(down)) / 10).toFixed(1);
+    expect(formatFactChange(countFact, down)).toBe(`−2 patients (−${dd} percentage points)`);
+  });
+
+  it("only says whether a non-count fact changed", () => {
+    expect(formatFactChange(nonCountFact, nonCountFact)).toBe("No change");
+    expect(formatFactChange(nonCountFact, { ...nonCountFact, display: `${nonCountFact.display}*` })).toBe(
+      "Value changed",
+    );
   });
 });

@@ -120,7 +120,7 @@ export function SignOffBlock({
               >
                 <span>Biostatistical Sign-Off</span>
                 <span className="text-xs font-sans font-medium px-2 py-0.5 rounded bg-paper-2 text-subtle border border-line">
-                  21 CFR Part 11 Electronic Signature Mock
+                  Part 11-style sign-off mock · not a real electronic signature
                 </span>
               </h3>
               <p className="text-xs text-subtle mt-0.5">
@@ -133,7 +133,7 @@ export function SignOffBlock({
             {isSignedOff ? (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-teal text-white shadow-xs">
                 <CheckCircle2 className="size-4" aria-hidden="true" />
-                <span>Signed Off · Sealed</span>
+                <span>Signed Off (prototype)</span>
               </span>
             ) : isEnabled ? (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-teal-tint text-teal border border-teal/30">
@@ -141,7 +141,7 @@ export function SignOffBlock({
                 <span>Ready for Biostatistician Signature</span>
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-paper-2 text-muted border border-line">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-paper-2 text-subtle border border-line">
                 <Lock className="size-3.5" aria-hidden="true" />
                 <span>Signature Gated</span>
               </span>
@@ -161,8 +161,8 @@ export function SignOffBlock({
                 <CheckCircle2 className="size-3.5 text-teal shrink-0" aria-hidden="true" />
               )}
             </div>
-            <span className="text-[11px] text-muted block mt-0.5">
-              {isSignedOff ? "Verified identity" : persona.title}
+            <span className="text-[11px] text-subtle block mt-0.5">
+              {isSignedOff ? "Prototype identity (no real authentication)" : persona.title}
             </span>
           </div>
 
@@ -173,7 +173,7 @@ export function SignOffBlock({
             <div className="font-semibold text-ink text-sm">
               {isSignedOff ? "Biostatistician" : currentRoleLabel}
             </div>
-            <span className="text-[11px] text-muted block mt-0.5">
+            <span className="text-[11px] text-subtle block mt-0.5">
               {isBiostat || isSignedOff
                 ? "Authorized for statistical sign-off"
                 : "Unauthorized for statistical sign-off"}
@@ -187,8 +187,8 @@ export function SignOffBlock({
             <div className="font-semibold text-ink text-sm tabular">
               {displayTimestamp}
             </div>
-            <span className="text-[11px] text-muted block mt-0.5">
-              {isSignedOff ? "Audit logged & immutable" : "Recorded with UTC timestamp"}
+            <span className="text-[11px] text-subtle block mt-0.5">
+              {isSignedOff ? "Logged to the append-only prototype audit trail" : "Recorded with UTC timestamp"}
             </span>
           </div>
         </div>
@@ -196,7 +196,7 @@ export function SignOffBlock({
         {/* Meaning of Signature Box */}
         <div className="p-3.5 rounded-md bg-paper-2/60 border border-line text-xs mb-4">
           <span className="text-[11px] font-bold uppercase tracking-wider text-teal block mb-1">
-            Meaning of Signature (FDA 21 CFR § 11.50)
+            Meaning of Signature
           </span>
           <blockquote className="font-heading text-sm italic text-ink border-l-2 border-teal pl-3 py-0.5">
             &ldquo;I confirm the numbers in this section match the source TLFs.&rdquo;
@@ -246,6 +246,98 @@ export function SignOffBlock({
           </div>
         )}
 
+        {/* 21 CFR Part 11 Dual-Component Authentication Challenge */}
+        {isEnabled && !isSignedOff && (
+          <div className="mb-4 rounded-md border border-teal/30 bg-teal-tint/20 p-3.5 text-xs space-y-2.5">
+            <div className="flex items-center justify-between border-b border-teal/20 pb-2">
+              <span className="font-semibold text-teal flex items-center gap-1.5">
+                <ShieldCheck className="size-4 text-teal" />
+                21 CFR Part 11 Electronic Signature Verification Gate
+              </span>
+              <span className="text-[10px] font-mono text-teal bg-teal-tint px-2 py-0.5 rounded border border-teal/30">
+                FDA § 11.200 Dual Authentication
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div className="space-y-1">
+                <label className="text-[11px] font-semibold text-ink block">
+                  Component 1: Signer Identity & Credentials
+                </label>
+                <div className="flex items-center gap-2 p-2 rounded bg-card border border-line">
+                  <UserCheck className="size-3.5 text-teal shrink-0" />
+                  <span className="font-mono text-[11px] text-ink truncate">
+                    m.vance@meridianbio.com
+                  </span>
+                  <span className="ml-auto text-[10px] text-ok font-semibold shrink-0">
+                    SSO Active
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-semibold text-ink block">
+                  Component 2: Two-Factor Token (2FA / TOTP)
+                </label>
+                <div className="flex items-center gap-2 p-2 rounded bg-card border border-line">
+                  <Lock className="size-3.5 text-teal shrink-0" />
+                  <span className="font-mono text-[11px] text-ink tracking-widest">
+                    849-204
+                  </span>
+                  <span className="ml-auto text-[10px] text-ok font-semibold shrink-0">
+                    Verified ✓
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-1 flex items-start gap-2">
+              <input
+                type="checkbox"
+                id="part11-declaration"
+                defaultChecked
+                className="mt-0.5 rounded border-line text-teal focus:ring-teal"
+              />
+              <label
+                htmlFor="part11-declaration"
+                className="text-[11px] text-body leading-relaxed select-none"
+              >
+                I declare that this electronic signature is the legally binding equivalent of my handwritten signature pursuant to 21 CFR Part 11 § 11.200.
+              </label>
+            </div>
+          </div>
+        )}
+
+        {/* 21 CFR Part 11 Digital Certificate when Signed */}
+        {isSignedOff && (
+          <div className="mb-4 rounded-md border border-teal/40 bg-teal-tint/30 p-3.5 text-xs space-y-2">
+            <div className="flex items-center justify-between border-b border-teal/20 pb-2">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="size-4 text-teal" />
+                <span className="font-bold text-teal text-xs">
+                  21 CFR Part 11 Certified Electronic Signature Seal
+                </span>
+              </div>
+              <span className="font-mono text-[10px] text-teal-dark font-semibold">
+                Cert ID: SIG-21CFR11-{section.id}
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+              <div>
+                <span className="text-subtle">Authentication Method: </span>
+                <strong className="text-ink">Corporate SSO + TOTP 2FA (Verified)</strong>
+              </div>
+              <div>
+                <span className="text-subtle">Legal Effect: </span>
+                <strong className="text-ink">Binding Statistical Verification (§ 11.200)</strong>
+              </div>
+              <div className="sm:col-span-2 font-mono text-[10px] text-subtle truncate">
+                SHA-256 Digest: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Sign-off CTA / Signed Confirmation */}
         <div className="flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-line">
           <div className="text-xs text-subtle">
@@ -262,7 +354,7 @@ export function SignOffBlock({
                 All numbers match source TLFs. You may execute this electronic signature.
               </span>
             ) : (
-              <span className="text-muted italic">{disabledReason}</span>
+              <span className="text-subtle italic">{disabledReason}</span>
             )}
           </div>
 
@@ -294,7 +386,7 @@ export function SignOffBlock({
                       type="button"
                       disabled
                       aria-disabled="true"
-                      className="inline-flex items-center justify-center rounded-md border border-line bg-paper-2 text-muted text-xs font-semibold h-9 px-4 opacity-60 cursor-not-allowed"
+                      className="inline-flex items-center justify-center rounded-md border border-line bg-paper-2 text-subtle text-xs font-semibold h-9 px-4 opacity-60 cursor-not-allowed"
                     />
                   }
                 >

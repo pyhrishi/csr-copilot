@@ -3,6 +3,7 @@ import { AlertTriangle, ArrowRight, CheckCircle2 } from "lucide-react";
 
 import { ExceptionsList } from "@/components/data-readiness/ExceptionsList";
 import { InputsTable } from "@/components/data-readiness/InputsTable";
+import { TlfFileUploadZone } from "@/components/data-readiness/TlfFileUploadZone";
 import { TlfMappingTable } from "@/components/data-readiness/TlfMappingTable";
 import { TlfParseResultsTable } from "@/components/data-readiness/TlfParseResultsTable";
 import type { InputSource } from "@/lib/data/inputs";
@@ -108,6 +109,9 @@ export function DataReadinessView({
 
       {/* 1. Inputs Table */}
       <InputsTable inputs={inputs} />
+
+      {/* Interactive TLF & SAS Output File Ingestion */}
+      <TlfFileUploadZone />
 
       {/* 2. TLF Parse Results Table */}
       <TlfParseResultsTable tlfs={tlfs} facts={facts} />

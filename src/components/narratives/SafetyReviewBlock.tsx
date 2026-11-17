@@ -120,7 +120,7 @@ export function SafetyReviewBlock({ patient, className = "" }: SafetyReviewBlock
             <span className="text-subtle font-semibold">Data issue: </span>
             <span className="text-critical font-medium">{patient.dataIssue}</span>
           </div>
-          <div className="text-muted font-mono text-[11px]">
+          <div className="text-subtle font-mono text-[11px]">
             Owner: <strong>Data management</strong>
           </div>
         </div>
@@ -150,9 +150,9 @@ export function SafetyReviewBlock({ patient, className = "" }: SafetyReviewBlock
           <UserCheck className="h-4 w-4 text-teal shrink-0" />
           <span className="text-subtle">Active Reviewer:</span>
           <strong className="font-semibold text-ink">{reviewerName}</strong>
-          <span className="text-muted font-mono">({persona.title})</span>
+          <span className="text-subtle font-mono">({persona.title})</span>
         </div>
-        <div className="flex items-center gap-2 font-mono text-[11px] text-muted">
+        <div className="flex items-center gap-2 font-mono text-[11px] text-subtle">
           <span>Role: {roleLabel(role)}</span>
           {!isWriterRole && (
             <span className="text-critical flex items-center gap-1 font-sans">
@@ -189,13 +189,13 @@ export function SafetyReviewBlock({ patient, className = "" }: SafetyReviewBlock
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-teal font-bold text-sm">
               <CheckCircle2 className="h-5 w-5 text-ok" />
-              <span>Safety Physician Approved · Sealed for Submission</span>
+              <span>Safety Physician Approved · Signed (prototype)</span>
             </div>
             <Button
               variant="ghost"
               size="sm"
               onClick={handleResetReview}
-              className="h-7 text-xs text-muted hover:text-ink gap-1"
+              className="h-7 text-xs text-subtle hover:text-ink gap-1"
             >
               <RotateCcw className="h-3 w-3" />
               Re-open review
@@ -203,9 +203,9 @@ export function SafetyReviewBlock({ patient, className = "" }: SafetyReviewBlock
           </div>
           <p className="text-xs text-body leading-relaxed">
             I confirm the narrative text and clinical chronology accurately reflect the patient
-            record and source data in compliance with ICH E3 Section 14.3.3 guidelines.
+            record and source data, following the ICH E3 Section 14.3.3 narrative structure.
           </p>
-          <div className="flex flex-wrap items-center justify-between text-[11px] text-muted pt-2 border-t border-teal/20 font-mono">
+          <div className="flex flex-wrap items-center justify-between text-[11px] text-subtle pt-2 border-t border-teal/20 font-mono">
             <span>Signed by: {review?.reviewer ?? reviewerName}</span>
             <span>Recorded at: {review ? new Date(review.at).toLocaleString() : "Just now"}</span>
           </div>
@@ -228,14 +228,14 @@ export function SafetyReviewBlock({ patient, className = "" }: SafetyReviewBlock
             </Button>
           </div>
           <div className="p-3 rounded-lg bg-card border border-amber/20 text-xs text-ink space-y-1">
-            <span className="text-[10px] uppercase font-bold tracking-wider text-muted block">
+            <span className="text-[10px] uppercase font-bold tracking-wider text-subtle block">
               Reviewer Comment:
             </span>
             <p className="font-medium italic">
               &ldquo;{review?.comment ?? "Please review timeline sequence."}&rdquo;
             </p>
           </div>
-          <div className="flex flex-wrap items-center justify-between text-[11px] text-muted pt-2 border-t border-amber/20 font-mono">
+          <div className="flex flex-wrap items-center justify-between text-[11px] text-subtle pt-2 border-t border-amber/20 font-mono">
             <span>Returned by: {review?.reviewer ?? reviewerName}</span>
             <span>At: {review ? new Date(review.at).toLocaleString() : "Just now"}</span>
           </div>

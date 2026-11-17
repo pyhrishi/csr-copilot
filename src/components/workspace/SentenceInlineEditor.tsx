@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { Check, Info, X } from "lucide-react";
+import { Check, Info, Wand2, X } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { parseTemplate } from "@/lib/slots/parse";
@@ -74,6 +75,44 @@ export function SentenceInlineEditor({
     onFactInserted?.();
   }, [activeFactToInsert, onFactInserted]);
 
+  const handleAutoBind = () => {
+    const editor = editorRef.current;
+    if (!editor) return;
+
+    let boundCount = 0;
+    const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT);
+    const textNodes: Text[] = [];
+    let current: Node | null = walker.nextNode();
+    while (current) {
+      textNodes.push(current as Text);
+      current = walker.nextNode();
+    }
+
+    for (const node of textNodes) {
+      if (!node.textContent?.trim()) continue;
+      for (const fact of facts) {
+        if (!fact.display || fact.display.length < 2) continue;
+        const idx = node.textContent?.indexOf(fact.display) ?? -1;
+        if (idx !== -1) {
+          const range = document.createRange();
+          range.setStart(node, idx);
+          range.setEnd(node, idx + fact.display.length);
+          range.deleteContents();
+          const chip = createChipElement(fact.id, fact.display);
+          range.insertNode(chip);
+          boundCount++;
+          break;
+        }
+      }
+    }
+
+    if (boundCount > 0) {
+      toast.success(`Auto-bound ${boundCount} number(s) to source TLF fact slots.`);
+    } else {
+      toast.info("No matching TLF fact numbers found in typed text. You can pick a fact slot from the dropdown.");
+    }
+  };
+
   const handleSave = () => {
     if (!editorRef.current) return;
     const template = extractTemplateFromDom(editorRef.current);
@@ -118,10 +157,51 @@ export function SentenceInlineEditor({
           <span className="size-2 rounded-full bg-teal animate-pulse" />
           <span>Editing Sentence {sentence.id}</span>
         </span>
-        <span className="text-[11px] text-muted flex items-center gap-1">
+        <span className="text-[11px] text-subtle flex items-center gap-1">
           <Info className="size-3 text-teal" aria-hidden="true" />
           <span>Chips are atomic · Raw numerals will trigger NUM-001</span>
         </span>
+      </div>
+
+      {/* Numeric Slot Assistance Toolbar */}
+      <div className="flex flex-wrap items-center justify-between gap-2 bg-paper-2/60 p-2 rounded border border-line text-xs">
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleAutoBind}
+            className="text-xs h-7 px-2.5 bg-card hover:bg-paper text-teal font-semibold border-teal/40"
+            title="Scan typed numbers and convert them to traced TLF fact slots"
+          >
+            <Wand2 className="size-3 mr-1 text-teal" />
+            Auto-bind Typed Numbers
+          </Button>
+          <span className="text-[11px] text-subtle">Automatically trace manual numbers</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[11px] text-subtle font-medium">Insert Fact:</span>
+          <select
+            aria-label="Insert Fact Slot"
+            className="h-7 text-[11px] rounded bg-card border border-line px-2 text-ink max-w-[200px]"
+            defaultValue=""
+            onChange={(e) => {
+              const fact = factMap.get(e.target.value);
+              if (fact && editorRef.current) {
+                insertChipAtSelection(editorRef.current, fact);
+                toast.success(`Inserted slot for ${fact.id}`);
+              }
+              e.target.value = "";
+            }}
+          >
+            <option value="" disabled>Select TLF fact...</option>
+            {facts.map((f) => (
+              <option key={f.id} value={f.id}>
+                {f.display} ({f.rowLabel.slice(0, 16)}...)
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* ContentEditable Container */}
@@ -143,7 +223,7 @@ export function SentenceInlineEditor({
 
       {/* Editor Action Bar */}
       <div className="flex items-center justify-between pt-1">
-        <div className="text-[11px] text-muted">
+        <div className="text-[11px] text-subtle">
           Press <kbd className="px-1.5 py-0.5 rounded bg-paper-2 border border-line text-[10px] font-mono">⌘Enter</kbd> to save, <kbd className="px-1.5 py-0.5 rounded bg-paper-2 border border-line text-[10px] font-mono">Esc</kbd> to cancel
         </div>
 

@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { AlertTriangle, ArrowRight, CheckCircle2, Clock, FileCheck2 } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowRight,
+  CheckCircle2,
+  CircleDashed,
+  Clock,
+  FileCheck2,
+} from "lucide-react";
 
 import type { ReadinessMetrics } from "@/lib/study-readiness";
 
@@ -10,11 +17,12 @@ interface ReadinessTilesProps {
 
 export function ReadinessTiles({ metrics, highlight = false }: ReadinessTilesProps) {
   const { inputsParsed, openExceptions, sentencesAwaitingReview, numbersReconciled } = metrics;
+  const noNumbersYet = numbersReconciled.total === 0;
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="label text-teal flex items-center gap-1.5">
+        <h3 className="flex items-center gap-1.5 label text-teal">
           <span>Clinical Data Readiness</span>
           {highlight && (
             <span className="rounded-full bg-teal-tint px-2 py-0.5 text-[10px] font-bold text-teal">
@@ -24,23 +32,23 @@ export function ReadinessTiles({ metrics, highlight = false }: ReadinessTilesPro
         </h3>
         <Link
           href="/setup"
-          className="text-xs font-medium text-teal hover:underline inline-flex items-center gap-1"
+          className="inline-flex items-center gap-1 text-xs font-medium text-teal hover:underline"
         >
           <span>View source data & mappings</span>
           <ArrowRight className="size-3" aria-hidden="true" />
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Tile 1: Inputs Parsed */}
-        <div className="rounded-xl border border-line bg-card p-4 flex flex-col justify-between">
+        <div className="flex flex-col justify-between rounded-xl border border-line bg-card p-4">
           <div>
             <div className="flex items-center justify-between text-subtle">
-              <span className="text-xs font-semibold uppercase tracking-wider">Inputs Parsed</span>
+              <span className="text-xs font-semibold tracking-wider uppercase">Inputs Parsed</span>
               <FileCheck2 className="size-4 text-teal" aria-hidden="true" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-2xl font-bold tabular text-ink">
+              <span className="text-2xl font-bold text-ink tabular">
                 {inputsParsed.count} of {inputsParsed.total}
               </span>
               <span className="text-xs font-semibold text-teal tabular">
@@ -51,8 +59,8 @@ export function ReadinessTiles({ metrics, highlight = false }: ReadinessTilesPro
               Protocol, SAP, TLF package, ADaM, and narrative listings hashed.
             </p>
           </div>
-          <div className="mt-3 pt-3 border-t border-line/60 flex items-center justify-between text-[11px]">
-            <span className="text-teal font-medium flex items-center gap-1">
+          <div className="mt-3 flex items-center justify-between border-t border-line/60 pt-3 text-[11px]">
+            <span className="flex items-center gap-1 font-medium text-teal">
               <CheckCircle2 className="size-3" aria-hidden="true" />
               All inputs parsed
             </span>
@@ -68,13 +76,15 @@ export function ReadinessTiles({ metrics, highlight = false }: ReadinessTilesPro
 
         {/* Tile 2: Open Exceptions */}
         <div
-          className={`rounded-xl border p-4 flex flex-col justify-between ${
+          className={`flex flex-col justify-between rounded-xl border p-4 ${
             openExceptions.count > 0 ? "border-amber/40 bg-card" : "border-line bg-card"
           }`}
         >
           <div>
             <div className="flex items-center justify-between text-subtle">
-              <span className="text-xs font-semibold uppercase tracking-wider">Open Exceptions</span>
+              <span className="text-xs font-semibold tracking-wider uppercase">
+                Open Exceptions
+              </span>
               <AlertTriangle
                 className={`size-4 ${openExceptions.count > 0 ? "text-amber" : "text-subtle"}`}
                 aria-hidden="true"
@@ -96,8 +106,8 @@ export function ReadinessTiles({ metrics, highlight = false }: ReadinessTilesPro
               Narrative source discrepancies flagged for Data Management.
             </p>
           </div>
-          <div className="mt-3 pt-3 border-t border-line/60 flex items-center justify-between text-[11px]">
-            <span className="text-amber font-medium flex items-center gap-1">
+          <div className="mt-3 flex items-center justify-between border-t border-line/60 pt-3 text-[11px]">
+            <span className="flex items-center gap-1 font-medium text-amber">
               <AlertTriangle className="size-3" aria-hidden="true" />
               Owner: Data Management
             </span>
@@ -112,16 +122,16 @@ export function ReadinessTiles({ metrics, highlight = false }: ReadinessTilesPro
         </div>
 
         {/* Tile 3: Sentences Awaiting Review */}
-        <div className="rounded-xl border border-line bg-card p-4 flex flex-col justify-between">
+        <div className="flex flex-col justify-between rounded-xl border border-line bg-card p-4">
           <div>
             <div className="flex items-center justify-between text-subtle">
-              <span className="text-xs font-semibold uppercase tracking-wider">
+              <span className="text-xs font-semibold tracking-wider uppercase">
                 Awaiting Review
               </span>
               <Clock className="size-4 text-teal" aria-hidden="true" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-2xl font-bold tabular text-ink">
+              <span className="text-2xl font-bold text-ink tabular">
                 {sentencesAwaitingReview.pendingCount}
               </span>
               <span className="text-xs font-semibold text-subtle tabular">
@@ -130,12 +140,12 @@ export function ReadinessTiles({ metrics, highlight = false }: ReadinessTilesPro
             </div>
             <p className="mt-1 text-xs text-subtle">
               {sentencesAwaitingReview.draftedCount === 0
-                ? `${sentencesAwaitingReview.totalTemplateCount} template sentences ready for authoring.`
+                ? `Nothing drafted yet · ${sentencesAwaitingReview.totalTemplateCount} sentences ready to generate`
                 : `${sentencesAwaitingReview.pendingCount} sentences awaiting writer or biostat review.`}
             </p>
           </div>
-          <div className="mt-3 pt-3 border-t border-line/60 flex items-center justify-between text-[11px]">
-            <span className="text-subtle font-medium">
+          <div className="mt-3 flex items-center justify-between border-t border-line/60 pt-3 text-[11px]">
+            <span className="font-medium text-subtle">
               {sentencesAwaitingReview.totalTemplateCount} sentences in R1
             </span>
             <Link
@@ -149,35 +159,45 @@ export function ReadinessTiles({ metrics, highlight = false }: ReadinessTilesPro
         </div>
 
         {/* Tile 4: Numbers Reconciled */}
-        <div className="rounded-xl border border-line bg-card p-4 flex flex-col justify-between">
+        <div className="flex flex-col justify-between rounded-xl border border-line bg-card p-4">
           <div>
             <div className="flex items-center justify-between text-subtle">
-              <span className="text-xs font-semibold uppercase tracking-wider">
+              <span className="text-xs font-semibold tracking-wider uppercase">
                 Numbers Reconciled
               </span>
               <CheckCircle2 className="size-4 text-teal" aria-hidden="true" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-2xl font-bold tabular text-ink">
+              <span className="text-2xl font-bold text-ink tabular">
                 {numbersReconciled.matched} of {numbersReconciled.total}
               </span>
-              <span className="text-xs font-semibold text-teal tabular">
-                ({numbersReconciled.percent}%)
-              </span>
+              {noNumbersYet ? (
+                <span className="text-xs font-semibold text-subtle">· nothing drafted yet</span>
+              ) : (
+                <span className="text-xs font-semibold text-teal tabular">
+                  ({numbersReconciled.percent}%)
+                </span>
+              )}
             </div>
             <p className="mt-1 text-xs text-subtle">
-              {numbersReconciled.matched} of {numbersReconciled.total} numbers match their source
-              tables.
+              {noNumbersYet
+                ? "Numbers in drafted sentences are checked against their source tables."
+                : `${numbersReconciled.matched} of ${numbersReconciled.total} numbers in drafted sentences match their source tables.`}
             </p>
           </div>
-          <div className="mt-3 pt-3 border-t border-line/60 flex items-center justify-between text-[11px]">
-            {numbersReconciled.percent === 100 && numbersReconciled.total > 0 ? (
-              <span className="text-teal font-medium flex items-center gap-1">
+          <div className="mt-3 flex items-center justify-between border-t border-line/60 pt-3 text-[11px]">
+            {noNumbersYet ? (
+              <span className="flex items-center gap-1 font-medium text-subtle">
+                <CircleDashed className="size-3" aria-hidden="true" />
+                No numbers to check yet
+              </span>
+            ) : numbersReconciled.allMatched ? (
+              <span className="flex items-center gap-1 font-medium text-teal">
                 <CheckCircle2 className="size-3" aria-hidden="true" />
                 100% table match
               </span>
             ) : (
-              <span className="text-amber font-medium flex items-center gap-1">
+              <span className="flex items-center gap-1 font-medium text-amber">
                 <Clock className="size-3" aria-hidden="true" />
                 {numbersReconciled.percent}% table match
               </span>

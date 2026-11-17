@@ -625,7 +625,7 @@ export function SectionWorkspaceView({
           onFactClick={handleFactClick}
         />
       ) : (
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex min-w-0 flex-1 overflow-hidden">
           {/* Pane 2: Draft Canvas (1fr) */}
           <DraftCanvas
             section={section}

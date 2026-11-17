@@ -29,3 +29,21 @@ export function formatFact(fact: Fact, format: SlotFormat): string {
       return `${n} (${percent})`;
   }
 }
+
+/**
+ * Describes how a fact changed between two TLF versions, e.g. "+1 patient (+0.3 percentage
+ * points)". The percentage-point change is taken from the one-decimal percentages the TLF shows,
+ * so it always agrees with the two displayed cells. Non-count facts only say whether they changed.
+ */
+export function formatFactChange(before: Fact, after: Fact): string {
+  if (!isCount(before.value) || !isCount(after.value)) {
+    return before.display === after.display ? "No change" : "Value changed";
+  }
+  const dn = after.value.n - before.value.n;
+  const dTenths = Math.round(after.value.pct * 10) - Math.round(before.value.pct * 10);
+  if (dn === 0 && dTenths === 0) return "No change";
+  const sign = (x: number) => (x > 0 ? "+" : x < 0 ? "−" : "±");
+  const patients = `${sign(dn)}${Math.abs(dn)} patient${Math.abs(dn) === 1 ? "" : "s"}`;
+  const points = `${sign(dTenths)}${(Math.abs(dTenths) / 10).toFixed(1)} percentage points`;
+  return `${patients} (${points})`;
+}

@@ -66,3 +66,40 @@ describe("evidence pack compiler", () => {
     ).toThrow(/Unknown section/);
   });
 });
+
+describe("evidence pack: TLF re-runs and revoked sign-offs", () => {
+  const sections = getSections();
+  const ev = (id: string, action: AuditEvent["action"], objectId: string, at: string): AuditEvent => ({
+    id,
+    at,
+    actor: "Test actor",
+    role: "biostat",
+    action,
+    objectId,
+    detail: action,
+  });
+  const section = sections.find((s) => s.id === "12.2")!;
+  const citedTlf = section.tlfs[0];
+
+  it("includes re-runs of tables the section cites and carries the fiction notice", () => {
+    const pack = buildEvidencePack("12.2", {
+      sections,
+      facts: getFacts(),
+      tlfs: getTlfs(),
+      auditEvents: [ev("a", "tlf_update", citedTlf, "2026-11-17T10:00:00Z"), ev("b", "tlf_update", "99.9", "2026-11-17T10:01:00Z")],
+    });
+    expect(pack.auditTrail.map((e) => e.id)).toEqual(["a"]);
+    expect(pack.notice).toMatch(/fictional study data/);
+  });
+
+  it("drops a sign-off that a later revocation cancelled, and keeps a re-sign", () => {
+    const opts = { sections, facts: getFacts(), tlfs: getTlfs() };
+    const signed = ev("s1", "sign_off", "12.2", "2026-11-17T10:00:00Z");
+    const revoked = ev("r1", "sign_off_revoked", "12.2", "2026-11-17T11:00:00Z");
+    const resigned = ev("s2", "sign_off", "12.2", "2026-11-17T12:00:00Z");
+    expect(buildEvidencePack("12.2", { ...opts, auditEvents: [signed, revoked] }).signOff).toBeNull();
+    expect(
+      buildEvidencePack("12.2", { ...opts, auditEvents: [signed, revoked, resigned] }).signOff?.auditEventId,
+    ).toBe("s2");
+  });
+});

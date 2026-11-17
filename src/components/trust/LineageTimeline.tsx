@@ -42,13 +42,24 @@ export function LineageTimeline({
   const citedFacts = citedFactIds.map((id) => factMap.get(id)).filter(Boolean) as Fact[];
   const citedTlfIds = [...new Set(citedFacts.map((f) => f.tlf))];
 
-  // Audit events relating to this sentence or section
+  // Audit events for this sentence, its section, or a re-run of a table it cites.
   const relatedEvents = auditEvents.filter(
-    (e) => e.objectId === sentenceId || e.objectId === section.id,
+    (e) =>
+      e.objectId === sentenceId ||
+      e.objectId === section.id ||
+      (e.action === "tlf_update" && citedTlfIds.includes(e.objectId)),
   );
 
-  const editEvents = relatedEvents.filter((e) => e.action === "edit");
-  const signOffEvent = relatedEvents.find((e) => e.action === "sign_off");
+  const editEvents = relatedEvents.filter(
+    (e) => e.action === "edit" && e.objectId === sentenceId,
+  );
+  const tlfUpdateEvents = relatedEvents.filter((e) => e.action === "tlf_update");
+  const signOffEvent = relatedEvents.findLast((e) => e.action === "sign_off");
+
+  // Rule status comes from the draft's findings; nothing is shown as passed unless it ran.
+  const ruleStatus = (ruleId: string) =>
+    !draft ? "not_run" : draft.findings.some((f) => f.ruleId === ruleId) ? "failed" : "passed";
+  const tlfVersion = (tId: string) => citedFacts.find((f) => f.tlf === tId)?.tlfVersion;
 
   // Format date safely
   const formatDate = (isoString?: string) => {
@@ -74,7 +85,7 @@ export function LineageTimeline({
             </Badge>
           </div>
           <p className="text-xs text-subtle mt-0.5">
-            Full deterministic audit trail from raw TLF ingestion to electronic sign-off.
+            Trail from TLF ingestion to sign-off, built from the fact store and the audit log.
           </p>
         </div>
       </div>
@@ -91,8 +102,8 @@ export function LineageTimeline({
               <span className="text-xs font-bold uppercase tracking-wider text-teal">
                 1. Source Ingestion & Fact Extraction
               </span>
-              <span className="text-[11px] font-mono text-muted">
-                {formatDate("2026-10-30T17:00:00Z")}
+              <span className="text-[11px] font-mono text-subtle">
+                At ingestion
               </span>
             </div>
             <div className="p-3.5 rounded-lg bg-card border border-line text-xs space-y-2">
@@ -100,12 +111,17 @@ export function LineageTimeline({
                 <span className="text-subtle">Cited Tables:</span>
                 {citedTlfIds.map((tId) => (
                   <Badge key={tId} variant="secondary" className="font-mono text-[11px]">
-                    Table {tId} (v1)
+                    Table {tId} (v{tlfVersion(tId)})
                   </Badge>
                 ))}
               </div>
+              {tlfUpdateEvents.map((ev) => (
+                <p key={ev.id} className="rounded border border-teal/30 bg-teal-tint/30 p-2 text-[11px] text-ink">
+                  Source updated · {formatDate(ev.at)} · {ev.detail}
+                </p>
+                ))}
               <div className="space-y-1 pt-1 border-t border-line/60">
-                <span className="text-[11px] text-muted block font-semibold">
+                <span className="text-[11px] text-subtle block font-semibold">
                   Extracted Clinical Facts:
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-0.5">
@@ -115,7 +131,7 @@ export function LineageTimeline({
                       className="p-2 rounded bg-paper-2/60 border border-line/40 text-[11px] space-y-0.5"
                     >
                       <div className="font-mono font-bold text-teal">{f.id}</div>
-                      <div className="text-muted">
+                      <div className="text-subtle">
                         Row: <strong>{f.rowLabel}</strong> · Col: {f.columnLabel}
                       </div>
                       <div className="font-semibold text-ink">Value: {f.display}</div>
@@ -137,25 +153,31 @@ export function LineageTimeline({
               <span className="text-xs font-bold uppercase tracking-wider text-teal">
                 2. Template Generation & Slot Binding
               </span>
-              <span className="text-[11px] font-mono text-muted">
-                {formatDate(draft?.generation.at ?? "2026-11-01T09:14:22Z")}
+              <span className="text-[11px] font-mono text-subtle">
+                {draft ? formatDate(draft.generation.at) : "Not generated yet"}
               </span>
             </div>
             <div className="p-3.5 rounded-lg bg-card border border-line text-xs space-y-2">
-              <div className="flex flex-wrap items-center gap-3 text-[11px] text-muted">
-                <span>
-                  Mode: <strong>{draft?.generation.mode ?? "simulated"}</strong>
-                </span>
-                <span>
-                  Model: <strong>{draft?.generation.model ?? "simulated-v1"}</strong>
-                </span>
-                <span>
-                  Prompt: <strong>{draft?.generation.promptVersion ?? "v1.2"}</strong>
-                </span>
-                <span>
-                  Template: <strong>{draft?.generation.templateVersion ?? "12.2-v1"}</strong>
-                </span>
-              </div>
+              {draft ? (
+                <div className="flex flex-wrap items-center gap-3 text-[11px] text-subtle">
+                  <span>
+                    Mode: <strong>{draft.generation.mode}</strong>
+                  </span>
+                  <span>
+                    Model: <strong>{draft.generation.model ?? "not recorded"}</strong>
+                  </span>
+                  <span>
+                    Prompt: <strong>{draft.generation.promptVersion}</strong>
+                  </span>
+                  <span>
+                    Template: <strong>{draft.generation.templateVersion}</strong>
+                  </span>
+                </div>
+              ) : (
+                <p className="text-[11px] text-subtle italic">
+                  No generation recorded for this sentence yet. Showing the section template.
+                </p>
+              )}
               <div className="p-2.5 rounded bg-paper font-mono text-[11px] text-ink border border-line/60">
                 {sentenceTemplate?.text ?? draft?.template ?? "Sentence template with slots"}
               </div>
@@ -173,11 +195,11 @@ export function LineageTimeline({
               <span className="text-xs font-bold uppercase tracking-wider text-teal">
                 3. Deterministic Numeric Filling
               </span>
-              <span className="text-[11px] font-mono text-muted">Execution: Code (Zero LLM)</span>
+              <span className="text-[11px] font-mono text-subtle">Execution: Code (Zero LLM)</span>
             </div>
             <div className="p-3.5 rounded-lg bg-card border border-line text-xs space-y-2">
               <p className="text-subtle">
-                Slots were evaluated by deterministic code filler against the verified fact store.
+                Slots were evaluated by deterministic code filler against the fact store.
               </p>
               <div className="p-2.5 rounded bg-teal-tint/30 border border-teal/20 text-ink leading-relaxed">
                 <ProvenanceShade provenance={draft?.provenance ?? "ai"}>
@@ -202,16 +224,39 @@ export function LineageTimeline({
               <span className="text-xs font-bold uppercase tracking-wider text-teal">
                 4. Automated Quality & Language Rules
               </span>
-              <span className="text-[11px] font-mono text-muted">Pre-submission Gate</span>
+              <span className="text-[11px] font-mono text-subtle">Pre-submission Gate</span>
             </div>
             <div className="p-3.5 rounded-lg bg-card border border-line text-xs space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-ok text-white">
-                  <CheckCircle2 className="w-3 h-3" /> NUM-001 Numeric Rule: Passed
-                </span>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-ok text-white">
-                  <CheckCircle2 className="w-3 h-3" /> CITE-001 Citation Rule: Passed
-                </span>
+              <div className="flex flex-wrap items-center gap-2">
+                {(
+                  [
+                    ["NUM-001", "Numeric Rule"],
+                    ["CITE-001", "Citation Rule"],
+                    ["STAT-001", "Statistical Language"],
+                  ] as const
+                ).map(([ruleId, label]) => {
+                  const status = ruleStatus(ruleId);
+                  return (
+                    <span
+                      key={ruleId}
+                      className={`inline-flex items-center gap-1 rounded px-2 py-0.5 text-[11px] font-semibold ${
+                        status === "passed"
+                          ? "bg-ok text-white"
+                          : status === "failed"
+                            ? "bg-critical text-white"
+                            : "border border-line bg-paper-2 text-subtle"
+                      }`}
+                    >
+                      {status === "failed" ? (
+                        <AlertTriangle className="h-3 w-3" aria-hidden />
+                      ) : (
+                        <CheckCircle2 className="h-3 w-3" aria-hidden />
+                      )}
+                      {ruleId} {label}:{" "}
+                      {status === "passed" ? "Passed" : status === "failed" ? "Finding open" : "Not run"}
+                    </span>
+                  );
+                })}
               </div>
               {draft?.findings && draft.findings.length > 0 ? (
                 <div className="space-y-1 pt-1">
@@ -228,7 +273,7 @@ export function LineageTimeline({
                   ))}
                 </div>
               ) : (
-                <div className="text-[11px] text-muted italic">
+                <div className="text-[11px] text-subtle italic">
                   Zero active rule findings.
                 </div>
               )}
@@ -246,7 +291,7 @@ export function LineageTimeline({
               <span className="text-xs font-bold uppercase tracking-wider text-amber">
                 5. Human-in-the-Loop Edits & Fixes
               </span>
-              <span className="text-[11px] font-mono text-muted">
+              <span className="text-[11px] font-mono text-subtle">
                 {draft?.provenance === "ai_edited" ? "AI-Edited" : "AI-Original"}
               </span>
             </div>
@@ -258,7 +303,7 @@ export function LineageTimeline({
                       key={ev.id}
                       className="p-2 rounded bg-amber-tint/40 border border-amber/20 text-xs space-y-1"
                     >
-                      <div className="flex justify-between text-[11px] text-muted font-mono">
+                      <div className="flex justify-between text-[11px] text-subtle font-mono">
                         <span>Actor: {ev.actor} ({ev.role})</span>
                         <span>{formatDate(ev.at)}</span>
                       </div>
@@ -285,7 +330,7 @@ export function LineageTimeline({
               <span className="text-xs font-bold uppercase tracking-wider text-ok">
                 6. Electronic Sign-Off & Verification
               </span>
-              <span className="text-[11px] font-mono text-muted">21 CFR Part 11</span>
+              <span className="text-[11px] font-mono text-subtle">Prototype audit trail</span>
             </div>
             <div className="p-3.5 rounded-lg bg-card border border-line text-xs space-y-2">
               {signOffEvent ? (
@@ -297,13 +342,13 @@ export function LineageTimeline({
                   <p className="text-[11px] text-body italic">
                     &ldquo;I confirm the numbers in this section match the source TLFs.&rdquo;
                   </p>
-                  <div className="text-[10px] font-mono text-muted pt-1 border-t border-teal/20 flex justify-between">
+                  <div className="text-[10px] font-mono text-subtle pt-1 border-t border-teal/20 flex justify-between">
                     <span>Role: {signOffEvent.role}</span>
                     <span>Timestamp: {formatDate(signOffEvent.at)}</span>
                   </div>
                 </div>
               ) : (
-                <div className="p-3 rounded bg-paper-2 text-muted text-xs italic">
+                <div className="p-3 rounded bg-paper-2 text-subtle text-xs italic">
                   Section sign-off pending Biostatistician review.
                 </div>
               )}

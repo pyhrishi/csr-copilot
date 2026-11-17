@@ -10,6 +10,9 @@ test.describe("Full 13-Step Guided Demo Walk (Simulated Mode)", () => {
     await expect(page.getByText("CARDIA-3 · Phase III")).toBeVisible();
     await expect(page.getByText("Release 1").first()).toBeVisible();
     await expect(page.getByText("Adverse events", { exact: true })).toBeVisible();
+    // Nothing drafted yet, so the reconciled-numbers tile is empty rather than "all matched"
+    await expect(page.getByText("0 of 0", { exact: true })).toBeVisible();
+    await expect(page.getByText("· nothing drafted yet", { exact: true })).toBeVisible();
 
     // -------------------------------------------------------------------------
     // Step 2: S2 Data Readiness (/setup)
@@ -39,6 +42,14 @@ test.describe("Full 13-Step Guided Demo Walk (Simulated Mode)", () => {
     await expect(page.locator("#sentence-12\\.2-s1")).toBeVisible({ timeout: 10000 });
     await expect(page.locator("#sentence-12\\.2-s5")).toBeVisible({ timeout: 10000 });
 
+    // Study Home now counts only the numbers in the drafted 12.2 sentences
+    await page.goto("/");
+    await expect(page.getByText("· nothing drafted yet", { exact: true })).toHaveCount(0);
+    await expect(page.getByText(/^[1-9]\d* of [1-9]\d*$/).last()).toBeVisible();
+    await expect(page.getByText(/% table match$/)).toBeVisible();
+    await page.goto("/sections/12.2");
+    await expect(page.locator("#sentence-12\\.2-s5")).toBeVisible({ timeout: 10000 });
+
     // -------------------------------------------------------------------------
     // Step 4: S3 Inspect Provenance (Hover & click NumberChip)
     // -------------------------------------------------------------------------
@@ -47,7 +58,9 @@ test.describe("Full 13-Step Guided Demo Walk (Simulated Mode)", () => {
     await firstChip.click();
 
     // Source drawer opens with Table 14.3.1.1 and cell highlighted
-    await expect(page.getByRole("dialog").getByRole("heading", { name: /Table 14\.3\.1\.1/ })).toBeVisible();
+    await expect(
+      page.getByRole("dialog").getByRole("heading", { name: /Table 14\.3\.1\.1/ }),
+    ).toBeVisible();
     // Close drawer via Escape key
     await page.keyboard.press("Escape");
     await expect(page.getByRole("dialog")).toBeHidden();
@@ -150,7 +163,9 @@ test.describe("Full 13-Step Guided Demo Walk (Simulated Mode)", () => {
     // Step 9: S6 Narrative Detail (/narratives/CRD301-1042)
     // -------------------------------------------------------------------------
     await page.goto("/narratives/CRD301-1042");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText(/Patient Narrative · CRD301-1042/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      /Patient Narrative · CRD301-1042/,
+    );
 
     // Timeline SVG and citations visible
     await expect(page.getByRole("region", { name: "Patient clinical timeline" })).toBeVisible();
@@ -160,7 +175,9 @@ test.describe("Full 13-Step Guided Demo Walk (Simulated Mode)", () => {
     const approveBtn = page.getByRole("button", { name: /Approve Narrative/i });
     if (await approveBtn.isVisible()) {
       await approveBtn.click();
-      await expect(page.getByText(/Safety Physician Approved · Sealed for Submission/i)).toBeVisible();
+      await expect(
+        page.getByText(/Safety Physician Approved · Signed \(prototype\)/i),
+      ).toBeVisible();
     }
 
     // -------------------------------------------------------------------------
@@ -194,7 +211,9 @@ test.describe("Full 13-Step Guided Demo Walk (Simulated Mode)", () => {
     await page.getByRole("option", { name: "Regulatory" }).click();
 
     await page.goto("/audit");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Audit Trail & Sentence Lineage");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "Audit Trail & Sentence Lineage",
+    );
 
     // Navigate to Evidence Pack
     await page.goto("/audit/evidence/12.2");
@@ -216,7 +235,9 @@ test.describe("Full 13-Step Guided Demo Walk (Simulated Mode)", () => {
     await page.getByRole("option", { name: "QA" }).click();
 
     await page.goto("/settings/autonomy");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Section Autonomy & Risk Governance");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "Section Autonomy & Risk Governance",
+    );
     await expect(page.getByText("AUTOMATE FIRST (R1 WEDGE)")).toBeVisible();
     await expect(page.getByText("SUPERVISED WITH SIGN-OFF (R2)")).toBeVisible();
     await expect(page.getByText("HUMAN OWNERSHIP")).toBeVisible();
@@ -230,7 +251,9 @@ test.describe("Full 13-Step Guided Demo Walk (Simulated Mode)", () => {
     await page.getByRole("option", { name: "Executive" }).click();
 
     await page.goto("/value");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Clinical Authoring Value & Impact Dashboard");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(
+      "Clinical Authoring Value & Impact Dashboard",
+    );
     await expect(page.getByText("Days from Database Lock to CSR Draft")).toBeVisible();
     await expect(page.getByText("3.5 days")).toBeVisible();
     await expect(page.getByText("14 hrs")).toBeVisible();

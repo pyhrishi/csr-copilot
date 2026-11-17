@@ -129,7 +129,7 @@ export function RightPanel({
                         Table {tlfId}
                       </span>
                       {tlf && (
-                        <span className="text-[11px] text-muted truncate max-w-[170px]" title={tlf.title}>
+                        <span className="text-[11px] text-subtle truncate max-w-[170px]" title={tlf.title}>
                           {tlf.title}
                         </span>
                       )}
@@ -269,7 +269,7 @@ export function RightPanel({
                               <span className="line-through text-critical">
                                 {original || "original"}
                               </span>
-                              <span className="text-muted">→</span>
+                              <span className="text-subtle">→</span>
                               <span className="font-semibold text-teal">
                                 {replacement || "replacement"}
                               </span>

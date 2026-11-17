@@ -217,7 +217,20 @@ export function AutonomyView() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [hoveredSectionId, setHoveredSectionId] = useState<string | null>(null);
 
+// Efficacy waits for Release 2 and conclusions stay human, whatever the evidence.
+const MIN_REASON_LENGTH = 5;
+function governanceLock(section: MatrixSection): string | null {
+  if (section.release === "R2") return "Locked until Release 2";
+  if (section.release === "Not planned") return "Human-authored: stays human";
+  return null;
+}
+
   const handleOpenChangeDialog = (section: MatrixSection) => {
+    const lock = governanceLock(section);
+    if (lock) {
+      toast.info(`Section ${section.id} (${section.title}): ${lock}.`);
+      return;
+    }
     if (!isQa) {
       toast.info(
         `Section ${section.id} (${section.title}) autonomy is currently ${sectionAutonomyMap[section.id] ?? section.defaultAutonomy}.`,
@@ -235,8 +248,13 @@ export function AutonomyView() {
   };
 
   const handleConfirmChange = () => {
-    if (!selectedSection || !changeReason.trim()) {
-      toast.error("A documented regulatory or QA reason is required.");
+    if (
+      !isQa ||
+      !selectedSection ||
+      governanceLock(selectedSection) ||
+      changeReason.trim().length < MIN_REASON_LENGTH
+    ) {
+      toast.error(`QA must give a reason of at least ${MIN_REASON_LENGTH} characters.`);
       return;
     }
 
@@ -256,7 +274,7 @@ export function AutonomyView() {
     toast.success(
       `Updated Section ${selectedSection.id} autonomy to ${newLevel}. Logged to audit trail.`,
       {
-        description: "Documented justification logged to 21 CFR Part 11 audit trail.",
+        description: "Documented justification logged to the append-only audit trail.",
         action: {
           label: "View in Audit",
           onClick: () => router.push("/audit"),
@@ -312,7 +330,7 @@ export function AutonomyView() {
             </span>
           ) : (
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-paper-2 text-subtle border border-line">
-              <Lock className="h-3 w-3 text-muted" />
+              <Lock className="h-3 w-3 text-subtle" />
               Role: {roleLabel(role)} (Autonomy Changes Gated to QA)
             </span>
           )}
@@ -618,13 +636,9 @@ export function AutonomyView() {
               </h2>
             </div>
             <p className="text-xs text-subtle">
-              Autonomy is granted on verifiable evidence. Adjustments require QA authorization and
-              an immutable justification in the audit trail.
+              Autonomy should be earned per section with evidence. Adjustments require QA authorization and
+              a justification in the append-only audit trail.
             </p>
-          </div>
-
-          <div className="text-xs text-subtle font-mono">
-            SOP: GxP-AI-042
           </div>
         </div>
 
@@ -641,7 +655,7 @@ export function AutonomyView() {
                   <span className="font-mono font-bold text-ink">{tier.label}</span>
                   <span className="font-semibold text-body">{tier.name}</span>
                 </div>
-                <p className="text-[11px] text-muted leading-relaxed">
+                <p className="text-[11px] text-subtle leading-relaxed">
                   {tier.description}
                 </p>
               </div>
@@ -697,7 +711,12 @@ export function AutonomyView() {
                     </td>
 
                     <td className="py-3 px-4 text-right">
-                      {isQa ? (
+                      {governanceLock(sec) ? (
+                        <span className="inline-flex items-center gap-1 text-xs text-subtle">
+                          <Lock className="size-3" aria-hidden />
+                          {governanceLock(sec)}
+                        </span>
+                      ) : isQa ? (
                         <Button
                           variant="outline"
                           size="sm"
@@ -714,7 +733,7 @@ export function AutonomyView() {
                                 variant="outline"
                                 size="sm"
                                 disabled
-                                className="text-xs h-8 opacity-50 border-line text-muted cursor-not-allowed"
+                                className="text-xs h-8 opacity-50 border-line text-subtle cursor-not-allowed"
                               >
                                 <Lock className="size-3 mr-1" />
                                 Locked (QA Only)
@@ -780,10 +799,10 @@ export function AutonomyView() {
                 onChange={(e) => setChangeReason(e.target.value)}
                 placeholder="State the clinical, statistical or validation reason for advancing or restricting this section's autonomy level..."
                 rows={3}
-                className="w-full rounded-md border border-line bg-paper p-2.5 text-xs text-ink placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-teal/30"
+                className="w-full rounded-md border border-line bg-paper p-2.5 text-xs text-ink placeholder:text-subtle focus:outline-none focus:ring-2 focus:ring-teal/30"
               />
-              <span className="text-[11px] text-muted block">
-                Actor: {persona.name} ({roleLabel(role)}) · Signed under GxP Change Control SOP-042
+              <span className="text-[11px] text-subtle block">
+                Actor: {persona.name} ({roleLabel(role)})
               </span>
             </div>
           </div>
@@ -800,7 +819,7 @@ export function AutonomyView() {
             <Button
               size="sm"
               onClick={handleConfirmChange}
-              disabled={changeReason.trim().length < 5}
+              disabled={changeReason.trim().length < MIN_REASON_LENGTH}
               className="bg-teal hover:bg-teal-dark text-white text-xs font-semibold shadow-xs"
             >
               Authorize & Log Audit

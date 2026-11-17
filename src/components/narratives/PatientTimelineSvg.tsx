@@ -275,7 +275,7 @@ export function PatientTimelineSvg({
               <span>Day {day}:</span>
             </div>
             <div className="flex-1 font-medium">{text}</div>
-            <span className="text-[10px] uppercase font-mono tracking-wider text-muted shrink-0">
+            <span className="text-[10px] uppercase font-mono tracking-wider text-subtle shrink-0">
               Entry #{activeIdx + 1}
             </span>
           </div>

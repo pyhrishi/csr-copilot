@@ -270,7 +270,7 @@ export function ReconciliationTable({
                           </span>
                         </div>
                       ) : (
-                        <span className="text-muted italic">No TLF linked</span>
+                        <span className="text-subtle italic">No TLF linked</span>
                       )}
                     </TableCell>
 

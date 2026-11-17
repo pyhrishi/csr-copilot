@@ -74,7 +74,7 @@ export function PatientSummaryCard({
       {/* Demographics & Event Metrics Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
         <div className={`p-2.5 rounded-lg border transition-all ${fieldHighlight("age")}`}>
-          <span className="text-[10px] uppercase font-bold tracking-wider text-muted block">
+          <span className="text-[10px] uppercase font-bold tracking-wider text-subtle block">
             Age & Sex
           </span>
           <span className="text-sm font-semibold text-ink tabular">
@@ -83,7 +83,7 @@ export function PatientSummaryCard({
         </div>
 
         <div className={`p-2.5 rounded-lg border transition-all ${fieldHighlight("event")}`}>
-          <span className="text-[10px] uppercase font-bold tracking-wider text-muted block">
+          <span className="text-[10px] uppercase font-bold tracking-wider text-subtle block">
             Adverse Event (PT)
           </span>
           <span className="text-sm font-semibold text-critical truncate block" title={patient.event}>
@@ -92,7 +92,7 @@ export function PatientSummaryCard({
         </div>
 
         <div className={`p-2.5 rounded-lg border transition-all ${fieldHighlight("severity")}`}>
-          <span className="text-[10px] uppercase font-bold tracking-wider text-muted block">
+          <span className="text-[10px] uppercase font-bold tracking-wider text-subtle block">
             Severity
           </span>
           <span className="text-sm font-semibold text-ink">
@@ -101,7 +101,7 @@ export function PatientSummaryCard({
         </div>
 
         <div className={`p-2.5 rounded-lg border transition-all ${fieldHighlight("onsetDay")}`}>
-          <span className="text-[10px] uppercase font-bold tracking-wider text-muted block">
+          <span className="text-[10px] uppercase font-bold tracking-wider text-subtle block">
             Onset / Resolution
           </span>
           <span className="text-sm font-semibold text-ink tabular">
@@ -110,7 +110,7 @@ export function PatientSummaryCard({
         </div>
 
         <div className={`p-2.5 rounded-lg border transition-all ${fieldHighlight("outcome")}`}>
-          <span className="text-[10px] uppercase font-bold tracking-wider text-muted block">
+          <span className="text-[10px] uppercase font-bold tracking-wider text-subtle block">
             Reported Outcome
           </span>
           <span className={`text-sm font-semibold ${isDeath ? "text-critical" : "text-ink"}`}>
@@ -119,7 +119,7 @@ export function PatientSummaryCard({
         </div>
 
         <div className={`p-2.5 rounded-lg border transition-all ${fieldHighlight("action")}`}>
-          <span className="text-[10px] uppercase font-bold tracking-wider text-muted block">
+          <span className="text-[10px] uppercase font-bold tracking-wider text-subtle block">
             Drug Action Taken
           </span>
           <span className="text-sm font-semibold text-ink truncate block" title={patient.action}>
@@ -136,7 +136,7 @@ export function PatientSummaryCard({
           <strong className="font-semibold text-ink">{patient.related} to study drug</strong>
         </div>
         <div className="flex items-center gap-2">
-          <Pill className="h-4 w-4 text-muted shrink-0" />
+          <Pill className="h-4 w-4 text-subtle shrink-0" />
           <span className="text-subtle">Dose Cohort:</span>
           <span className="font-mono text-ink font-semibold">{patient.armLabel}</span>
         </div>

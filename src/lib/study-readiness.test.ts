@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { getFacts, getPatients, getSections, getTlfs } from "@/lib/data/seed";
+import { factIdsIn, renderSlots } from "@/lib/slots";
 import { computeReadinessMetrics, computeSectionStatus } from "./study-readiness";
 
 describe("computeReadinessMetrics", () => {
@@ -27,20 +28,53 @@ describe("computeReadinessMetrics", () => {
 
     // 2. Open exceptions: 2 patients
     expect(metrics.openExceptions.count).toBe(2);
-    expect(metrics.openExceptions.items.map((p) => p.id)).toEqual([
-      "CRD301-1402",
-      "CRD301-2190",
-    ]);
+    expect(metrics.openExceptions.items.map((p) => p.id)).toEqual(["CRD301-1402", "CRD301-2190"]);
 
     // 3. Sentences awaiting review
     expect(metrics.sentencesAwaitingReview.totalTemplateCount).toBe(11);
     expect(metrics.sentencesAwaitingReview.pendingCount).toBe(0);
     expect(metrics.sentencesAwaitingReview.draftedCount).toBe(0);
 
-    // 4. Numbers reconciled: 24 of 24
-    expect(metrics.numbersReconciled.total).toBe(24);
-    expect(metrics.numbersReconciled.matched).toBe(24);
-    expect(metrics.numbersReconciled.percent).toBe(100);
+    // 4. Numbers reconciled: nothing drafted, so nothing to count
+    expect(metrics.numbersReconciled.total).toBe(0);
+    expect(metrics.numbersReconciled.matched).toBe(0);
+    expect(metrics.numbersReconciled.percent).toBe(0);
+    expect(metrics.numbersReconciled.allMatched).toBe(false);
+  });
+
+  it("counts numbers only from drafted sentences", () => {
+    const sectionWithSlots = sections.find((s) =>
+      s.sentences.some((sent) => factIdsIn(sent.text).length > 0),
+    )!;
+    const sentence = sectionWithSlots.sentences.find((sent) => factIdsIn(sent.text).length > 0)!;
+    const rendered = renderSlots(sentence.text, { facts: new Map(facts.map((f) => [f.id, f])) });
+    const slotCount = rendered.filter((p) => p.type === "slot").length;
+    expect(slotCount).toBeGreaterThan(0);
+
+    const metrics = computeReadinessMetrics({
+      totalInputs: 5,
+      parsedInputs: 5,
+      patients,
+      sections,
+      facts,
+      tlfs,
+      draftSentences: {
+        [sentence.id]: {
+          id: sentence.id,
+          sectionId: sectionWithSlots.id,
+          template: sentence.text,
+          rendered,
+          provenance: "ai",
+          state: "pending",
+          cites: sentence.cites,
+          generation: { mode: "simulated", promptVersion: "v1", templateVersion: "v1", at: "" },
+          findings: [],
+        },
+      },
+    });
+
+    expect(metrics.numbersReconciled.total).toBe(slotCount);
+    expect(metrics.numbersReconciled.matched).toBe(slotCount);
     expect(metrics.numbersReconciled.allMatched).toBe(true);
   });
 
@@ -106,7 +140,12 @@ describe("computeSectionStatus", () => {
           provenance: "ai" as const,
           state: "accepted" as const,
           cites: s.cites,
-          generation: { mode: "simulated" as const, promptVersion: "v1", templateVersion: "v1", at: "" },
+          generation: {
+            mode: "simulated" as const,
+            promptVersion: "v1",
+            templateVersion: "v1",
+            at: "",
+          },
           findings: [],
         },
       ]),
@@ -127,7 +166,12 @@ describe("computeSectionStatus", () => {
         provenance: "ai" as const,
         state: "pending" as const,
         cites: [],
-        generation: { mode: "simulated" as const, promptVersion: "v1", templateVersion: "v1", at: "" },
+        generation: {
+          mode: "simulated" as const,
+          promptVersion: "v1",
+          templateVersion: "v1",
+          at: "",
+        },
         findings: [],
       },
     };
@@ -146,7 +190,12 @@ describe("computeSectionStatus", () => {
         provenance: "ai" as const,
         state: "accepted" as const,
         cites: [],
-        generation: { mode: "simulated" as const, promptVersion: "v1", templateVersion: "v1", at: "" },
+        generation: {
+          mode: "simulated" as const,
+          promptVersion: "v1",
+          templateVersion: "v1",
+          at: "",
+        },
         findings: [],
       },
     };

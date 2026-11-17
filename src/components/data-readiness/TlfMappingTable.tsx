@@ -69,13 +69,13 @@ export function TlfMappingTable({ tlfs, sections }: TlfMappingTableProps) {
         </h3>
         <div className="flex items-center gap-2">
           {isExec && (
-            <span className="text-[11px] font-medium text-muted bg-paper-2 px-2 py-0.5 rounded border border-line">
+            <span className="text-[11px] font-medium text-subtle bg-paper-2 px-2 py-0.5 rounded border border-line">
               Read-only view (Executive)
             </span>
           )}
           <span className="text-xs text-subtle flex items-center gap-1">
             <SlidersHorizontal className="size-3" aria-hidden="true" />
-            Overrides log an immutable audit event
+            Overrides are logged to the append-only audit trail
           </span>
         </div>
       </div>

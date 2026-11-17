@@ -162,13 +162,13 @@ export function ReconciliationView({
     // 1. Update section status to signed_off in drafts store
     setSectionStatus(section.id, "signed_off");
 
-    // 2. Append immutable audit event
+    // 2. Append audit event
     appendAudit({
       actor: `${persona.name} (${persona.title})`,
       role,
       action: "sign_off",
       objectId: section.id,
-      detail: `Biostatistician electronic sign-off: verified ${summary.matched}/${summary.total} numbers against source TLFs with 0 open critical findings. Meaning of signature: "I confirm the numbers in this section match the source TLFs" (21 CFR Part 11).`,
+      detail: `Biostatistician sign-off: reconciled ${summary.matched}/${summary.total} numbers against source TLFs with 0 open critical findings. Meaning of signature: "I confirm the numbers in this section match the source TLFs" (prototype sign-off, not a real electronic signature)`,
     });
 
     // 3. Confirm with toast notification
@@ -277,7 +277,7 @@ export function ReconciliationView({
                 </h2>
                 <p className="text-xs text-subtle mt-0.5">
                   {summary.allMatched
-                    ? "100% concordance: every rendered numeral in Section 12.2 matches the corresponding TLF cell."
+                    ? `Every rendered number in Section ${section.id} matches its TLF cell.`
                     : `${summary.mismatched} discrepancy detected between draft text and source tables.`}
                 </p>
               </div>

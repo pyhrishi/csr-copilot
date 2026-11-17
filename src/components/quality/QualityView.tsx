@@ -121,7 +121,7 @@ export function QualityView({ facts, patients }: QualityViewProps) {
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-teal-tint text-teal-dark border border-teal/30">
             <ShieldCheck className="h-3.5 w-3.5 text-teal" />
-            Zero Generative Hallucinations Gate
+            Numbers filled from the fact store only
           </span>
         </div>
       </div>
@@ -159,7 +159,7 @@ export function QualityView({ facts, patients }: QualityViewProps) {
 
               <div className="space-y-1.5 text-xs border-t border-line/60 pt-2.5">
                 <p className="text-body leading-snug">{stat.subtext}</p>
-                <div className="flex items-center justify-between text-[11px] text-muted font-mono">
+                <div className="flex items-center justify-between text-[11px] text-subtle font-mono">
                   <span>{stat.source === "live_session" ? "Source: Live Session" : "Source: Gold Set"}</span>
                   <span className="text-ok font-semibold">Verified</span>
                 </div>
@@ -221,7 +221,7 @@ export function QualityView({ facts, patients }: QualityViewProps) {
                   <tr key={row.id} className="hover:bg-paper/40 transition-colors">
                     <td className="py-3 px-4">
                       <span className="font-bold text-ink block">{row.metric}</span>
-                      <span className="text-[10px] uppercase font-mono text-muted">{row.category}</span>
+                      <span className="text-[10px] uppercase font-mono text-subtle">{row.category}</span>
                     </td>
 
                     <td className="py-3 px-4 space-y-0.5">
@@ -239,7 +239,7 @@ export function QualityView({ facts, patients }: QualityViewProps) {
                         </span>
                       )}
                       <span className="text-xs font-mono text-teal block">{row.sourceA.value}</span>
-                      <span className="text-[10px] text-muted">{row.sourceA.label}</span>
+                      <span className="text-[10px] text-subtle">{row.sourceA.label}</span>
                     </td>
 
                     <td className="py-3 px-4 space-y-0.5">
@@ -257,7 +257,7 @@ export function QualityView({ facts, patients }: QualityViewProps) {
                         </span>
                       )}
                       <span className="text-xs font-mono text-teal block">{row.sourceB.value}</span>
-                      <span className="text-[10px] text-muted">{row.sourceB.label}</span>
+                      <span className="text-[10px] text-subtle">{row.sourceB.label}</span>
                     </td>
 
                     <td className="py-3 px-4 max-w-xs text-xs text-subtle leading-relaxed">
@@ -344,7 +344,7 @@ export function QualityView({ facts, patients }: QualityViewProps) {
                   />
                 </div>
 
-                <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted">
+                <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-subtle">
                   <span>Defect: {item.description}</span>
                   <span className="font-medium text-teal">Gate: {item.preventionMechanism}</span>
                 </div>

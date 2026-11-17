@@ -66,7 +66,9 @@ export function computeReadinessMetrics({
     totalTemplateCount,
   };
 
-  // 4. Numbers reconciled (via reconcileSection)
+  // 4. Numbers reconciled (via reconcileSection), counting only drafted sentences.
+  // Undrafted template sentences have no numbers on the page yet, so they must not
+  // inflate the tile (otherwise it reads "all matched" before anything is written).
   let totalNumbers = 0;
   let matchedNumbers = 0;
 
@@ -75,12 +77,17 @@ export function computeReadinessMetrics({
     if (s.rendered) renderedMap[id] = s.rendered;
   }
 
-  for (const section of sections) {
+  const draftedSections = sections.map((section) => ({
+    ...section,
+    sentences: section.sentences.filter((s) => s.id in draftSentences),
+  }));
+
+  for (const section of draftedSections) {
     if (section.sentences.length === 0) continue;
     try {
       const report = reconcileSection(section.id, facts, tlfs, {
-        sections,
-        rendered: Object.keys(renderedMap).length > 0 ? renderedMap : undefined,
+        sections: draftedSections,
+        rendered: renderedMap,
       });
       totalNumbers += report.summary.total;
       matchedNumbers += report.summary.matched;
@@ -89,8 +96,7 @@ export function computeReadinessMetrics({
     }
   }
 
-  const numbersPercent =
-    totalNumbers > 0 ? Math.floor((matchedNumbers * 100) / totalNumbers) : 0;
+  const numbersPercent = totalNumbers > 0 ? Math.floor((matchedNumbers * 100) / totalNumbers) : 0;
 
   const numbersReconciled = {
     matched: matchedNumbers,
@@ -160,12 +166,15 @@ export function computeSectionStatus(
     return { status: "not_started", label: "Not started", draftedCount, totalCount, percent: 0 };
   }
 
-  const allAccepted = draftedCount === totalCount && sectionDrafts.every((s) => s.state === "accepted");
+  const allAccepted =
+    draftedCount === totalCount && sectionDrafts.every((s) => s.state === "accepted");
   if (allAccepted) {
     return { status: "signed_off", label: "Signed off", draftedCount, totalCount, percent: 100 };
   }
 
-  const anyPendingOrRejected = sectionDrafts.some((s) => s.state === "pending" || s.state === "rejected");
+  const anyPendingOrRejected = sectionDrafts.some(
+    (s) => s.state === "pending" || s.state === "rejected",
+  );
   if (anyPendingOrRejected) {
     return { status: "in_review", label: "In review", draftedCount, totalCount, percent };
   }

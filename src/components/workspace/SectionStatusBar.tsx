@@ -48,14 +48,14 @@ export function SectionStatusBar({
   if (!hasDraft) {
     disabledReason = "Generate draft before sending to review";
   } else if (hasCritical) {
-    disabledReason = `Blocked: ${criticalFindings.length} critical finding${criticalFindings.length > 1 ? "s" : ""} must be resolved`;
+    disabledReason = `Blocked: ${criticalFindings.length} critical finding${criticalFindings.length > 1 ? "s" : ""} open`;
   } else if (isSubmittedToReview) {
     disabledReason = "Section is already In Review";
   }
 
   return (
     <TooltipProvider>
-      <div className="h-14 border-t border-line bg-card px-6 flex items-center justify-between shrink-0 shadow-xs z-10">
+      <div className="z-10 flex min-h-14 min-w-0 shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-line bg-card px-6 py-2 shadow-xs">
         {/* Left: Sentence & Finding counts */}
         <div className="flex items-center gap-4 text-xs font-medium">
           <span className="text-[11px] font-bold uppercase tracking-wider text-teal">
@@ -72,7 +72,7 @@ export function SectionStatusBar({
             </span>
 
             <span className="inline-flex items-center gap-1.5 text-subtle tabular" title="Pending sentences">
-              <Clock className="size-3.5 text-muted" aria-hidden="true" />
+              <Clock className="size-3.5 text-subtle" aria-hidden="true" />
               <span>{pendingCount} pending</span>
             </span>
 
@@ -117,7 +117,7 @@ export function SectionStatusBar({
               <span>Ready for Biostatistician review</span>
             </span>
           ) : disabledReason ? (
-            <span className="text-[11px] text-muted italic max-w-xs truncate hidden sm:inline" title={disabledReason}>
+            <span className="text-[11px] text-subtle italic max-w-xs truncate hidden sm:inline" title={disabledReason}>
               {disabledReason}
             </span>
           ) : null}
@@ -138,7 +138,7 @@ export function SectionStatusBar({
                     type="button"
                     disabled
                     aria-disabled="true"
-                    className="inline-flex items-center justify-center rounded-md border border-line bg-paper-2 text-muted text-xs font-semibold h-8 px-3 opacity-60 cursor-not-allowed"
+                    className="inline-flex items-center justify-center rounded-md border border-line bg-paper-2 text-subtle text-xs font-semibold h-8 px-3 opacity-60 cursor-not-allowed"
                   />
                 }
               >

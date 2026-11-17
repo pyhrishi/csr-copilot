@@ -87,7 +87,7 @@ export function NarrativeDetailView({
             <ArrowLeft className="h-4 w-4" />
             Back to Narratives Queue
           </Link>
-          <span className="text-muted text-xs">/</span>
+          <span className="text-subtle text-xs">/</span>
           <span className="text-xs font-mono font-semibold text-ink">{patient.id}</span>
         </div>
 
@@ -193,14 +193,14 @@ export function NarrativeDetailView({
             <span>GCP Regulatory Refusal · Narrative Assembly Blocked</span>
           </div>
           <p className="text-sm text-body leading-relaxed max-w-3xl">
-            Under ICH E3 Section 14.3.3 and Good Clinical Practice (GCP) compliance standards, patient
+            Following the ICH E3 Section 14.3.3 narrative structure, patient
             narratives cannot be generated over unverified or conflicting clinical source data.
             Drafting is halted to prevent false or inaccurate regulatory submissions.
           </p>
           <div className="p-4 rounded-lg bg-card border border-critical/20 text-xs space-y-2 max-w-2xl">
             <div className="flex items-center justify-between">
               <span className="font-semibold text-ink">Identified Data Issue:</span>
-              <span className="font-mono text-muted text-[11px]">
+              <span className="font-mono text-subtle text-[11px]">
                 Query Assigned to: <strong>Data management</strong>
               </span>
             </div>
@@ -227,7 +227,7 @@ export function NarrativeDetailView({
         />
       ) : (
         <div className="p-8 rounded-xl bg-card border border-line text-center space-y-3">
-          <p className="text-sm text-muted">
+          <p className="text-sm text-subtle">
             This narrative has not been drafted yet.
           </p>
           <Button

@@ -1,7 +1,10 @@
 // Evidence Pack: aggregates input file hashes, reconciliation report, audit trail slice,
-// versions and electronic sign-offs for an ICH E3 section into an inspection-ready bundle.
+// versions and electronic sign-offs for an ICH E3 section into one bundle.
 import { reconcileSection, type ReconciliationReport } from "@/lib/reconcile";
-import type { AuditEvent, Fact, Section, Tlf } from "@/lib/types";
+import type { AuditEvent, Fact, RenderedPart, Section, Tlf } from "@/lib/types";
+
+export const EVIDENCE_PACK_NOTICE =
+  "Prototype · fictional study data · not for clinical use. Input hashes are simulated; sign-offs are mock, not real electronic signatures.";
 
 export interface EvidencePackSignOff {
   signerName: string;
@@ -46,6 +49,7 @@ export const DEFAULT_EVIDENCE_INPUTS: readonly EvidencePackInput[] = [
 ];
 
 export interface EvidencePack {
+  notice: string;
   sectionId: string;
   sectionTitle: string;
   generatedAt: string;
@@ -70,6 +74,8 @@ export interface BuildEvidencePackOptions {
   facts: readonly Fact[];
   tlfs: readonly Tlf[];
   auditEvents?: readonly AuditEvent[];
+  /** Live drafts by sentence id, so the pack reconciles what was actually written. */
+  rendered?: Readonly<Record<string, readonly RenderedPart[]>>;
   inputs?: readonly EvidencePackInput[];
   clock?: () => Date;
 }
@@ -81,6 +87,7 @@ export function buildEvidencePack(
     facts,
     tlfs,
     auditEvents = [],
+    rendered,
     inputs,
     clock = () => new Date(),
   }: BuildEvidencePackOptions,
@@ -90,19 +97,21 @@ export function buildEvidencePack(
 
   const packInputs = inputs ? [...inputs] : [...DEFAULT_EVIDENCE_INPUTS];
 
-  const reconciliation = reconcileSection(sectionId, facts, tlfs, {
-    sections,
-  });
+  const reconciliation = reconcileSection(sectionId, facts, tlfs, { sections, rendered });
 
-  // Extract section-specific audit events
+  // Section events, its sentences' events, and re-runs of the tables the section cites.
   const sectionAudit = auditEvents.filter(
-    (e) => e.objectId === sectionId || e.objectId.startsWith(`${sectionId}-`),
+    (e) =>
+      e.objectId === sectionId ||
+      e.objectId.startsWith(`${sectionId}-`) ||
+      (e.action === "tlf_update" && section.tlfs.includes(e.objectId)),
   );
 
-  // Extract latest sign-off event if available
-  const signOffEvent = [...sectionAudit]
-    .reverse()
-    .find((e) => e.action === "sign_off");
+  // The latest sign-off counts only if no revocation followed it.
+  const lastSignOffOrRevoke = sectionAudit.findLast(
+    (e) => e.action === "sign_off" || e.action === "sign_off_revoked",
+  );
+  const signOffEvent = lastSignOffOrRevoke?.action === "sign_off" ? lastSignOffOrRevoke : undefined;
 
   const signOff: EvidencePackSignOff | null = signOffEvent
     ? {
@@ -116,6 +125,7 @@ export function buildEvidencePack(
     : null;
 
   return {
+    notice: EVIDENCE_PACK_NOTICE,
     sectionId: section.id,
     sectionTitle: section.title,
     generatedAt: clock().toISOString(),

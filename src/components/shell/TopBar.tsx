@@ -2,6 +2,7 @@ import { getStudy } from "@/lib/data/seed";
 import { DemoButton } from "./DemoButton";
 import { ModeToggle } from "./ModeToggle";
 import { RoleSwitcher } from "./RoleSwitcher";
+import { TeamSyncButton } from "./TeamSyncButton";
 
 export function TopBar() {
   const study = getStudy();
@@ -17,9 +18,10 @@ export function TopBar() {
           <span className="text-subtle"> · {study.shortName}</span>
         </span>
       </div>
-      <div className="ml-auto flex items-center gap-4 sm:gap-5">
+      <div className="ml-auto flex items-center gap-3 sm:gap-4">
         <RoleSwitcher />
         <ModeToggle />
+        <TeamSyncButton />
         <DemoButton />
       </div>
     </header>

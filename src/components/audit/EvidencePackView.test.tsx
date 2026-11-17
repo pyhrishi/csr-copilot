@@ -50,7 +50,7 @@ describe("EvidencePackView (/audit/evidence/[sectionId])", () => {
     );
 
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
-      "Clinical Study Report Evidence Pack (21 CFR Part 11)",
+      "Clinical Study Report Evidence Pack (prototype)",
     );
     expect(screen.getByText("CRD-301")).toBeInTheDocument();
     expect(screen.getByText("velorantib")).toBeInTheDocument();
@@ -66,11 +66,11 @@ describe("EvidencePackView (/audit/evidence/[sectionId])", () => {
     expect(
       screen.getByText(/2\. Numeric Reconciliation Report/i),
     ).toBeInTheDocument();
-    expect(screen.getByText(/12 of 12 numbers reconciled \(100%\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/12 of 12 numbers match their source tables \(100%\)/i)).toBeInTheDocument();
 
     // 3. Electronic Sign-Offs
     expect(
-      screen.getByText(/3\. 21 CFR Part 11 Electronic Signature Record/i),
+      screen.getByText(/3\. Sign-off Record \(Part 11-style mock\)/i),
     ).toBeInTheDocument();
     expect(screen.getAllByText("Marcus Vance, PhD")[0]).toBeInTheDocument();
     expect(

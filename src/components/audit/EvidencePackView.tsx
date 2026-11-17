@@ -17,8 +17,10 @@ import { MatchStatus } from "@/components/trust";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { buildEvidencePack, type EvidencePackInput } from "@/lib/evidence-pack";
+import { downloadDocxBlob, exportFullCsrDossierToDocx } from "@/lib/export/docx";
 import { rolePersona } from "@/lib/roles";
-import type { Fact, Section, Tlf } from "@/lib/types";
+import { describeReconciliation } from "@/lib/reconcile";
+import type { AuditEvent, DraftSentence, Fact, RenderedPart, Section, Tlf } from "@/lib/types";
 import { useAuditStore, useDraftsStore, useRoleStore } from "@/store";
 
 interface EvidencePackViewProps {
@@ -31,6 +33,8 @@ interface EvidencePackViewProps {
 
 const EMPTY_FACTS: Record<string, Fact> = {};
 const EMPTY_TLFS: Record<string, Tlf> = {};
+const EMPTY_SENTENCES: Record<string, DraftSentence> = {};
+const EMPTY_EVENTS: AuditEvent[] = [];
 
 export function EvidencePackView({
   sectionId,
@@ -42,7 +46,7 @@ export function EvidencePackView({
   const auditEvents = useSyncExternalStore(
     useAuditStore.subscribe,
     () => useAuditStore.getState().events,
-    () => [],
+    () => EMPTY_EVENTS,
   );
 
   const customFacts = useSyncExternalStore(
@@ -56,6 +60,17 @@ export function EvidencePackView({
     () => useDraftsStore.getState().customTlfs,
     () => EMPTY_TLFS,
   );
+
+  const draftSentences = useSyncExternalStore(
+    useDraftsStore.subscribe,
+    () => useDraftsStore.getState().sentences,
+    () => EMPTY_SENTENCES,
+  );
+  const rendered = useMemo(() => {
+    const map: Record<string, readonly RenderedPart[]> = {};
+    for (const s of Object.values(draftSentences)) if (s.rendered) map[s.id] = s.rendered;
+    return map;
+  }, [draftSentences]);
 
   const activeFacts = useMemo(() => {
     return facts.map((f) => customFacts[f.id] ?? f);
@@ -72,9 +87,10 @@ export function EvidencePackView({
       facts: activeFacts,
       tlfs: activeTlfs,
       auditEvents,
+      rendered,
       inputs,
     });
-  }, [sectionId, sections, activeFacts, activeTlfs, auditEvents, inputs]);
+  }, [sectionId, sections, activeFacts, activeTlfs, auditEvents, rendered, inputs]);
 
   const appendAudit = useAuditStore((s) => s.append);
   const role = useRoleStore((s) => s.role);
@@ -98,10 +114,33 @@ export function EvidencePackView({
       role,
       action: "export",
       objectId: pack.sectionId,
-      detail: `Exported 21 CFR Part 11 Evidence Pack JSON for Section ${pack.sectionId}`,
+      detail: `Exported Evidence Pack JSON for Section ${pack.sectionId}`,
     });
 
     toast.success(`Downloaded evidence-pack-${pack.sectionId}.json`);
+  };
+
+  const handleExportFullDossier = async () => {
+    try {
+      const blob = await exportFullCsrDossierToDocx({
+        sections,
+        sentences: draftSentences,
+        facts: activeFacts,
+        auditEvents,
+      });
+      downloadDocxBlob(blob, `CSR-CRD-301-Full-Dossier-${new Date().toISOString().slice(0, 10)}.docx`);
+      const persona = rolePersona(role);
+      appendAudit({
+        actor: persona.name,
+        role,
+        action: "export",
+        objectId: "full-csr-dossier",
+        detail: "Exported compiled full-study CSR dossier to Word (.docx) with Table of Contents and all sections.",
+      });
+      toast.success("Full CSR Dossier Downloaded (.docx)");
+    } catch {
+      toast.error("Failed to export full dossier");
+    }
   };
 
   return (
@@ -116,13 +155,23 @@ export function EvidencePackView({
             <ArrowLeft className="h-4 w-4" />
             Back to Audit Log
           </Link>
-          <span className="text-muted text-xs">/</span>
+          <span className="text-subtle text-xs">/</span>
           <span className="text-xs font-mono font-semibold text-ink">
             Evidence Pack · Section {pack.sectionId}
           </span>
         </div>
 
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportFullDossier}
+            className="text-xs h-9 gap-1.5 text-teal border-teal/40 bg-teal-tint/30 hover:bg-teal-tint font-semibold shadow-xs"
+          >
+            <Download className="h-3.5 w-3.5 text-teal" />
+            Export Full CSR Dossier (.docx)
+          </Button>
+
           <Button
             variant="outline"
             size="sm"
@@ -154,14 +203,14 @@ export function EvidencePackView({
                 Meridian Biopharma · Regulatory Affairs & Quality
               </span>
               <h1 className="text-2xl sm:text-3xl font-bold font-serif text-ink tracking-tight mt-1">
-                Clinical Study Report Evidence Pack (21 CFR Part 11)
+                Clinical Study Report Evidence Pack (prototype)
               </h1>
             </div>
             <div className="text-right">
               <Badge variant="outline" className="text-xs font-mono bg-teal-tint text-teal-dark border-teal/40 font-bold">
-                Inspection Ready · Sealed
+                Prototype · fictional study data
               </Badge>
-              <div className="text-[11px] font-mono text-muted mt-1">
+              <div className="text-[11px] font-mono text-subtle mt-1">
                 Generated: {new Date(pack.generatedAt).toLocaleString()}
               </div>
             </div>
@@ -203,7 +252,7 @@ export function EvidencePackView({
                 <tr>
                   <th className="py-2 px-3">Input Name</th>
                   <th className="py-2 px-3">Version</th>
-                  <th className="py-2 px-3">Cryptographic SHA-256 Hash</th>
+                  <th className="py-2 px-3">Simulated hash</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line font-mono text-body">
@@ -211,7 +260,7 @@ export function EvidencePackView({
                   <tr key={idx} className="hover:bg-paper/40">
                     <td className="py-2 px-3 font-sans font-semibold text-ink">{inp.name}</td>
                     <td className="py-2 px-3">{inp.version}</td>
-                    <td className="py-2 px-3 text-[11px] text-muted">{inp.sha256}</td>
+                    <td className="py-2 px-3 text-[11px] text-subtle">{inp.sha256}</td>
                   </tr>
                 ))}
               </tbody>
@@ -228,8 +277,10 @@ export function EvidencePackView({
                 2. Numeric Reconciliation Report
               </h2>
             </div>
-            <span className="text-xs font-semibold text-ok font-mono">
-              {pack.reconciliation.summary.matched} of {pack.reconciliation.summary.total} numbers reconciled (100%)
+            <span
+              className={`font-mono text-xs font-semibold ${pack.reconciliation.summary.allMatched ? "text-ok" : "text-critical"}`}
+            >
+              {describeReconciliation(pack.reconciliation.summary)}
             </span>
           </div>
 
@@ -250,7 +301,7 @@ export function EvidencePackView({
                   <tr key={`${r.sentenceId}-${r.factId}-${idx}`} className="hover:bg-paper/40">
                     <td className="py-2 px-3 font-mono font-bold text-ink">{r.sentenceId}</td>
                     <td className="py-2 px-3 font-mono font-semibold text-teal tabular">{r.renderedValue}</td>
-                    <td className="py-2 px-3 font-mono text-[11px] text-muted">{r.factId}</td>
+                    <td className="py-2 px-3 font-mono text-[11px] text-subtle">{r.factId}</td>
                     <td className="py-2 px-3">
                       <strong>Table {r.tlf ?? "—"}</strong> · {r.rowLabel ?? "—"} / {r.columnLabel ?? "—"}
                     </td>
@@ -274,7 +325,7 @@ export function EvidencePackView({
           <div className="flex items-center gap-2">
             <FileText className="h-4 w-4 text-teal" />
             <h2 className="text-sm font-bold text-ink uppercase tracking-wider">
-              3. 21 CFR Part 11 Electronic Signature Record
+              3. Sign-off Record (Part 11-style mock)
             </h2>
           </div>
 
@@ -283,9 +334,9 @@ export function EvidencePackView({
               <div className="flex flex-wrap items-center justify-between">
                 <div className="flex items-center gap-2 text-teal font-bold text-sm">
                   <CheckCircle2 className="h-4 w-4 text-ok" />
-                  <span>Electronically Signed & Sealed</span>
+                  <span>Signed (prototype)</span>
                 </div>
-                <span className="font-mono text-[11px] text-muted">
+                <span className="font-mono text-[11px] text-subtle">
                   Audit Event ID: {pack.signOff.auditEventId}
                 </span>
               </div>
@@ -297,7 +348,7 @@ export function EvidencePackView({
               </div>
             </div>
           ) : (
-            <div className="p-4 rounded-lg bg-paper-2 border border-line text-xs text-muted italic">
+            <div className="p-4 rounded-lg bg-paper-2 border border-line text-xs text-subtle italic">
               No final electronic sign-off recorded yet for this section.
             </div>
           )}
@@ -326,14 +377,14 @@ export function EvidencePackView({
               <tbody className="divide-y divide-line text-body text-[11px]">
                 {pack.auditTrail.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="py-4 text-center text-muted">
+                    <td colSpan={5} className="py-4 text-center text-subtle">
                       No section-specific audit events recorded yet.
                     </td>
                   </tr>
                 ) : (
                   pack.auditTrail.map((ev) => (
                     <tr key={ev.id} className="hover:bg-paper/40">
-                      <td className="py-2 px-3 font-mono text-muted whitespace-nowrap tabular">
+                      <td className="py-2 px-3 font-mono text-subtle whitespace-nowrap tabular">
                         {new Date(ev.at).toLocaleString()}
                       </td>
                       <td className="py-2 px-3 font-semibold text-ink">{ev.actor}</td>
@@ -355,7 +406,7 @@ export function EvidencePackView({
             <div>Prompt Version: <strong>{pack.versions.promptVersion}</strong></div>
             <div>Template Version: <strong>{pack.versions.templateVersion}</strong></div>
           </div>
-          <p className="text-[11px] text-muted leading-relaxed">
+          <p className="text-[11px] text-subtle leading-relaxed">
             Prototype inspection artifact demonstrating traceability, deterministic slot reconciliation,
             and Part 11-style electronic sign-off architecture. Prepared on fictional study data for technical evaluation.
           </p>

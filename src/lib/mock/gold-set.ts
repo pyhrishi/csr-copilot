@@ -137,7 +137,7 @@ export function computeQualityMetrics(
       label: "Numeric Fidelity",
       value: "100%",
       subtext: "0 hallucinations across 1,420 clinical values (slots)",
-      benchmark: "Target: 100% · Deterministic slots guarantee zero hallucination",
+      benchmark: "Target: 100% · numbers come only from deterministic slots",
       status: "exceptional",
       source: "gold_set",
     },

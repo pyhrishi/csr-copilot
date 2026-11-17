@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 
 import { ReconciliationView } from "@/components/reconciliation";
 import { getFacts, getRules, getSection, getSections, getTlfs } from "@/lib/data/seed";
@@ -25,11 +24,26 @@ export default async function Page({
 }: PageProps<"/sections/[id]/reconciliation">) {
   const { id } = await params;
   const decodedId = decodeURIComponent(id);
-  const section = getSection(decodedId);
+  let section = getSection(decodedId);
 
   if (!section) {
-    notFound();
+    section = {
+      id: decodedId,
+      title: `Section ${decodedId}`,
+      release: "R1",
+      autonomy: "L2",
+      tlfs: ["14.1.1"],
+      sentences: [
+        {
+          id: `${decodedId}-s1`,
+          text: `Section ${decodedId} authoring canvas. Total safety population evaluated: {F:14.1.1.safety.all} patients.`,
+          cites: ["14.1.1"],
+        },
+      ],
+    };
   }
+
+  const activeSection = section;
 
   const allSections = getSections();
   const facts = getFacts();
@@ -38,7 +52,7 @@ export default async function Page({
 
   return (
     <ReconciliationView
-      section={section}
+      section={activeSection}
       allSections={allSections}
       facts={facts}
       tlfs={tlfs}

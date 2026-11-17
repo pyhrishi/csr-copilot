@@ -12,7 +12,14 @@ import {
 
 import { AutonomyPill, ReleaseBadge } from "@/components/trust";
 import { Progress } from "@/components/ui/progress";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { computeSectionStatus } from "@/lib/study-readiness";
 import type { DraftSentence, Section } from "@/lib/types";
 
@@ -20,6 +27,8 @@ interface SectionBoardProps {
   sections: readonly Section[];
   draftSentences: Record<string, DraftSentence>;
   sectionStatuses?: Record<string, "not_started" | "drafted" | "in_review" | "signed_off">;
+  /** QA-approved autonomy overrides; fall back to the seed level. */
+  sectionAutonomy?: Record<string, string>;
   highlightWriter?: boolean;
 }
 
@@ -53,12 +62,13 @@ export function SectionBoard({
   sections,
   draftSentences,
   sectionStatuses,
+  sectionAutonomy,
   highlightWriter = false,
 }: SectionBoardProps) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="label text-teal flex items-center gap-1.5">
+        <h3 className="flex items-center gap-1.5 label text-teal">
           <span>ICH E3 Section Board</span>
           {highlightWriter && (
             <span className="rounded-full bg-teal-tint px-2 py-0.5 text-[10px] font-bold text-teal">
@@ -71,10 +81,10 @@ export function SectionBoard({
         </span>
       </div>
 
-      <div className="rounded-xl border border-line bg-card overflow-hidden shadow-xs">
+      <div className="overflow-x-auto rounded-xl border border-line bg-card shadow-xs">
         <Table>
           <TableHeader>
-            <TableRow className="bg-paper-2 hover:bg-paper-2 border-b border-line">
+            <TableRow className="border-b border-line bg-paper-2 hover:bg-paper-2">
               <TableHead className="w-[80px] font-bold text-ink">Section</TableHead>
               <TableHead className="min-w-[220px] font-bold text-ink">Title</TableHead>
               <TableHead className="w-[120px] font-bold text-ink">Release</TableHead>
@@ -117,29 +127,23 @@ export function SectionBoard({
                   }`}
                 >
                   {/* Section ID */}
-                  <TableCell className="font-bold tabular text-ink">
-                    {section.id}
-                  </TableCell>
+                  <TableCell className="font-bold text-ink tabular">{section.id}</TableCell>
 
                   {/* Title & locked description */}
                   <TableCell>
-                    <div className="font-medium text-ink flex items-center gap-2">
+                    <div className="flex items-center gap-2 font-medium text-ink">
                       <span>{section.title}</span>
                       {isR2Locked && (
-                        <span className="text-[11px] text-subtle font-normal italic">
-                          (Locked)
-                        </span>
+                        <span className="text-[11px] font-normal text-subtle italic">(Locked)</span>
                       )}
                       {isHumanOnly && (
-                        <span className="text-[11px] text-amber font-normal italic">
+                        <span className="text-[11px] font-normal text-amber italic">
                           (Human Authoring)
                         </span>
                       )}
                     </div>
                     {meta.lockedReason && (
-                      <p className="text-xs text-subtle mt-0.5 max-w-md">
-                        {meta.lockedReason}
-                      </p>
+                      <p className="mt-0.5 max-w-md text-xs text-subtle">{meta.lockedReason}</p>
                     )}
                   </TableCell>
 
@@ -150,22 +154,27 @@ export function SectionBoard({
 
                   {/* Autonomy Pill */}
                   <TableCell>
-                    <AutonomyPill level={section.autonomy} />
+                    <AutonomyPill
+                      level={
+                        (sectionAutonomy?.[section.id] as Section["autonomy"] | undefined) ??
+                        section.autonomy
+                      }
+                    />
                   </TableCell>
 
                   {/* Status from drafts store (Icon + Word + Colour) */}
                   <TableCell>
                     <span
-                      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium tabular ${
+                      className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium tabular ${
                         statusInfo.status === "signed_off"
-                          ? "bg-teal-tint text-teal border border-teal/20"
+                          ? "border border-teal/20 bg-teal-tint text-teal"
                           : statusInfo.status === "in_review"
-                            ? "bg-amber-tint text-amber border border-amber/20"
+                            ? "border border-amber/20 bg-amber-tint text-amber"
                             : statusInfo.status === "drafted"
-                              ? "bg-paper-2 text-ink border border-line"
+                              ? "border border-line bg-paper-2 text-ink"
                               : isHumanOnly
-                                ? "bg-amber-tint text-amber border border-amber/20"
-                                : "text-subtle bg-paper-2/60 border border-line/60"
+                                ? "border border-amber/20 bg-amber-tint text-amber"
+                                : "border border-line/60 bg-paper-2/60 text-subtle"
                       }`}
                     >
                       <StatusIcon className="size-3 shrink-0" aria-hidden="true" />
@@ -175,7 +184,7 @@ export function SectionBoard({
 
                   {/* Owner */}
                   <TableCell>
-                    <div className="flex items-center gap-1.5 text-xs text-body font-medium">
+                    <div className="flex items-center gap-1.5 text-xs font-medium text-body">
                       <User className="size-3.5 text-subtle" aria-hidden="true" />
                       <span>{meta.owner}</span>
                     </div>
@@ -185,8 +194,9 @@ export function SectionBoard({
                   <TableCell className="text-right">
                     {section.sentences.length > 0 ? (
                       <div className="flex flex-col items-end gap-1">
-                        <span className="text-xs font-medium tabular text-ink">
-                          {statusInfo.draftedCount} / {statusInfo.totalCount} sentences ({statusInfo.percent}%)
+                        <span className="text-xs font-medium text-ink tabular">
+                          {statusInfo.draftedCount} / {statusInfo.totalCount} sentences (
+                          {statusInfo.percent}%)
                         </span>
                         <Progress value={statusInfo.percent} className="h-1.5 w-24 bg-paper-2" />
                       </div>
@@ -200,30 +210,30 @@ export function SectionBoard({
                     {isR2Locked ? (
                       <Link
                         href={`/sections/${section.id}`}
-                        className="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold bg-paper-2/80 text-subtle hover:bg-paper-2 hover:text-ink border border-line transition-colors"
+                        className="inline-flex items-center gap-1 rounded-md border border-line bg-paper-2/80 px-2.5 py-1 text-xs font-semibold text-subtle transition-colors hover:bg-paper-2 hover:text-ink"
                         title={meta.lockedReason}
                       >
                         <Lock className="size-3" aria-hidden="true" />
                         <span>Locked (R2)</span>
-                        <ArrowRight className="size-2.5 ml-0.5 opacity-60" aria-hidden="true" />
+                        <ArrowRight className="ml-0.5 size-2.5 opacity-60" aria-hidden="true" />
                       </Link>
                     ) : isHumanOnly ? (
                       <Link
                         href={`/sections/${section.id}`}
-                        className="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold bg-paper-2/80 text-amber hover:bg-paper-2 hover:text-ink border border-line transition-colors"
+                        className="inline-flex items-center gap-1 rounded-md border border-line bg-paper-2/80 px-2.5 py-1 text-xs font-semibold text-amber transition-colors hover:bg-paper-2 hover:text-ink"
                         title={meta.lockedReason}
                       >
                         <PenLine className="size-3" aria-hidden="true" />
                         <span>Human only</span>
-                        <ArrowRight className="size-2.5 ml-0.5 opacity-60" aria-hidden="true" />
+                        <ArrowRight className="ml-0.5 size-2.5 opacity-60" aria-hidden="true" />
                       </Link>
                     ) : (
                       <Link
                         href={`/sections/${section.id}`}
                         className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
                           isHighlighted
-                            ? "bg-teal text-white hover:bg-teal/90 shadow-xs"
-                            : "bg-paper-2 text-ink hover:bg-paper-2/80 border border-line"
+                            ? "bg-teal text-white shadow-xs hover:bg-teal/90"
+                            : "border border-line bg-paper-2 text-ink hover:bg-paper-2/80"
                         }`}
                       >
                         <span>Workspace</span>

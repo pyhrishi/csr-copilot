@@ -123,7 +123,7 @@ describe("SignOffBlock", () => {
       />,
     );
 
-    expect(screen.getByText("Signed Off · Sealed")).toBeInTheDocument();
+    expect(screen.getByText("Signed Off (prototype)")).toBeInTheDocument();
     expect(
       screen.getByText("Marcus Vance, PhD (Principal Biostatistician)"),
     ).toBeInTheDocument();

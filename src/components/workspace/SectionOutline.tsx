@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   CheckCircle2,
   CircleDashed,
@@ -11,11 +12,16 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   PenLine,
+  Plus,
+  X,
 } from "lucide-react";
+import { toast } from "sonner";
 
+import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { computeSectionStatus, type SectionDraftStatus } from "@/lib/study-readiness";
 import type { DraftSentence, Section } from "@/lib/types";
+import { useAuditStore, useDraftsStore, useRoleStore } from "@/store";
 
 interface SectionOutlineProps {
   sections: readonly Section[];
@@ -24,13 +30,79 @@ interface SectionOutlineProps {
   sectionStatuses?: Record<string, SectionDraftStatus>;
 }
 
+const EMPTY_CUSTOM_SECTIONS: Record<string, Section> = {};
+
 export function SectionOutline({
   sections,
   activeSectionId,
   draftSentences,
   sectionStatuses,
 }: SectionOutlineProps) {
+  const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newSectionId, setNewSectionId] = useState("");
+  const [newSectionTitle, setNewSectionTitle] = useState("");
+  const [newSectionRelease, setNewSectionRelease] = useState<"R1" | "R2">("R1");
+
+  const customSections = useSyncExternalStore(
+    useDraftsStore.subscribe,
+    () => useDraftsStore.getState().customSections,
+    () => EMPTY_CUSTOM_SECTIONS,
+  );
+  const addCustomSection = useDraftsStore((s) => s.addCustomSection);
+  const appendAudit = useAuditStore((s) => s.append);
+  const role = useRoleStore((s) => s.role);
+
+  const mergedSections = useMemo(() => {
+    const list = [...sections];
+    const existing = new Set(sections.map((s) => s.id));
+    for (const custom of Object.values(customSections)) {
+      if (!existing.has(custom.id)) {
+        list.push(custom);
+      }
+    }
+    return list;
+  }, [sections, customSections]);
+
+  const handleCreateSection = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newSectionId.trim() || !newSectionTitle.trim()) {
+      toast.error("Please enter a section number and title.");
+      return;
+    }
+
+    const cleanId = newSectionId.trim();
+    const newSection: Section = {
+      id: cleanId,
+      title: newSectionTitle.trim(),
+      release: newSectionRelease,
+      autonomy: "L2",
+      tlfs: ["14.1.1"],
+      sentences: [
+        {
+          id: `${cleanId}-s1`,
+          text: `Study results for Section ${cleanId}: safety population evaluated in {F:14.1.1.safety.all} subjects.`,
+          cites: ["14.1.1"],
+        },
+      ],
+    };
+
+    addCustomSection(newSection);
+    appendAudit({
+      actor: role,
+      role,
+      action: "edit",
+      objectId: cleanId,
+      detail: `Created custom CSR Section ${cleanId}: "${newSection.title}" with initial template.`,
+    });
+
+    toast.success(`Section ${cleanId} created!`);
+    setIsAddModalOpen(false);
+    setNewSectionId("");
+    setNewSectionTitle("");
+    router.push(`/sections/${encodeURIComponent(cleanId)}`);
+  };
 
   return (
     <aside
@@ -66,7 +138,7 @@ export function SectionOutline({
       </div>
 
       <nav aria-label="Section outline" className="space-y-1">
-        {sections.map((s) => {
+        {mergedSections.map((s) => {
           const isActive = s.id === activeSectionId;
           const statusInfo = computeSectionStatus(s, draftSentences, sectionStatuses);
           const isR2Locked = s.release === "R2" || s.autonomy === "locked";
@@ -159,7 +231,106 @@ export function SectionOutline({
 
           return linkEl;
         })}
+
+        {/* Add Custom Section Button */}
+        <div className="pt-2 border-t border-line/40">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsAddModalOpen(true)}
+            className={`w-full text-xs text-teal hover:bg-teal-tint/50 h-8 ${
+              collapsed ? "px-0 justify-center" : "px-2.5 justify-start"
+            }`}
+            title="Add Custom CSR Section"
+          >
+            <Plus className="size-3.5 shrink-0" />
+            {!collapsed && <span className="ml-1.5 font-semibold">Add Section</span>}
+          </Button>
+        </div>
       </nav>
+
+      {/* Add Section Modal Dialog */}
+      {isAddModalOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        >
+          <div className="w-full max-w-md rounded-xl bg-card border border-line p-5 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-line pb-3">
+              <div className="flex items-center gap-2">
+                <FileText className="size-4 text-teal" />
+                <h3 className="font-heading text-lg font-semibold text-ink">Add Custom CSR Section</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAddModalOpen(false)}
+                className="text-subtle hover:text-ink p-1 rounded-md"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateSection} className="space-y-3 text-xs">
+              <div>
+                <label className="font-semibold text-ink block mb-1">ICH E3 Section Number</label>
+                <input
+                  type="text"
+                  placeholder="e.g. 11.1, 14.1, 16.2"
+                  value={newSectionId}
+                  onChange={(e) => setNewSectionId(e.target.value)}
+                  className="w-full h-8 px-2.5 rounded bg-paper border border-line text-xs font-mono"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="font-semibold text-ink block mb-1">Section Title</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Demographics and Baseline Characteristics"
+                  value={newSectionTitle}
+                  onChange={(e) => setNewSectionTitle(e.target.value)}
+                  className="w-full h-8 px-2.5 rounded bg-paper border border-line text-xs"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="font-semibold text-ink block mb-1">Release Stage</label>
+                <select
+                  value={newSectionRelease}
+                  onChange={(e) => setNewSectionRelease(e.target.value as "R1" | "R2")}
+                  className="w-full h-8 px-2 rounded bg-paper border border-line text-xs"
+                >
+                  <option value="R1">Release 1 (Interactive Authoring Enabled)</option>
+                  <option value="R2">Release 2 (Locked / Future Scope)</option>
+                </select>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-line">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="h-8 text-xs"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="h-8 text-xs bg-teal hover:bg-teal/90 text-white font-semibold"
+                >
+                  Create & Open Section
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </aside>
   );
 }

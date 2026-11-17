@@ -9,7 +9,9 @@ test.describe("S1 · Study Home", () => {
     await expect(page.locator("main").getByText("CRD-301")).toBeVisible();
     await expect(page.getByText("CARDIA-3 · Phase III")).toBeVisible();
     await expect(page.getByText(/Meridian Biopharma/)).toBeVisible();
-    await expect(page.getByText(/Chronic heart failure with reduced ejection fraction/)).toBeVisible();
+    await expect(
+      page.getByText(/Chronic heart failure with reduced ejection fraction/),
+    ).toBeVisible();
 
     // Milestones
     await expect(page.getByText("Database Lock")).toBeVisible();
@@ -32,14 +34,21 @@ test.describe("S1 · Study Home", () => {
 
     // 3. Sentences awaiting review
     await expect(page.getByText("Awaiting Review")).toBeVisible();
+    await expect(
+      page.getByText("Nothing drafted yet · 11 sentences ready to generate", { exact: true }),
+    ).toBeVisible();
 
-    // 4. Numbers reconciled
+    // 4. Numbers reconciled: counts only drafted sentences, so empty before generation
     await expect(page.getByText("Numbers Reconciled")).toBeVisible();
-    await expect(page.getByText("24 of 24", { exact: true })).toBeVisible();
-    await expect(page.getByText("100% table match")).toBeVisible();
+    await expect(page.getByText("0 of 0", { exact: true })).toBeVisible();
+    await expect(page.getByText("· nothing drafted yet", { exact: true })).toBeVisible();
+    await expect(page.getByText("No numbers to check yet")).toBeVisible();
+    await expect(page.getByText("100% table match")).toHaveCount(0);
   });
 
-  test("renders the ICH E3 section board with release badges and autonomy pills", async ({ page }) => {
+  test("renders the ICH E3 section board with release badges and autonomy pills", async ({
+    page,
+  }) => {
     await page.goto("/");
 
     // Check all sections are listed
@@ -64,7 +73,9 @@ test.describe("S1 · Study Home", () => {
     await expect(page.getByText("Human only")).toBeVisible();
   });
 
-  test("role switcher changes S1 emphasis (Writer sees sections first; Executive sees readiness)", async ({ page }) => {
+  test("role switcher changes S1 emphasis (Writer sees sections first; Executive sees readiness)", async ({
+    page,
+  }) => {
     await page.goto("/");
 
     // Default is Medical Writer: Writer priority workspace is visible
@@ -88,7 +99,7 @@ test.describe("S1 · Study Home", () => {
     const tilesHeading = page.getByText("Clinical Data Readiness", { exact: true });
     const isTilesBeforeTable = await tilesHeading.evaluate((el) => {
       const table = document.querySelector("table");
-      return Boolean(table && (el.compareDocumentPosition(table) & 4)); // 4 is Node.DOCUMENT_POSITION_FOLLOWING
+      return Boolean(table && el.compareDocumentPosition(table) & 4); // 4 is Node.DOCUMENT_POSITION_FOLLOWING
     });
     expect(isTilesBeforeTable).toBe(true);
   });
@@ -128,7 +139,9 @@ test.describe("S2 · Data Readiness", () => {
     await expect(page.getByText("Verified").first()).toBeVisible();
   });
 
-  test("TLF mapping override changes target section and writes an audit event", async ({ page }) => {
+  test("TLF mapping override changes target section and writes an audit event", async ({
+    page,
+  }) => {
     await page.goto("/setup");
 
     // Find override select for Table 14.1.1
@@ -146,7 +159,9 @@ test.describe("S2 · Data Readiness", () => {
     await expect(page.getByText("TLF Mapping Updated")).toBeVisible();
   });
 
-  test("renders exceptions list with the two data issues owned by Data management", async ({ page }) => {
+  test("renders exceptions list with the two data issues owned by Data management", async ({
+    page,
+  }) => {
     await page.goto("/setup");
 
     // Both patient IDs
@@ -155,7 +170,9 @@ test.describe("S2 · Data Readiness", () => {
 
     // Verbatim issues
     await expect(page.getByText(/Resolution date missing in source data/)).toBeVisible();
-    await expect(page.getByText(/Onset date conflicts between AE page and hospitalization record/)).toBeVisible();
+    await expect(
+      page.getByText(/Onset date conflicts between AE page and hospitalization record/),
+    ).toBeVisible();
 
     // Owner: Data management
     await expect(page.getByText("Data management").first()).toBeVisible();
@@ -167,7 +184,9 @@ test.describe("S2 · Data Readiness", () => {
 });
 
 test.describe("S3 · Section Workspace", () => {
-  test("Section 12.2 streams 5 sentences with number chips and opens SourceDrawer", async ({ page }) => {
+  test("Section 12.2 streams 5 sentences with number chips and opens SourceDrawer", async ({
+    page,
+  }) => {
     await page.goto("/sections/12.2");
     await expect(page.locator('[data-hydrated="true"]')).toBeVisible();
 
@@ -201,10 +220,14 @@ test.describe("S3 · Section Workspace", () => {
 
     // Checks tab has STAT-001 finding on 12.2-s3
     await page.getByRole("tab", { name: /Checks/ }).click();
-    await expect(page.getByRole("tabpanel", { name: "Checks" }).getByText("STAT-001")).toBeVisible();
+    await expect(
+      page.getByRole("tabpanel", { name: "Checks" }).getByText("STAT-001"),
+    ).toBeVisible();
   });
 
-  test("Section 12.2 generates draft, applies STAT-001 fix, accepts all sentences and enables review", async ({ page }) => {
+  test("Section 12.2 generates draft, applies STAT-001 fix, accepts all sentences and enables review", async ({
+    page,
+  }) => {
     await page.goto("/sections/12.2");
     await expect(page.locator('[data-hydrated="true"]')).toBeVisible();
 
@@ -219,7 +242,9 @@ test.describe("S3 · Section Workspace", () => {
 
     // Open Checks tab
     await page.getByRole("tab", { name: /Checks/ }).click();
-    await expect(page.getByRole("tabpanel", { name: "Checks" }).getByText("STAT-001")).toBeVisible();
+    await expect(
+      page.getByRole("tabpanel", { name: "Checks" }).getByText("STAT-001"),
+    ).toBeVisible();
     await expect(page.getByText("1 critical", { exact: true })).toBeVisible();
 
     // Verify "Send to review" is disabled due to open critical finding
@@ -256,7 +281,9 @@ test.describe("S3 · Section Workspace", () => {
     await expect(page.getByText(/Section In Review/i)).toBeVisible();
   });
 
-  test("Keyboard shortcuts dialog opens and inline editing flags raw numerals with NUM-001", async ({ page }) => {
+  test("Keyboard shortcuts dialog opens and inline editing flags raw numerals with NUM-001", async ({
+    page,
+  }) => {
     await page.goto("/sections/12.2");
     await expect(page.locator('[data-hydrated="true"]')).toBeVisible();
 
@@ -288,7 +315,9 @@ test.describe("S3 · Section Workspace", () => {
 
     // Checks tab now displays NUM-001 critical finding
     await page.getByRole("tab", { name: /Checks/ }).click();
-    await expect(page.getByRole("tabpanel", { name: "Checks" }).getByText("NUM-001", { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("tabpanel", { name: "Checks" }).getByText("NUM-001", { exact: true }),
+    ).toBeVisible();
     await expect(page.getByText(/Critical Findings \(\d+\)/)).toBeVisible();
     await expect(page.getByText(/critical/i).first()).toBeVisible();
   });
@@ -308,7 +337,9 @@ test.describe("S3 · Section Workspace", () => {
 
     // 12.3 Deaths
     await page.goto("/sections/12.3");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Deaths and other serious adverse events");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "Deaths and other serious adverse events",
+    );
     const genBtn123 = page.getByRole("button", { name: "Generate draft" }).first();
     if (await genBtn123.isVisible()) {
       await genBtn123.click();
@@ -323,13 +354,19 @@ test.describe("S3 · Section Workspace", () => {
     // 11.4 (R2 Locked)
     await page.goto("/sections/11.4");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Efficacy results");
-    await expect(page.getByText(/Efficacy results arrive in Release 2 with biostatistician sign-off/)).toBeVisible();
+    await expect(
+      page.getByText(/Efficacy results arrive in Release 2 with biostatistician sign-off/),
+    ).toBeVisible();
     await expect(page.getByText("Locked for Release 2")).toBeVisible();
 
     // 13 (Human Authoring)
     await page.goto("/sections/13");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Discussion and overall conclusions");
-    await expect(page.getByText(/Conclusions stay human-authored; AI supplies a fact panel only/)).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "Discussion and overall conclusions",
+    );
+    await expect(
+      page.getByText(/Conclusions stay human-authored; AI supplies a fact panel only/),
+    ).toBeVisible();
     await expect(page.getByText("Human-Authored Section")).toBeVisible();
 
     // Section 13 displays Fact Panel
@@ -338,7 +375,9 @@ test.describe("S3 · Section Workspace", () => {
 });
 
 test.describe("S4 · Reconciliation Report", () => {
-  test("Section 12.2 reconciliation report renders numbers, gating blocks sign-off for writer and STAT-001, and biostatistician signs off", async ({ page }) => {
+  test("Section 12.2 reconciliation report renders numbers, gating blocks sign-off for writer and STAT-001, and biostatistician signs off", async ({
+    page,
+  }) => {
     // 1. Start as Medical Writer on Section 12.2
     await page.goto("/sections/12.2");
     await expect(page.locator('[data-hydrated="true"]')).toBeVisible();
@@ -418,14 +457,16 @@ test.describe("S4 · Reconciliation Report", () => {
     await expect(page.getByText(/Ready for Biostatistician Signature/i)).toBeVisible();
     await expect(page.getByText("Marcus Vance, PhD")).toBeVisible();
     await expect(page.getByText("Biostatistician").first()).toBeVisible();
-    await expect(page.getByText(/I confirm the numbers in this section match the source TLFs/i)).toBeVisible();
+    await expect(
+      page.getByText(/I confirm the numbers in this section match the source TLFs/i),
+    ).toBeVisible();
 
     const enabledSignOffBtn = page.getByRole("button", { name: "Sign off section" });
     await expect(enabledSignOffBtn).toBeEnabled();
     await enabledSignOffBtn.click();
 
     // 8. Verify Signed Off state on S4
-    await expect(page.getByText("Signed Off · Sealed")).toBeVisible();
+    await expect(page.getByText("Signed Off (prototype)")).toBeVisible();
     await expect(page.getByText("Signed Off & Recorded")).toBeVisible();
 
     // 9. Navigate to S1 (Study Home) and verify Section 12.2 shows "Signed off"
@@ -437,7 +478,9 @@ test.describe("S4 · Reconciliation Report", () => {
 });
 
 test.describe("S5 · Narratives Queue", () => {
-  test("renders 12 patients, filters, counts, and runs batch generation skipping exceptions", async ({ page }) => {
+  test("renders 12 patients, filters, counts, and runs batch generation skipping exceptions", async ({
+    page,
+  }) => {
     await page.goto("/narratives");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Patient Narratives Queue");
 
@@ -446,7 +489,9 @@ test.describe("S5 · Narratives Queue", () => {
 
     // Verify exception patient displays data issue and data management owner
     await expect(page.getByText("CRD301-1402")).toBeVisible();
-    await expect(page.getByText(/Resolution date missing in source data; query open/i)).toBeVisible();
+    await expect(
+      page.getByText(/Resolution date missing in source data; query open/i),
+    ).toBeVisible();
     await expect(page.getByText(/Owner: Data management/i).first()).toBeVisible();
 
     // Click "Generate all ready narratives" (Demo Script Step 8)
@@ -455,7 +500,9 @@ test.describe("S5 · Narratives Queue", () => {
     await generateBtn.click();
 
     // Wait for batch completion
-    await expect(page.getByText("All ready narratives drafted", { exact: false })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText("All ready narratives drafted", { exact: false })).toBeVisible({
+      timeout: 10000,
+    });
     await expect(page.getByText(/10 drafted · 0 reviewed/)).toBeVisible();
 
     // CRD301-1042 now shows Drafted status
@@ -469,10 +516,14 @@ test.describe("S5 · Narratives Queue", () => {
 });
 
 test.describe("S6 · Narrative Detail", () => {
-  test("renders patient timeline, cited prose, and allows safety physician sign-off", async ({ page }) => {
+  test("renders patient timeline, cited prose, and allows safety physician sign-off", async ({
+    page,
+  }) => {
     // Open CRD301-1042 (Demo Script Step 9)
     await page.goto("/narratives/CRD301-1042");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText(/Patient Narrative · CRD301-1042/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      /Patient Narrative · CRD301-1042/,
+    );
 
     // 1. Patient summary card
     await expect(page.getByText("Velorantib 20 mg").first()).toBeVisible();
@@ -498,7 +549,7 @@ test.describe("S6 · Narrative Detail", () => {
     await approveBtn.click();
 
     // Verify Approved state
-    await expect(page.getByText(/Safety Physician Approved · Sealed for Submission/i)).toBeVisible();
+    await expect(page.getByText(/Safety Physician Approved · Signed \(prototype\)/i)).toBeVisible();
 
     // 5. Navigate back to S5 and verify CRD301-1042 shows Reviewed
     await page.getByRole("link", { name: /Back to Narratives Queue/i }).click();
@@ -507,13 +558,21 @@ test.describe("S6 · Narrative Detail", () => {
     await expect(row1042.getByText("✓ Reviewed")).toBeVisible();
   });
 
-  test("refuses drafting for exception patient and displays verbatim data issue", async ({ page }) => {
+  test("refuses drafting for exception patient and displays verbatim data issue", async ({
+    page,
+  }) => {
     await page.goto("/narratives/CRD301-1402");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText(/Patient Narrative · CRD301-1402/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      /Patient Narrative · CRD301-1402/,
+    );
 
     // Refusal banner
-    await expect(page.getByText(/GCP Regulatory Refusal · Narrative Assembly Blocked/i)).toBeVisible();
-    await expect(page.getByText(/Resolution date missing in source data; query open/i).first()).toBeVisible();
+    await expect(
+      page.getByText(/GCP Regulatory Refusal · Narrative Assembly Blocked/i),
+    ).toBeVisible();
+    await expect(
+      page.getByText(/Resolution date missing in source data; query open/i).first(),
+    ).toBeVisible();
     await expect(page.getByText(/Data management/).first()).toBeVisible();
 
     // Review is blocked
@@ -523,12 +582,16 @@ test.describe("S6 · Narrative Detail", () => {
 });
 
 test.describe("S7 · TLF Change Impact", () => {
-  test("renders side-by-side diff, before/after sentence comparison, and applies update", async ({ page }) => {
+  test("renders side-by-side diff, before/after sentence comparison, and applies update", async ({
+    page,
+  }) => {
     await page.goto("/changes");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("TLF Change Impact Analysis");
 
     // Side-by-side diff table
-    await expect(page.getByText("Table 14.3.1.2 Cell Diff (TEAEs ≥ 5% by Preferred Term)")).toBeVisible();
+    await expect(
+      page.getByText("Table 14.3.1.2 Cell Diff (TEAEs ≥ 5% by Preferred Term)"),
+    ).toBeVisible();
     await expect(page.getByText("Dizziness").first()).toBeVisible();
     await expect(page.getByText("22 (7.4%)").first()).toBeVisible();
     await expect(page.getByText("23 (7.7%)").first()).toBeVisible();
@@ -547,7 +610,9 @@ test.describe("S7 · TLF Change Impact", () => {
     await expect(page.getByText("Table 14.3.1.2 v2 is active and reconciled")).toBeVisible();
 
     // Navigate to reconciliation report
-    const viewReconciliationBtn = page.getByRole("link", { name: /View Section 12.2 Reconciliation Report/i });
+    const viewReconciliationBtn = page.getByRole("link", {
+      name: /View Section 12.2 Reconciliation Report/i,
+    });
     await viewReconciliationBtn.click();
     await page.waitForURL("/sections/12.2/reconciliation");
 
@@ -558,12 +623,16 @@ test.describe("S7 · TLF Change Impact", () => {
 });
 
 test.describe("S8 · Audit & Lineage", () => {
-  test("renders append-only audit trail without mutation controls and filters events", async ({ page }) => {
+  test("renders append-only audit trail without mutation controls and filters events", async ({
+    page,
+  }) => {
     await page.goto("/audit");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Audit Trail & Sentence Lineage");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "Audit Trail & Sentence Lineage",
+    );
 
-    // 21 CFR Part 11 notice
-    await expect(page.getByText("Designed for 21 CFR Part 11")).toBeVisible();
+    // Append-only notice
+    await expect(page.getByText("Append-only log (prototype)")).toBeVisible();
 
     // Verify NO delete or edit buttons exist anywhere on the page
     const deleteButtons = page.getByRole("button", { name: /delete|remove|erase/i });
@@ -606,7 +675,7 @@ test.describe("S8 · Audit & Lineage", () => {
 
     // Inspection-ready evidence pack header
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-      "Clinical Study Report Evidence Pack (21 CFR Part 11)",
+      "Clinical Study Report Evidence Pack (prototype)",
     );
     await expect(page.getByText("Meridian Biopharma · Regulatory Affairs & Quality")).toBeVisible();
     await expect(page.getByText("12.2 Adverse events")).toBeVisible();
@@ -616,7 +685,7 @@ test.describe("S8 · Audit & Lineage", () => {
     await expect(page.getByText("CRD-301 Clinical Study Protocol")).toBeVisible();
 
     // Numeric reconciliation summary
-    await expect(page.getByText("12 of 12 numbers reconciled (100%)")).toBeVisible();
+    await expect(page.getByText("12 of 12 numbers match their source tables (100%)")).toBeVisible();
 
     // Download JSON button
     const downloadJsonBtn = page.getByRole("button", { name: /Download JSON/i });
@@ -647,16 +716,22 @@ test.describe("DOCX Export", () => {
     // Verify audit event logged in /audit
     await page.goto("/audit");
     await expect(page.getByText("export", { exact: true }).first()).toBeVisible();
-    await expect(page.getByText("Exported section 12.2 Adverse events to Word (.docx)").first()).toBeVisible();
+    await expect(
+      page.getByText("Exported section 12.2 Adverse events to Word (.docx)").first(),
+    ).toBeVisible();
   });
 });
 
 test.describe("Screen S9 · Quality Assurance (/quality)", () => {
-  test("renders 4 stat cards, error taxonomy, and cross-section consistency table", async ({ page }) => {
+  test("renders 4 stat cards, error taxonomy, and cross-section consistency table", async ({
+    page,
+  }) => {
     await page.goto("/quality");
 
     // Header
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Quality & Consistency Assurance");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "Quality & Consistency Assurance",
+    );
 
     // 4 Stat cards
     await expect(page.getByText("Numeric Fidelity", { exact: true })).toBeVisible();
@@ -686,11 +761,15 @@ test.describe("Screen S9 · Quality Assurance (/quality)", () => {
 });
 
 test.describe("Screen S10 · Autonomy & Risk Governance (/settings/autonomy)", () => {
-  test("renders SVG 2x2 risk matrix and allows QA role to adjust section autonomy with audit log", async ({ page }) => {
+  test("renders SVG 2x2 risk matrix and allows QA role to adjust section autonomy with audit log", async ({
+    page,
+  }) => {
     await page.goto("/settings/autonomy");
 
     // Header
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Section Autonomy & Risk Governance");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "Section Autonomy & Risk Governance",
+    );
 
     // Risk Matrix Quadrants
     await expect(page.getByText("AUTOMATE FIRST (R1 WEDGE)")).toBeVisible();
@@ -719,7 +798,9 @@ test.describe("Screen S10 · Autonomy & Risk Governance (/settings/autonomy)", (
 
     // Click Change Level to open modal
     await changeBtn.click();
-    await expect(page.getByRole("heading", { name: "Change Section Autonomy Level" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Change Section Autonomy Level" }),
+    ).toBeVisible();
 
     // Select new level L3
     const levelSelect = page.getByRole("dialog").getByRole("combobox");
@@ -727,8 +808,12 @@ test.describe("Screen S10 · Autonomy & Risk Governance (/settings/autonomy)", (
     await page.getByRole("option", { name: /L3 · Auto-Assemble/i }).click();
 
     // Type mandatory justification reason
-    const reasonInput = page.getByPlaceholder(/State the clinical, statistical or validation reason/i);
-    await reasonInput.fill("Validated through 3 historical phase III oncology trials with 0 critical findings.");
+    const reasonInput = page.getByPlaceholder(
+      /State the clinical, statistical or validation reason/i,
+    );
+    await reasonInput.fill(
+      "Validated through 3 historical phase III oncology trials with 0 critical findings.",
+    );
 
     // Submit change
     const confirmBtn = page.getByRole("button", { name: "Authorize & Log Audit" });
@@ -749,7 +834,9 @@ test.describe("Screen S11 · Value Dashboard (/value)", () => {
     await page.goto("/value");
 
     // Header & prototype disclaimer badge
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Clinical Authoring Value & Impact Dashboard");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "Clinical Authoring Value & Impact Dashboard",
+    );
     await expect(page.getByText("Simulated values for the prototype")).toBeVisible();
 
     // 4 KPI Cards

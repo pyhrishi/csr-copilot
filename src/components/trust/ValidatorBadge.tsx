@@ -29,7 +29,7 @@ const SEVERITY_CONFIG = {
     icon: Info,
     badgeClass: "bg-paper-2 text-subtle border-line",
     tintClass: "bg-paper-2 text-subtle border-line",
-    iconClass: "text-muted",
+    iconClass: "text-subtle",
   },
 } as const;
 

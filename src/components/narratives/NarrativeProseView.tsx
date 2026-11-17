@@ -98,7 +98,7 @@ export function NarrativeProseView({
               className="group relative p-2.5 rounded-lg transition-all duration-150 hover:bg-card hover:shadow-xs border border-transparent hover:border-line/60"
             >
               {/* Step indicator header */}
-              <div className="flex items-center gap-2 text-[11px] font-mono text-muted mb-1 select-none">
+              <div className="flex items-center gap-2 text-[11px] font-mono text-subtle mb-1 select-none">
                 <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-teal-tint text-teal font-bold text-[10px]">
                   {partMeta.step}
                 </span>

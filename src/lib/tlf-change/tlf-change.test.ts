@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { getFacts, getSections, getTlfRevision, getTlfs } from "@/lib/data/seed";
 import type { TlfRevision } from "@/lib/data/seed-types";
-import { applyTlfVersion } from ".";
+import { formatFactChange } from "@/lib/slots";
+import { applyTlfVersion, tlfCellDiff } from ".";
 
 const current = { facts: getFacts(), tlfs: getTlfs(), sections: getSections() };
 const revision = getTlfRevision();
@@ -67,5 +68,32 @@ describe("applyTlfVersion", () => {
       facts: [{ ...revision.facts[0], tlfVersion: oldVersion }, ...revision.facts.slice(1)],
     };
     expect(() => applyTlfVersion(current, foreign)).toThrow(/does not belong/);
+  });
+});
+
+describe("tlfCellDiff", () => {
+  it("lists every cell of the re-run table with its v1 and v2 facts, flagging only the change", () => {
+    const update = applyTlfVersion(current, revision);
+    const cells = tlfCellDiff(update);
+    const cellCount = revision.tlf.rows.reduce((n, r) => n + r.cells.length, 0);
+    expect(cells).toHaveLength(cellCount);
+    expect(cells.filter((c) => c.changed).map((c) => c.factId)).toEqual(["14.3.1.2.dizziness.velo"]);
+    for (const c of cells) {
+      const v1 = current.facts.find((f) => f.id === c.factId)!;
+      const v2 = revision.facts.find((f) => f.id === c.factId)!;
+      expect(c.before).toEqual(v1);
+      expect(c.after).toEqual(v2);
+      expect(c.changed).toBe(v1.display !== v2.display);
+    }
+  });
+
+  it("feeds the delta formatter values that agree with the displayed cells", () => {
+    const update = applyTlfVersion(current, revision);
+    const change = tlfCellDiff(update).find((c) => c.changed)!;
+    const before = change.before!.value as { n: number };
+    const after = change.after!.value as { n: number };
+    expect(formatFactChange(change.before!, change.after!)).toMatch(
+      new RegExp(`^\\+${after.n - before.n} patient`),
+    );
   });
 });
