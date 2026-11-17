@@ -1,6 +1,5 @@
 // Evidence Pack: aggregates input file hashes, reconciliation report, audit trail slice,
 // versions and electronic sign-offs for an ICH E3 section into an inspection-ready bundle.
-import { getInputSources } from "@/lib/data/inputs";
 import { reconcileSection, type ReconciliationReport } from "@/lib/reconcile";
 import type { AuditEvent, Fact, Section, Tlf } from "@/lib/types";
 
@@ -17,6 +16,34 @@ export interface EvidencePackInput {
   version: string;
   sha256: string;
 }
+
+export const DEFAULT_EVIDENCE_INPUTS: readonly EvidencePackInput[] = [
+  {
+    name: "CRD-301 Clinical Study Protocol",
+    version: "v3.0",
+    sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
+  {
+    name: "Statistical Analysis Plan (SAP)",
+    version: "v2.1",
+    sha256: "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb",
+  },
+  {
+    name: "TLF Package (Post-Lock Initial Run)",
+    version: "v1.0",
+    sha256: "872983764f4c5691d3e16b680f5fa329472532418f4ba8e291f81f6d30d0fb8a",
+  },
+  {
+    name: "ADaM Analysis Datasets",
+    version: "v1.0",
+    sha256: "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+  },
+  {
+    name: "Patient Profile & Narrative Source Listings",
+    version: "v1.0",
+    sha256: "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+  },
+];
 
 export interface EvidencePack {
   sectionId: string;
@@ -43,6 +70,7 @@ export interface BuildEvidencePackOptions {
   facts: readonly Fact[];
   tlfs: readonly Tlf[];
   auditEvents?: readonly AuditEvent[];
+  inputs?: readonly EvidencePackInput[];
   clock?: () => Date;
 }
 
@@ -53,17 +81,14 @@ export function buildEvidencePack(
     facts,
     tlfs,
     auditEvents = [],
+    inputs,
     clock = () => new Date(),
   }: BuildEvidencePackOptions,
 ): EvidencePack {
   const section = sections.find((s) => s.id === sectionId);
   if (!section) throw new Error(`Unknown section "${sectionId}" for evidence pack`);
 
-  const inputs = getInputSources().map((inp) => ({
-    name: inp.name,
-    version: inp.version,
-    sha256: inp.sha256,
-  }));
+  const packInputs = inputs ? [...inputs] : [...DEFAULT_EVIDENCE_INPUTS];
 
   const reconciliation = reconcileSection(sectionId, facts, tlfs, {
     sections,
@@ -99,7 +124,7 @@ export function buildEvidencePack(
       compound: "velorantib",
       phase: "Phase III",
     },
-    inputs,
+    inputs: packInputs,
     reconciliation,
     signOff,
     auditTrail: Object.freeze(sectionAudit),

@@ -39,9 +39,9 @@ Work top to bottom. Tick boxes as you finish. The SessionStart hook reads this f
 - [x] S6 detail: patient timeline, cited narrative, safety physician review
 
 ## M6 · Change, audit, export
-- [ ] S7 TLF change impact (v1 → v2 dizziness), apply update, re-reconcile
-- [ ] S8 audit log, sentence lineage, evidence pack (print view + JSON)
-- [ ] DOCX export of a section with the `docx` package
+- [x] S7 TLF change impact (v1 → v2 dizziness), apply update, re-reconcile
+- [x] S8 audit log, sentence lineage, evidence pack (print view + JSON)
+- [x] DOCX export of a section with the `docx` package
 
 ## M7 · Quality, autonomy, value
 - [ ] S9 quality view (mock gold-set metrics, clearly labelled) and cross-section consistency check

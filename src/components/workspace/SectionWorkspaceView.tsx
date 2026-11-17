@@ -78,6 +78,16 @@ export function SectionWorkspaceView({
   const setSentence = useDraftsStore((state) => state.setSentence);
   const setSentenceState = useDraftsStore((state) => state.setSentenceState);
   const setSectionStatus = useDraftsStore((state) => state.setSectionStatus);
+  const customFacts = useDraftsStore((state) => state.customFacts);
+  const customTlfs = useDraftsStore((state) => state.customTlfs);
+
+  const activeFacts = useMemo(() => {
+    return facts.map((f) => customFacts[f.id] ?? f);
+  }, [facts, customFacts]);
+
+  const activeTlfs = useMemo(() => {
+    return tlfs.map((t) => customTlfs[t.id] ?? t);
+  }, [tlfs, customTlfs]);
 
   // Sentences belonging to this section
   const currentSentences = useMemo(() => {
@@ -92,11 +102,11 @@ export function SectionWorkspaceView({
     section.autonomy === "locked";
 
   const validationCtx = useMemo(() => {
-    const factMap = new Map(facts.map((f) => [f.id, f]));
+    const factMap = new Map(activeFacts.map((f) => [f.id, f]));
     const compiledRules = loadRules(rules);
-    const references = buildReferenceIndex({ tlfs, sections: allSections });
+    const references = buildReferenceIndex({ tlfs: activeTlfs, sections: allSections });
     return { facts: factMap, rules: compiledRules, references };
-  }, [facts, rules, tlfs, allSections]);
+  }, [activeFacts, rules, activeTlfs, allSections]);
 
   const { status: currentStatus } = computeSectionStatus(
     section,
@@ -492,7 +502,7 @@ export function SectionWorkspaceView({
       {isLockedOrHuman ? (
         <LockedSectionView
           section={section}
-          facts={facts}
+          facts={activeFacts}
           sentences={currentSentences}
           onFactClick={handleFactClick}
         />
@@ -502,7 +512,7 @@ export function SectionWorkspaceView({
           <DraftCanvas
             section={section}
             sentences={currentSentences}
-            facts={facts}
+            facts={activeFacts}
             isGenerating={isGenerating}
             onGenerate={handleGenerate}
             isReadOnly={role === "exec"}
@@ -529,8 +539,8 @@ export function SectionWorkspaceView({
           {/* Pane 3: Right Panel (360px) */}
           <RightPanel
             section={section}
-            facts={facts}
-            tlfs={tlfs}
+            facts={activeFacts}
+            tlfs={activeTlfs}
             sentences={currentSentences}
             editingSentenceId={editingSentenceId}
             onFactClick={handleFactClick}

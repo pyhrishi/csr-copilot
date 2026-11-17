@@ -34,6 +34,8 @@ interface ReconciliationViewProps {
 
 const EMPTY_SENTENCES: Record<string, DraftSentence> = {};
 const EMPTY_STATUSES: Record<string, "not_started" | "drafted" | "in_review" | "signed_off"> = {};
+const EMPTY_FACTS: Record<string, Fact> = {};
+const EMPTY_TLFS: Record<string, Tlf> = {};
 
 export function ReconciliationView({
   section,
@@ -55,6 +57,18 @@ export function ReconciliationView({
     () => EMPTY_STATUSES,
   );
 
+  const customFacts = useSyncExternalStore(
+    useDraftsStore.subscribe,
+    () => useDraftsStore.getState().customFacts,
+    () => EMPTY_FACTS,
+  );
+
+  const customTlfs = useSyncExternalStore(
+    useDraftsStore.subscribe,
+    () => useDraftsStore.getState().customTlfs,
+    () => EMPTY_TLFS,
+  );
+
   const role = useSyncExternalStore(
     useRoleStore.subscribe,
     () => useRoleStore.getState().role,
@@ -70,6 +84,14 @@ export function ReconciliationView({
   const appendAudit = useAuditStore((state) => state.append);
   const setSectionStatus = useDraftsStore((state) => state.setSectionStatus);
 
+  const activeFacts = useMemo(() => {
+    return facts.map((f) => customFacts[f.id] ?? f);
+  }, [facts, customFacts]);
+
+  const activeTlfs = useMemo(() => {
+    return tlfs.map((t) => customTlfs[t.id] ?? t);
+  }, [tlfs, customTlfs]);
+
   // Sentences belonging to this section
   const currentSentences = useMemo(() => {
     return section.sentences
@@ -79,11 +101,11 @@ export function ReconciliationView({
 
   // Validation context to determine active critical findings
   const validationCtx = useMemo(() => {
-    const factMap = new Map(facts.map((f) => [f.id, f]));
+    const factMap = new Map(activeFacts.map((f) => [f.id, f]));
     const compiledRules = loadRules(rules);
-    const references = buildReferenceIndex({ tlfs, sections: allSections });
+    const references = buildReferenceIndex({ tlfs: activeTlfs, sections: allSections });
     return { facts: factMap, rules: compiledRules, references };
-  }, [facts, rules, tlfs, allSections]);
+  }, [activeFacts, rules, activeTlfs, allSections]);
 
   // Active findings: if sentences are drafted in store, read their findings;
   // otherwise, validate base template sentences.
@@ -114,11 +136,11 @@ export function ReconciliationView({
 
   // Execute numeric reconciliation
   const report = useMemo(() => {
-    return reconcileSection(section.id, facts, tlfs, {
+    return reconcileSection(section.id, activeFacts, activeTlfs, {
       sections: allSections,
       rendered: renderedMap,
     });
-  }, [section.id, facts, tlfs, allSections, renderedMap]);
+  }, [section.id, activeFacts, activeTlfs, allSections, renderedMap]);
 
   const { rows, summary } = report;
 
@@ -309,8 +331,8 @@ export function ReconciliationView({
             section={section}
             rows={rows}
             summary={summary}
-            facts={facts}
-            tlfs={tlfs}
+            facts={activeFacts}
+            tlfs={activeTlfs}
           />
         </section>
 

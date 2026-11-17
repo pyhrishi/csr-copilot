@@ -5,6 +5,7 @@ import {
   AlertOctagon,
   Check,
   CheckCircle2,
+  FileDown,
   Keyboard,
   Loader2,
   Pencil,
@@ -13,6 +14,7 @@ import {
   X,
   XCircle,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import {
   AutonomyPill,
@@ -23,7 +25,12 @@ import {
   ReleaseBadge,
 } from "@/components/trust";
 import { Button } from "@/components/ui/button";
+import { downloadDocxBlob, exportSectionToDocx } from "@/lib/export/docx";
+import { rolePersona } from "@/lib/roles";
 import type { DraftSentence, Fact, Section } from "@/lib/types";
+import { useAuditStore } from "@/store/audit";
+import { useDraftsStore } from "@/store/drafts";
+import { useRoleStore } from "@/store/role";
 
 import { SectionStatusBar } from "./SectionStatusBar";
 import { SentenceInlineEditor } from "./SentenceInlineEditor";
@@ -88,6 +95,43 @@ export function DraftCanvas({
     [sentences],
   );
 
+  const [isExporting, setIsExporting] = React.useState(false);
+  const appendAudit = useAuditStore((s) => s.append);
+  const role = useRoleStore((s) => s.role);
+  const updatedSentenceIds = useDraftsStore((s) => s.updatedSentenceIds);
+
+  const handleExportDocx = async () => {
+    try {
+      setIsExporting(true);
+      const sentenceMap: Record<string, DraftSentence> = {};
+      for (const s of sentences) {
+        sentenceMap[s.id] = s;
+      }
+      const blob = await exportSectionToDocx({
+        section,
+        sentences: sentenceMap,
+        facts,
+      });
+      const filename = `${section.id}-${section.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.docx`;
+      downloadDocxBlob(blob, filename);
+
+      const persona = rolePersona(role);
+      appendAudit({
+        actor: persona.name,
+        role,
+        action: "export",
+        objectId: section.id,
+        detail: `Exported section ${section.id} ${section.title} to Word (.docx)`,
+      });
+
+      toast.success(`Section ${section.id} exported to Word (.docx)`);
+    } catch {
+      toast.error("Failed to export Word document");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <main className="flex-1 overflow-hidden flex flex-col bg-paper">
       {/* Scrollable Canvas Area */}
@@ -121,6 +165,18 @@ export function DraftCanvas({
                 <Keyboard className="size-3.5 text-teal" aria-hidden="true" />
                 <span>Shortcuts</span>
                 <kbd className="px-1 rounded bg-paper-2 border border-line text-[10px] font-mono">?</kbd>
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportDocx}
+                disabled={isExporting}
+                className="text-xs h-9 px-3 border-line text-subtle hover:text-ink shadow-2xs flex items-center gap-1.5"
+                title="Export section to Microsoft Word (.docx)"
+              >
+                <FileDown className="size-3.5 text-teal" aria-hidden="true" />
+                <span>{isExporting ? "Exporting..." : "Export to Word"}</span>
               </Button>
 
               <Button
@@ -263,6 +319,11 @@ export function DraftCanvas({
                         <span className="inline-flex items-center gap-1 mr-2 px-1.5 py-0.2 rounded text-[10px] font-bold uppercase bg-critical text-white align-middle tabular">
                           <X className="size-2.5" aria-hidden="true" />
                           <span>Rejected</span>
+                        </span>
+                      )}
+                      {updatedSentenceIds?.[draft.id] && (
+                        <span className="inline-flex items-center gap-1 mr-2 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase bg-teal-tint text-teal border border-teal/30 align-middle tabular">
+                          <span>Source updated</span>
                         </span>
                       )}
 

@@ -521,3 +521,132 @@ test.describe("S6 · Narrative Detail", () => {
     await expect(page.getByRole("button", { name: /Approve Narrative/i })).not.toBeVisible();
   });
 });
+
+test.describe("S7 · TLF Change Impact", () => {
+  test("renders side-by-side diff, before/after sentence comparison, and applies update", async ({ page }) => {
+    await page.goto("/changes");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("TLF Change Impact Analysis");
+
+    // Side-by-side diff table
+    await expect(page.getByText("Table 14.3.1.2 Cell Diff (TEAEs ≥ 5% by Preferred Term)")).toBeVisible();
+    await expect(page.getByText("Dizziness").first()).toBeVisible();
+    await expect(page.getByText("22 (7.4%)").first()).toBeVisible();
+    await expect(page.getByText("23 (7.7%)").first()).toBeVisible();
+    await expect(page.getByText("+1 patient (+0.3%)")).toBeVisible();
+
+    // Sentence 12.2-s4 impact
+    await expect(page.getByText(/Sentence 12\.2-s4/)).toBeVisible();
+
+    // Apply update
+    const applyBtn = page.getByRole("button", { name: "Apply update" });
+    if (await applyBtn.isVisible()) {
+      await applyBtn.click();
+    }
+
+    // Verify applied banner
+    await expect(page.getByText("Table 14.3.1.2 v2 is active and reconciled")).toBeVisible();
+
+    // Navigate to reconciliation report
+    const viewReconciliationBtn = page.getByRole("link", { name: /View Section 12.2 Reconciliation Report/i });
+    await viewReconciliationBtn.click();
+    await page.waitForURL("/sections/12.2/reconciliation");
+
+    // Verify 100% matched with new value
+    await expect(page.getByText("12 of 12 numbers reconciled (100%)")).toBeVisible();
+    await expect(page.getByText("23 (7.7%)").first()).toBeVisible();
+  });
+});
+
+test.describe("S8 · Audit & Lineage", () => {
+  test("renders append-only audit trail without mutation controls and filters events", async ({ page }) => {
+    await page.goto("/audit");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Audit Trail & Sentence Lineage");
+
+    // 21 CFR Part 11 notice
+    await expect(page.getByText("Designed for 21 CFR Part 11")).toBeVisible();
+
+    // Verify NO delete or edit buttons exist anywhere on the page
+    const deleteButtons = page.getByRole("button", { name: /delete|remove|erase/i });
+    expect(await deleteButtons.count()).toBe(0);
+
+    // Verify audit table columns
+    await expect(page.getByRole("columnheader", { name: "Timestamp" })).toBeVisible();
+    await expect(page.getByRole("columnheader", { name: "Actor & Role" })).toBeVisible();
+    await expect(page.getByRole("columnheader", { name: "Action" })).toBeVisible();
+    await expect(page.getByRole("columnheader", { name: "Target Object" })).toBeVisible();
+    await expect(page.getByRole("columnheader", { name: "Event Detail" })).toBeVisible();
+
+    // Search filter input exists and can be typed into
+    const searchInput = page.getByPlaceholder(/Search object, actor, or detail/i);
+    await searchInput.fill("14.3.1.2");
+  });
+
+  test("renders 6-step sentence lineage timeline", async ({ page }) => {
+    await page.goto("/audit");
+
+    // Lineage timeline container
+    await expect(page.getByText("Sentence Lineage Inspector")).toBeVisible();
+
+    // 6 lifecycle stages in LineageTimeline
+    await expect(page.getByText(/1\. Source Ingestion/)).toBeVisible();
+    await expect(page.getByText(/2\. Template Generation/)).toBeVisible();
+    await expect(page.getByText(/3\. Deterministic Numeric Filling/)).toBeVisible();
+    await expect(page.getByText(/4\. Automated Quality & Language Rules/)).toBeVisible();
+    await expect(page.getByText(/5\. Human-in-the-Loop Edits/)).toBeVisible();
+    await expect(page.getByText(/6\. Electronic Sign-Off/)).toBeVisible();
+  });
+
+  test("navigates to Evidence Pack view and supports JSON download", async ({ page }) => {
+    await page.goto("/audit");
+
+    // Click Export Evidence Pack link
+    const exportBtn = page.getByRole("link", { name: /Export Evidence Pack/i });
+    await exportBtn.click();
+    await page.waitForURL("/audit/evidence/12.2");
+
+    // Inspection-ready evidence pack header
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "Clinical Study Report Evidence Pack (21 CFR Part 11)",
+    );
+    await expect(page.getByText("Meridian Biopharma · Regulatory Affairs & Quality")).toBeVisible();
+    await expect(page.getByText("12.2 Adverse events")).toBeVisible();
+
+    // Input cryptographic SHA-256 hashes
+    await expect(page.getByText("1. Ingested Input Hashes & Ingestion Lineage")).toBeVisible();
+    await expect(page.getByText("CRD-301 Clinical Study Protocol")).toBeVisible();
+
+    // Numeric reconciliation summary
+    await expect(page.getByText("12 of 12 numbers reconciled (100%)")).toBeVisible();
+
+    // Download JSON button
+    const downloadJsonBtn = page.getByRole("button", { name: /Download JSON/i });
+    await expect(downloadJsonBtn).toBeVisible();
+  });
+});
+
+test.describe("DOCX Export", () => {
+  test("exports Section 12.2 to Word (.docx) and logs audit event", async ({ page }) => {
+    await page.goto("/sections/12.2");
+    await expect(page.locator('[data-hydrated="true"]')).toBeVisible();
+
+    // Generate Draft if not present
+    const generateBtn = page.getByRole("button", { name: "Generate draft" }).first();
+    if (await generateBtn.isVisible()) {
+      await generateBtn.click();
+      await expect(page.getByText("5 of 5 sentences")).toBeVisible({ timeout: 10000 });
+    }
+
+    // Export to Word button
+    const exportWordBtn = page.getByRole("button", { name: /Export to Word/i });
+    await expect(exportWordBtn).toBeVisible();
+    await exportWordBtn.click();
+
+    // Toast notification
+    await expect(page.getByText("Section 12.2 exported to Word (.docx)")).toBeVisible();
+
+    // Verify audit event logged in /audit
+    await page.goto("/audit");
+    await expect(page.getByText("export", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("Exported section 12.2 Adverse events to Word (.docx)").first()).toBeVisible();
+  });
+});

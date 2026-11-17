@@ -6,3 +6,4 @@ export { CitationMarker, formatCitationLabel } from "./CitationMarker";
 export { ProvenanceLegend, ProvenanceShade } from "./ProvenanceShade";
 export { SourceDrawer } from "./SourceDrawer";
 export { ValidatorBadge, type ValidatorBadgeProps } from "./ValidatorBadge";
+export { LineageTimeline } from "./LineageTimeline";
