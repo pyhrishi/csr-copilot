@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { EB_Garamond, Public_Sans } from "next/font/google";
 
+import { DemoTourModal } from "@/components/shell/DemoTourModal";
 import { FictionBanner } from "@/components/shell/FictionBanner";
 import { SideNav } from "@/components/shell/SideNav";
 import { StoreHydrator } from "@/components/shell/StoreHydrator";
@@ -51,6 +52,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               {children}
             </main>
           </div>
+          <DemoTourModal />
           <Toaster position="bottom-right" />
         </TooltipProvider>
       </body>

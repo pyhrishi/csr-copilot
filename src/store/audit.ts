@@ -7,10 +7,11 @@ import { STORE_PREFIX, persistStorage } from "./storage";
 
 export type { NewAuditEvent } from "@/lib/audit";
 
-// Append-only: `append` is the only mutator; the log itself lives in src/lib/audit.
+// Append-only in production: `append` adds events; `reset` is provided for demo walkthrough reset.
 interface AuditState {
   events: AuditLog;
   append: (event: NewAuditEvent) => AuditEvent;
+  reset: () => void;
 }
 
 export const useAuditStore = create<AuditState>()(
@@ -21,6 +22,9 @@ export const useAuditStore = create<AuditState>()(
         const events = appendEvent(get().events, event);
         set({ events });
         return events.at(-1)!;
+      },
+      reset: () => {
+        set({ events: EMPTY_LOG });
       },
     }),
     {
