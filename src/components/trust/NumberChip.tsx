@@ -66,6 +66,12 @@ export function NumberChip({
               <span className="text-paper/60">Column: </span>
               <span>{fact.columnLabel}</span>
             </div>
+            <div>
+              <span className="text-paper/60">Cell: </span>
+              <span className="font-mono text-[10px] text-teal-light">
+                R{fact.cell.row + 1}:C{fact.cell.col + 1}
+              </span>
+            </div>
             <div className="text-[10px] text-teal-light pt-1 border-t border-white/10 mt-1">
               Click to open Table {fact.tlf} cell in Source Drawer
             </div>

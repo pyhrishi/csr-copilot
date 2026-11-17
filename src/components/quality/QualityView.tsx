@@ -97,7 +97,7 @@ export function QualityView({ facts, patients }: QualityViewProps) {
   const allChecksMatched = consistencyChecks.every((c) => c.status === "matched");
 
   return (
-    <div className="space-y-8 pb-16">
+    <div className="px-6 py-8 md:px-8 md:py-10 space-y-8 pb-16 max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>

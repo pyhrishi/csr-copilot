@@ -105,7 +105,7 @@ export function EvidencePackView({
   };
 
   return (
-    <div className="space-y-6 pb-20">
+    <div className="px-6 py-8 md:px-8 md:py-10 space-y-8 pb-20 max-w-5xl mx-auto">
       {/* Top Toolbar (Hidden on print) */}
       <div className="print:hidden flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-card border border-line shadow-xs">
         <div className="flex items-center gap-3">

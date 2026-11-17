@@ -143,7 +143,7 @@ export function TlfChangeView({
   };
 
   return (
-    <div className="space-y-6 pb-16">
+    <div className="px-6 py-8 md:px-8 md:py-10 space-y-8 pb-16 max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>

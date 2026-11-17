@@ -24,7 +24,7 @@ export function DataReadinessView({
   exceptions,
 }: DataReadinessViewProps) {
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
+    <div className="px-6 py-8 md:px-8 md:py-10 space-y-8 max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-line pb-4">
         <div>

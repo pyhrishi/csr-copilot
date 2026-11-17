@@ -7,9 +7,9 @@ export function TopBar() {
   const study = getStudy();
 
   return (
-    <header className="flex h-(--topbar-h) items-center gap-6 border-b border-line bg-card px-6">
+    <header className="flex h-[var(--topbar-h,64px)] items-center gap-6 border-b border-line bg-card px-6 shadow-2xs">
       <div className="flex min-w-0 items-baseline gap-3">
-        <span className="font-heading text-[22px] font-semibold text-ink">CSR Copilot</span>
+        <span className="font-heading text-[22px] font-semibold text-ink tracking-tight">CSR Copilot</span>
         <span aria-hidden className="h-5 w-px self-center bg-line" />
         <span className="truncate text-sm">
           <span className="mr-2 label">Study</span>
@@ -17,7 +17,7 @@ export function TopBar() {
           <span className="text-subtle"> · {study.shortName}</span>
         </span>
       </div>
-      <div className="ml-auto flex items-center gap-5">
+      <div className="ml-auto flex items-center gap-4 sm:gap-5">
         <RoleSwitcher />
         <ModeToggle />
         <DemoButton />

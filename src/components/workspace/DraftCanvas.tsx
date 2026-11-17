@@ -299,7 +299,7 @@ export function DraftCanvas({
                     tabIndex={0}
                     onFocus={() => onFocusSentence(draft.id)}
                     onClick={() => onFocusSentence(draft.id)}
-                    className={`relative group rounded-md transition-all outline-none p-2 -m-2 ${
+                    className={`relative group rounded-md transition-all outline-none p-2 -m-2 animate-stream-in ${
                       isHighlighted
                         ? "ring-2 ring-amber bg-amber-tint/40 animate-pulse"
                         : hasCriticalFinding

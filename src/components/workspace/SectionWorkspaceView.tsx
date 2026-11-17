@@ -565,7 +565,7 @@ export function SectionWorkspaceView({
     (section.tlfs.length > 0 ? tlfs.find((t) => t.id === section.tlfs[0]) : tlfs[0]);
 
   return (
-    <div data-hydrated="true" className="flex h-[calc(100vh-var(--topbar-h)-var(--banner-h))] overflow-hidden bg-paper">
+    <div data-hydrated="true" className="flex h-[calc(100dvh-var(--topbar-h,64px)-var(--banner-h,28px))] overflow-hidden bg-paper">
       {/* Pane 1: Left Outline (260px) */}
       <SectionOutline
         sections={allSections}
