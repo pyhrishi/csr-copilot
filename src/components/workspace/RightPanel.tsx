@@ -250,14 +250,32 @@ export function RightPanel({
                           </div>
                         )}
 
-                        {/* Micro-diff preview for STAT-001 */}
-                        {finding.ruleId === "STAT-001" && (
-                          <div className="rounded bg-paper-2/60 p-1.5 text-[10px] font-mono border border-line flex items-center justify-between">
-                            <span className="line-through text-critical">significantly more common</span>
-                            <span className="text-muted">→</span>
-                            <span className="font-semibold text-teal">more frequent</span>
-                          </div>
-                        )}
+                        {/* Dynamic micro-diff preview from finding.span and finding.fix */}
+                        {(() => {
+                          const sentence = sentences.find((s) => s.id === finding.sentenceId);
+                          const span = finding.fix?.span ?? finding.span;
+                          let original = "";
+                          if (span && sentence?.template) {
+                            original = sentence.template.slice(span[0], span[1]);
+                          } else if (finding.ruleId === "STAT-001") {
+                            original = "significantly more common";
+                          }
+                          const replacement =
+                            finding.fix?.replacement ??
+                            (finding.ruleId === "STAT-001" ? "more frequent" : undefined);
+                          if (!original && !replacement) return null;
+                          return (
+                            <div className="rounded bg-paper-2/60 p-1.5 text-[10px] font-mono border border-line flex items-center justify-between">
+                              <span className="line-through text-critical">
+                                {original || "original"}
+                              </span>
+                              <span className="text-muted">→</span>
+                              <span className="font-semibold text-teal">
+                                {replacement || "replacement"}
+                              </span>
+                            </div>
+                          );
+                        })()}
 
                         {/* One-click Apply Suggestion (e.g. STAT-001 on 12.2-s3) */}
                         {onApplySuggestion && (finding.ruleId === "STAT-001" || finding.fix) && (
