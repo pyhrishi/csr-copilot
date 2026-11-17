@@ -43,6 +43,7 @@ export function NumberChip({
         tabIndex={0}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
+        data-testid={`number-chip-${factId}`}
         aria-label={`Clinical number ${value}, source Table ${fact?.tlf ?? factId}`}
         className={`inline-block tabular cursor-pointer select-none font-semibold text-teal border-b-2 border-dotted border-teal px-0.5 rounded-xs transition-colors hover:bg-teal-tint/80 focus-visible:outline-2 focus-visible:outline-teal ${className}`}
       >

@@ -10,6 +10,7 @@ import {
   Loader2,
   Pencil,
   RefreshCw,
+  RotateCcw,
   Sparkles,
   X,
   XCircle,
@@ -48,6 +49,7 @@ interface DraftCanvasProps {
   onFocusSentence: (id: string | null) => void;
   editingSentenceId: string | null;
   onEdit: (id: string) => void;
+  onUndoEdit?: (id: string) => void;
   onSaveEdit: (sentenceId: string, newTemplate: string) => void;
   onCancelEdit: () => void;
   onAccept: (id: string) => void;
@@ -75,6 +77,7 @@ export function DraftCanvas({
   onFocusSentence,
   editingSentenceId,
   onEdit,
+  onUndoEdit,
   onSaveEdit,
   onCancelEdit,
   onAccept,
@@ -398,7 +401,7 @@ export function DraftCanvas({
                     {/* Sentence Hover & Focus Actions Bar */}
                     <div
                       className={`mt-1.5 pt-1 border-t border-line/40 flex items-center justify-between text-xs transition-opacity ${
-                        isFocused || isHighlighted
+                        isFocused || isHighlighted || hasCriticalFinding
                           ? "opacity-100"
                           : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
                       }`}
@@ -443,6 +446,24 @@ export function DraftCanvas({
                           <span>Edit</span>
                           <kbd className="ml-1 text-[9px] font-mono opacity-70">E</kbd>
                         </Button>
+
+                        {onUndoEdit && (draft.provenance === "ai_edited" || draft.findings?.some((f) => f.ruleId === "NUM-001")) && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onUndoEdit(draft.id);
+                            }}
+                            className="text-xs h-6 px-2 text-amber hover:text-amber-800 hover:bg-amber-tint/40 font-medium"
+                            title="Undo edit (revert to template)"
+                            data-testid={`undo-sentence-${draft.id}`}
+                          >
+                            <RotateCcw className="size-3 mr-1" aria-hidden="true" />
+                            <span>Undo</span>
+                          </Button>
+                        )}
 
                         <Button
                           type="button"

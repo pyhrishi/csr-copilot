@@ -771,3 +771,37 @@ test.describe("Screen S11 · Value Dashboard (/value)", () => {
     await expect(page.getByText("Writer Hours on R1 Sections")).toBeVisible();
   });
 });
+
+test.describe("All 11 routes render with zero console errors", () => {
+  const routes = [
+    { name: "S1 Study Home", path: "/" },
+    { name: "S2 Data Readiness", path: "/setup" },
+    { name: "S3 Section 12.2 Workspace", path: "/sections/12.2" },
+    { name: "S4 Reconciliation", path: "/sections/12.2/reconciliation" },
+    { name: "S5 Narratives Queue", path: "/narratives" },
+    { name: "S6 Narrative Detail", path: "/narratives/CRD301-1042" },
+    { name: "S7 TLF Change Impact", path: "/changes" },
+    { name: "S8 Audit & Lineage", path: "/audit" },
+    { name: "S9 Quality Dashboard", path: "/quality" },
+    { name: "S10 Autonomy & Risk", path: "/settings/autonomy" },
+    { name: "S11 Value & Impact", path: "/value" },
+  ];
+
+  for (const { name, path } of routes) {
+    test(`${name} (${path}) renders without console errors`, async ({ page }) => {
+      const consoleErrors: string[] = [];
+      page.on("console", (msg) => {
+        if (msg.type() === "error") {
+          consoleErrors.push(msg.text());
+        }
+      });
+      page.on("pageerror", (err) => {
+        consoleErrors.push(err.message);
+      });
+
+      await page.goto(path);
+      await page.waitForLoadState("domcontentloaded");
+      expect(consoleErrors).toEqual([]);
+    });
+  }
+});

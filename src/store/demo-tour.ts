@@ -83,7 +83,7 @@ export const DEMO_STEPS: DemoStep[] = [
     action: 'Edit a sentence and type "in 201 patients"',
     whatToSay:
       '"If a human types a raw number, it\'s flagged too: numbers must come from the tables." Then undo.',
-    targetSelector: 'button[title*="Edit sentence"], [data-testid="edit-sentence-btn"]',
+    targetSelector: 'button[title*="Edit inline"], [data-testid^="undo-sentence-"]',
   },
   {
     step: 7,

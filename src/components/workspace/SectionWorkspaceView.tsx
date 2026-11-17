@@ -309,6 +309,48 @@ export function SectionWorkspaceView({
     setEditingSentenceId(null);
   };
 
+  // Undo manual edit and revert to template
+  const handleUndoEdit = (sentenceId: string) => {
+    const templateDef = section.sentences.find((s) => s.id === sentenceId);
+    if (!templateDef) return;
+
+    const rendered = renderSlots(templateDef.text, { facts: activeFacts });
+    const findings = validateSentence(
+      { template: templateDef.text, cites: templateDef.cites },
+      validationCtx,
+    );
+
+    const restored: DraftSentence = {
+      id: templateDef.id,
+      sectionId: section.id,
+      template: templateDef.text,
+      rendered,
+      provenance: "ai",
+      state: "pending",
+      cites: templateDef.cites,
+      generation: {
+        mode: "simulated",
+        promptVersion: "v1.0",
+        templateVersion: "v1.0",
+        at: new Date().toISOString(),
+      },
+      findings,
+    };
+
+    setSentence(restored);
+    appendAudit({
+      actor: `${roleLabel(role)} (${role})`,
+      role,
+      action: "edit",
+      objectId: sentenceId,
+      detail: `Undid manual edit on sentence ${sentenceId}, reverted to original AI template.`,
+    });
+
+    toast.success("Edit Undone", {
+      description: `Sentence ${sentenceId} restored to original verified template.`,
+    });
+  };
+
   // Open regenerate reason dialog
   const handleRegenerate = (sentenceId: string) => {
     setRegenerateTargetId(sentenceId);
@@ -599,6 +641,7 @@ export function SectionWorkspaceView({
             onFocusSentence={setFocusedSentenceId}
             editingSentenceId={editingSentenceId}
             onEdit={handleEdit}
+            onUndoEdit={handleUndoEdit}
             onSaveEdit={handleSaveEdit}
             onCancelEdit={handleCancelEdit}
             onAccept={handleAccept}

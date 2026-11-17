@@ -50,9 +50,9 @@ Work top to bottom. Tick boxes as you finish. The SessionStart hook reads this f
 
 ## M8 · Live mode, demo polish, deploy
 - [x] Optional Live AI mode: `/api/generate` route using accessible open-source model (Meta Llama 3.3 70B via Groq/OpenRouter/local Ollama), prompt in `src/lib/generation/prompts/section.md`; returns placeholder prose only; same fill and validate path
-- [ ] Guided demo tour following `docs/demo-script.md`
-- [ ] Empty, loading and error states; `prefers-reduced-motion`; Lighthouse accessibility ≥ 90 on S1 and S3
-- [ ] Playwright smoke test: every route renders; the demo path completes
+- [x] Guided demo tour following `docs/demo-script.md`
+- [x] Empty, loading and error states; `prefers-reduced-motion`; Lighthouse accessibility ≥ 90 on S1 and S3
+- [x] Playwright smoke test: every route renders; the demo path completes
 - [ ] Run `/demo-ready`, then `/deploy-vercel`
 
 ## Polish backlog (checkpoint 1)

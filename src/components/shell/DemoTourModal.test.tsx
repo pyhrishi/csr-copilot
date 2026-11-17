@@ -81,9 +81,9 @@ describe("DemoTourModal", () => {
 
   it("resets demo data when Reset button is clicked", () => {
     useDraftsStore.setState({
-      sentences: { "12.2-s1": { id: "12.2-s1" } as any },
+      sentences: { "12.2-s1": { id: "12.2-s1" } as unknown as import("@/lib/types").DraftSentence },
     });
-    useAuditStore.setState({ events: [{ id: "test" }] as any });
+    useAuditStore.setState({ events: [{ id: "test" }] as unknown as import("@/lib/types").AuditEvent[] });
     useRoleStore.setState({ role: "biostat" });
 
     useDemoTourStore.getState().startTour();

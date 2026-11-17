@@ -9,7 +9,6 @@ import {
   Play,
   Quote,
   RotateCcw,
-  Sparkles,
   Target,
   X,
 } from "lucide-react";
